@@ -3,28 +3,30 @@ package gremlin.textures {
     import flash.display3D.Context3DTextureFormat;
     import flash.display3D.textures.Texture;
     import gremlin.core.Context;
+    import gremlin.core.IRestorable;
 
     /**
      * ...
      * @author mosowski
      */
-    public class TextureResource {
+    public class TextureResource implements IRestorable {
         public var ctx:Context;
         public var texture3d:Texture;
         public var width:int;
         public var height:int;
         public var bitmapSource:BitmapData;
         public var isRenderTarget:Boolean;
-        public var isReady:Boolean;
+        public var isLoaded:Boolean;
 
         public function TextureResource(_ctx:Context) {
             ctx = _ctx;
-            isReady = false;
+            ctx.restorableResources.push(this);
+            isLoaded = false;
             isRenderTarget = false;
         }
 
         public function prepareAsRenderTarget(w:int, h:int):void {
-            if (texture3d) {
+            if (texture3d != null) {
                 texture3d.dispose();
             }
 
@@ -36,12 +38,12 @@ package gremlin.textures {
                 Context3DTextureFormat.BGRA,
                 true
             );
-            isReady = true;
+            isLoaded = true;
             isRenderTarget = true;
         }
 
         public function setBitmapSource(src:BitmapData):void {
-            if (texture3d) {
+            if (texture3d != null) {
                 if (src.width != width || src.height != height) {
                     texture3d.dispose();
                     texture3d = null;
@@ -51,7 +53,7 @@ package gremlin.textures {
             width = src.width;
             height = src.height;
             bitmapSource = src;
-            if (!texture3d) {
+            if (texture3d == null) {
                 texture3d = ctx.createTexture(
                     src.width,
                     src.height,
@@ -61,11 +63,12 @@ package gremlin.textures {
             }
 
             texture3d.uploadFromBitmapData(src);
-            isReady = true;
+            isLoaded = true;
         }
 
         public function restore():void {
-            if (bitmapSource) {
+            texture3d = null;
+            if (bitmapSource != null) {
                 setBitmapSource(bitmapSource);
             } else if (isRenderTarget) {
                 prepareAsRenderTarget(width, height);

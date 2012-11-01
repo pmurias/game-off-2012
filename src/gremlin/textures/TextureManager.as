@@ -12,19 +12,16 @@ package gremlin.textures {
         public var textures:Dictionary;
         public var onReadyCallbacks:Dictionary;
         public var ctx:Context;;
-        public var loaderMgr:LoaderManager;
 
-        public function TextureManager(c:Context, lm:LoaderManager) {
-            ctx = c;
+        public function TextureManager(_ctx:Context) {
+            ctx = _ctx;
             ctx.addListener(Context.CONTEXT_LOST, onContextLost);
-
-            loaderMgr = lm;
 
             textures = new Dictionary();
             onReadyCallbacks = new Dictionary();
         }
 
-        public function getTextureResource(url:String, onReadyCb:Function = null):TextureResource {
+        public function loadTextureResource(url:String, onReadyCb:Function = null):TextureResource {
             var tr:TextureResource = textures[url];
             var cbks:Vector.<Function> = onReadyCallbacks[url];
             if (tr == null) {
@@ -33,9 +30,9 @@ package gremlin.textures {
                 if (onReadyCb != null) {
                     cbks.push(onReadyCb);
                 }
-                loaderMgr.loadImage(url, onTextureImageLoaded);
+                ctx.loaderMgr.loadImage(url, onTextureImageLoaded);
 
-            } else if (tr.isReady == false) {
+            } else if (tr.isLoaded == false) {
                 if (onReadyCb != null) {
                     cbks.push(onReadyCb);
                 }
@@ -43,10 +40,20 @@ package gremlin.textures {
             return tr;
         }
 
+        public function getTextureResource(url:String):TextureResource {
+            return textures[url];
+        }
+
+        public function createTextureResource(url:String):TextureResource {
+            var tr:TextureResource = new TextureResource(ctx);
+            textures[url] = tr;
+            return tr;
+        }
+
         private function onTextureImageLoaded(url:String):void {
             var tr:TextureResource = textures[url];
             var cbks:Vector.<Function> = onReadyCallbacks[url];
-            tr.setBitmapSource(loaderMgr.getLoaderBitmap(url).bitmapData);
+            tr.setBitmapSource(ctx.loaderMgr.getLoaderBitmap(url).bitmapData);
             for (var i:int = 0; i < cbks.length; i += 1) {
                 cbks[i](url);
             }

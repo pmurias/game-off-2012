@@ -1,0 +1,21 @@
+{
+    "vpOrange": [
+        "m44 vt0, va0, vc4",
+        "m44 op, vt0, vc0"
+    ],
+    "fpOrange": [
+        "mov oc, fc0"
+    ],
+
+    "vpTextured": [
+        "mov v0, va1",
+        "m44 vt0, va0, vc4",
+        "m44 op, vt0, vc0"
+    ],
+    "fpTextured": [
+        "tex ft0, v0, fs0 <2d, repeat, linear>",
+        "mul oc, ft0, fc0"
+    ]
+
+
+}

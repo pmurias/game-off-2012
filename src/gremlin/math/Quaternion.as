@@ -3,7 +3,6 @@ package gremlin.math
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.geom.Orientation3D;
-	import gremlin.api2d.Quad2D;
 	/**
 	 * ...
 	 * @author mosowski

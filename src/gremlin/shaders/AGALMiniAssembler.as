@@ -2,25 +2,25 @@
 Copyright (c) 2011, Adobe Systems Incorporated
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-* Redistributions of source code must retain the above copyright notice, 
+* Redistributions of source code must retain the above copyright notice,
 this list of conditions and the following disclaimer.
 
 * Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the 
+notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
 
-* Neither the name of Adobe Systems Incorporated nor the names of its 
-contributors may be used to endorse or promote products derived from 
+* Neither the name of Adobe Systems Incorporated nor the names of its
+contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
 CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
 EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
@@ -30,7 +30,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package gremlin
+package gremlin.shaders
 {
 	// ===========================================================================
 	//	Imports
@@ -46,7 +46,7 @@ package gremlin
 		// ======================================================================
 		//	Properties
 		// ----------------------------------------------------------------------
-		// AGAL bytes and error buffer 
+		// AGAL bytes and error buffer
 		private var _agalcode:ByteArray							= null;
 		private var _error:String								= "";
 		
@@ -76,7 +76,7 @@ package gremlin
 		{
 			var start:uint = getTimer();
 			
-			_agalcode = new ByteArray();			
+			_agalcode = new ByteArray();
 			_error = "";
 			
 			var isFrag:Boolean = false;
@@ -221,7 +221,7 @@ package gremlin
 							_error = "error: register operand "+j+" ("+regs[j]+") relative adressing not allowed in fragment programs.";
 							badreg = true;
 							break;
-						}			
+						}
 					}
 					else
 					{
@@ -258,15 +258,15 @@ package gremlin
 					
 					if ( isDest && isRelative )
 					{
-						_error = "error: relative can not be destination";	
-						badreg = true; 
-						break;								
+						_error = "error: relative can not be destination";
+						badreg = true;
+						break;
 					}
 					
 					if ( maskmatch )
 					{
 						regmask = 0;
-						var cv:uint; 
+						var cv:uint;
 						var maskLength:uint = maskmatch[0].length;
 						for ( var k:int = 1; k < maskLength; k++ )
 						{
@@ -280,64 +280,64 @@ package gremlin
 						}
 						if ( !isDest )
 							for ( ; k <= 4; k++ )
-								regmask |= cv << ( ( k - 1 ) << 1 ); // repeat last								
+								regmask |= cv << ( ( k - 1 ) << 1 ); // repeat last
 					}
 					else
 					{
-						regmask = isDest ? 0xf : 0xe4; // id swizzle or mask						
+						regmask = isDest ? 0xf : 0xe4; // id swizzle or mask
 					}
 					
 					if ( isRelative )
 					{
-						var relname:Array = relreg[0].match( /[A-Za-z]{1,2}/ig );						
-						var regFoundRel:Register = REGMAP[ relname[0]];						
+						var relname:Array = relreg[0].match( /[A-Za-z]{1,2}/ig );
+						var regFoundRel:Register = REGMAP[ relname[0]];
 						if ( regFoundRel == null )
-						{ 
-							_error = "error: bad index register"; 
-							badreg = true; 
+						{
+							_error = "error: bad index register";
+							badreg = true;
 							break;
 						}
 						reltype = regFoundRel.emitCode;
-						var selmatch:Array = relreg[0].match( /(\.[xyzw]{1,1})/ );						
+						var selmatch:Array = relreg[0].match( /(\.[xyzw]{1,1})/ );
 						if ( selmatch.length==0 )
 						{
-							_error = "error: bad index register select"; 
-							badreg = true; 
-							break;						
+							_error = "error: bad index register select";
+							badreg = true;
+							break;
 						}
 						relsel = selmatch[0].charCodeAt(1) - "x".charCodeAt(0);
 						if ( relsel > 2 )
-							relsel = 3; 
+							relsel = 3;
 						var relofs:Array = relreg[0].match( /\+\d{1,3}/ig );
-						if ( relofs.length > 0 ) 
-							reloffset = relofs[0]; 						
+						if ( relofs.length > 0 )
+							reloffset = relofs[0];
 						if ( reloffset < 0 || reloffset > 255 )
 						{
-							_error = "error: index offset "+reloffset+" out of bounds. [0..255]"; 
-							badreg = true; 
-							break;							
+							_error = "error: index offset "+reloffset+" out of bounds. [0..255]";
+							badreg = true;
+							break;
 						}
 						if ( verbose )
-							trace( "RELATIVE: type="+reltype+"=="+relname[0]+" sel="+relsel+"=="+selmatch[0]+" idx="+regidx+" offset="+reloffset ); 
+							trace( "RELATIVE: type="+reltype+"=="+relname[0]+" sel="+relsel+"=="+selmatch[0]+" idx="+regidx+" offset="+reloffset );
 					}
 					
 					if ( verbose )
 						trace( "  emit argcode="+regFound+"["+regidx+"]["+regmask+"]" );
 					if ( isDest )
-					{												
+					{
 						agalcode.writeShort( regidx );
 						agalcode.writeByte( regmask );
 						agalcode.writeByte( regFound.emitCode );
-						pad -= 32; 
+						pad -= 32;
 					} else
 					{
 						if ( isSampler )
 						{
 							if ( verbose )
 								trace( "  emit sampler" );
-							var samplerbits:uint = 5; // type 5 
+							var samplerbits:uint = 5; // type 5
 							var optsLength:uint = opts.length;
-							var bias:Number = 0; 
+							var bias:Number = 0;
 							for ( k = 0; k<optsLength; k++ )
 							{
 								if ( verbose )
@@ -347,20 +347,20 @@ package gremlin
 								{
 									// todo check that it's a number...
 									//trace( "Warning, unknown sampler option: "+opts[k] );
-									bias = Number(opts[k]); 
+									bias = Number(opts[k]);
 									if ( verbose )
-										trace( "    bias: " + bias );																	
+										trace( "    bias: " + bias );
 								}
 								else
 								{
 									if ( optfound.flag != SAMPLER_SPECIAL_SHIFT )
-										samplerbits &= ~( 0xf << optfound.flag );										
+										samplerbits &= ~( 0xf << optfound.flag );
 									samplerbits |= uint( optfound.mask ) << uint( optfound.flag );
 								}
 							}
 							agalcode.writeShort( regidx );
 							agalcode.writeByte(int(bias*8.0));
-							agalcode.writeByte(0);							
+							agalcode.writeByte(0);
 							agalcode.writeUnsignedInt( samplerbits );
 							
 							if ( verbose )
@@ -387,7 +387,7 @@ package gremlin
 				}
 				
 				// pad unused regs
-				for ( j = 0; j < pad; j += 8 ) 
+				for ( j = 0; j < pad; j += 8 )
 					agalcode.writeByte( 0 );
 				
 				if ( badreg )
@@ -438,10 +438,10 @@ package gremlin
 			OPMAP[ SUB ] = new OpCode( SUB, 3, 0x02, 0 );
 			OPMAP[ MUL ] = new OpCode( MUL, 3, 0x03, 0 );
 			OPMAP[ DIV ] = new OpCode( DIV, 3, 0x04, 0 );
-			OPMAP[ RCP ] = new OpCode( RCP, 2, 0x05, 0 );					
+			OPMAP[ RCP ] = new OpCode( RCP, 2, 0x05, 0 );
 			OPMAP[ MIN ] = new OpCode( MIN, 3, 0x06, 0 );
 			OPMAP[ MAX ] = new OpCode( MAX, 3, 0x07, 0 );
-			OPMAP[ FRC ] = new OpCode( FRC, 2, 0x08, 0 );			
+			OPMAP[ FRC ] = new OpCode( FRC, 2, 0x08, 0 );
 			OPMAP[ SQT ] = new OpCode( SQT, 2, 0x09, 0 );
 			OPMAP[ RSQ ] = new OpCode( RSQ, 2, 0x0a, 0 );
 			OPMAP[ POW ] = new OpCode( POW, 3, 0x0b, 0 );
@@ -452,13 +452,13 @@ package gremlin
 			OPMAP[ COS ] = new OpCode( COS, 2, 0x10, 0 );
 			OPMAP[ CRS ] = new OpCode( CRS, 3, 0x11, 0 );
 			OPMAP[ DP3 ] = new OpCode( DP3, 3, 0x12, 0 );
-			OPMAP[ DP4 ] = new OpCode( DP4, 3, 0x13, 0 );					
+			OPMAP[ DP4 ] = new OpCode( DP4, 3, 0x13, 0 );
 			OPMAP[ ABS ] = new OpCode( ABS, 2, 0x14, 0 );
 			OPMAP[ NEG ] = new OpCode( NEG, 2, 0x15, 0 );
 			OPMAP[ SAT ] = new OpCode( SAT, 2, 0x16, 0 );
 			OPMAP[ M33 ] = new OpCode( M33, 3, 0x17, OP_SPECIAL_MATRIX );
 			OPMAP[ M44 ] = new OpCode( M44, 3, 0x18, OP_SPECIAL_MATRIX );
-			OPMAP[ M34 ] = new OpCode( M34, 3, 0x19, OP_SPECIAL_MATRIX );			
+			OPMAP[ M34 ] = new OpCode( M34, 3, 0x19, OP_SPECIAL_MATRIX );
 			OPMAP[ IFZ ] = new OpCode( IFZ, 1, 0x1a, OP_NO_DEST | OP_INC_NEST | OP_SCALAR );
 			OPMAP[ INZ ] = new OpCode( INZ, 1, 0x1b, OP_NO_DEST | OP_INC_NEST | OP_SCALAR );
 			OPMAP[ IFE ] = new OpCode( IFE, 2, 0x1c, OP_NO_DEST | OP_INC_NEST | OP_SCALAR );
@@ -621,7 +621,7 @@ package gremlin
 //	Class
 // ---------------------------------------------------------------------------
 class OpCode
-{		
+{
 	// ======================================================================
 	//	Properties
 	// ----------------------------------------------------------------------
@@ -647,7 +647,7 @@ class OpCode
 		_numRegister = numRegister;
 		_emitCode = emitCode;
 		_flags = flags;
-	}		
+	}
 	
 	// ======================================================================
 	//	Methods
