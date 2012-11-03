@@ -106,6 +106,17 @@ package gremlin.shaders {
             }
         }
 
+        public function setParamM44Array(name:String, array:Vector.<Matrix3D>):void {
+            if (params[name] != null) {
+                var register:int = params[name];
+                for (var i:int = 0; i < array.length; ++i) {
+                    if (array[i] != null) {
+                        ctx.setProgramConstantFromMatrix(type, register + i * 4, array[i]);
+                    }
+                }
+            }
+        }
+
         public function setParamM42(name:String, m42:Matrix):void {
             throw "Not implemented yet."
         }

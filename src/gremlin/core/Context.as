@@ -10,11 +10,13 @@ package gremlin.core {
     import flash.utils.ByteArray;
     import flash.utils.Dictionary;
     import flash.utils.getTimer;
+    import gremlin.animation.SkeletonManager;
     import gremlin.debug.MemoryStats;
     import gremlin.events.EventDispatcher;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.MaterialManager;
     import gremlin.math.ProjectionUtils;
+    import gremlin.meshes.ModelManager;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.Shader;
     import gremlin.textures.TextureManager;
@@ -32,6 +34,8 @@ package gremlin.core {
 
         public var loaderMgr:LoaderManager;
         public var textureMgr:TextureManager;
+        public var skeletonMgr:SkeletonManager;
+        public var modelMgr:ModelManager;
         public var materialMgr:MaterialManager;
         public var autoParams:AutoParams;
 
@@ -66,6 +70,8 @@ package gremlin.core {
 
             loaderMgr = new LoaderManager();
             textureMgr = new TextureManager(this);
+            skeletonMgr = new SkeletonManager(this);
+            modelMgr = new ModelManager(this);
             materialMgr = new MaterialManager(this);
             autoParams = new AutoParams(this);
 

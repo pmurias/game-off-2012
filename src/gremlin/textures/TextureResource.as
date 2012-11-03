@@ -3,13 +3,14 @@ package gremlin.textures {
     import flash.display3D.Context3DTextureFormat;
     import flash.display3D.textures.Texture;
     import gremlin.core.Context;
+    import gremlin.core.IResource;
     import gremlin.core.IRestorable;
 
     /**
      * ...
      * @author mosowski
      */
-    public class TextureResource implements IRestorable {
+    public class TextureResource implements IRestorable, IResource {
         public var ctx:Context;
         public var texture3d:Texture;
         public var width:int;
@@ -73,6 +74,10 @@ package gremlin.textures {
             } else if (isRenderTarget) {
                 prepareAsRenderTarget(width, height);
             }
+        }
+
+        public function isResourceLoaded():Boolean {
+            return isLoaded;
         }
     }
 

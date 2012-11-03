@@ -7,16 +7,20 @@ package {
     import flash.geom.Matrix3D;
     import flash.geom.Vector3D;
     import flash.text.TextField;
+    import gremlin.animation.SkeletonResource;
     import gremlin.core.Context;
     import gremlin.loading.LoaderBatch;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.Material;
     import gremlin.materials.Pass;
     import gremlin.math.Quaternion;
-    import gremlin.meshes.Mesh;
-    import gremlin.scene.MeshEntity;
+    import gremlin.meshes.ModelResource;
+    import gremlin.scene.AnimatedEntity;
+    import gremlin.scene.ModelEntity;
+    import gremlin.scene.ModelEntity;
     import gremlin.scene.Node;
     import gremlin.shaders.AutoParams;
+    import gremlin.shaders.consts.ShaderConstFloat;
     import gremlin.shaders.consts.ShaderConstVec4;
     import gremlin.shaders.Shader;
     import gremlin.textures.TextureManager;
@@ -50,7 +54,8 @@ package {
             var lb:LoaderBatch = new LoaderBatch(ctx.loaderMgr);
             lb.addListener(LoaderBatch.COMPLETE, onAssetsLoaded);
             lb.addImageUrl("static/chess.png");
-            lb.addDataUrl("static/cox.orcm");
+            lb.addDataUrl("static/Cox.orcm");
+            lb.addDataUrl("static/CoxSkeleton.orcs");
             lb.addDataUrl("static/shaders.txt");
             lb.load();
         }
@@ -61,26 +66,24 @@ package {
 
         public var orange:Shader;
         public var textured:Shader;
-        public var mesh:Mesh;
+        public var animated:Shader;
+        public var mesh:ModelResource;
         public var rootNode:Node;
         public var cameraMatrix:Matrix3D;
 
         public var node0:Node;
         public var node1:Node;
 
-        public var ent0:MeshEntity;
+        public var ent0:AnimatedEntity;
 
         private function onImageLoaded(u:String):void {
-            stage.addChild(new Bitmap(
-                ctx.textureMgr.getTextureResource("static/chess.png").bitmapSource)
-                );
-
             initShaders();
 
             initMaterials();
 
-            mesh = new Mesh(ctx);
-            mesh.fromJSON(ctx.loaderMgr.getLoaderJSON("static/cox.orcm"));
+            ctx.skeletonMgr.loadSkeletonResource("static/CoxSkeleton.orcs");
+
+            ctx.modelMgr.loadModelResource("static/Cox.orcm");
 
             cameraMatrix = new Matrix3D();
 
@@ -94,8 +97,11 @@ package {
             node1.setPosition(1, 0, 0);
             node1.setScale(0.5, 0.5, 1);
 
-            ent0 = new MeshEntity(mesh, node0);
-            ent0 = new MeshEntity(mesh, node1);
+            var skele:SkeletonResource;
+
+            ent0 = new AnimatedEntity(ctx.modelMgr.modelResourceByName["Cox"], node0);
+            //ent0 = new ModelEntity(ctx.modelMgr.modelResourceByName["Cox"], node1);
+            ent0.setAnimationState("Idle");
 
             ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
         }
@@ -122,6 +128,23 @@ package {
             textured.vertexProgram.addAttr("uv0", 1);
             textured.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
             textured.fragmentProgram.addSampler("tex", 0);
+
+
+            animated = new Shader(ctx);
+            animated.setSources(shaders.vpAnimated, shaders.fpAnimated);
+            animated.vertexProgram.addParam(AutoParams.BONES_MATRICES, 0);
+            animated.vertexProgram.addParam(AutoParams.CAMERA_MATRIX, 100);
+            animated.vertexProgram.addParam(AutoParams.MODEL_MATRIX, 104);
+            animated.vertexProgram.addConst("four", 108, new ShaderConstFloat(4));
+
+            animated.vertexProgram.autoParams.push(AutoParams.CAMERA_MATRIX, AutoParams.MODEL_MATRIX, AutoParams.BONES_MATRICES);
+
+            animated.vertexProgram.addAttr("pos", 0);
+            animated.vertexProgram.addAttr("uv0", 1);
+            animated.vertexProgram.addAttr("bones", 2);
+            animated.vertexProgram.addAttr("weights", 3);
+            animated.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
+            animated.fragmentProgram.addSampler("tex", 0);
         }
 
         public function initMaterials():void {
@@ -134,7 +157,7 @@ package {
 
             m = ctx.materialMgr.createMaterial("Cox");
             p = new Pass();
-            p.shader = textured;
+            p.shader = animated;
             p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
             m.addPass(p);
         }
@@ -160,6 +183,8 @@ package {
             node1.getPosition().y = Math.sin(ctx.time);
             node1.markAsDirty()
             rootNode.updateTransformation();
+
+            ent0.currentAnimationState.advance(2);
 
             textured.fragmentProgram.consts["color"].x =
             textured.fragmentProgram.consts["color"].y =

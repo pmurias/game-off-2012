@@ -6,7 +6,7 @@ package gremlin.meshes {
      * @author mosowski
      */
     public class Submesh {
-        public var mesh:Mesh;
+        public var modelResource:ModelResource;
         public var indexOffset:int;
         public var numTriangles:int;
         public var material:Material;

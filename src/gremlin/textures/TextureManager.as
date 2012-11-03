@@ -2,67 +2,39 @@ package gremlin.textures {
     import flash.events.Event;
     import flash.utils.Dictionary;
     import gremlin.core.Context;
+    import gremlin.core.ResourceManager;
     import gremlin.loading.LoaderManager;
 
     /**
      * ...
      * @author mosowski
      */
-    public class TextureManager {
-        public var textures:Dictionary;
-        public var onReadyCallbacks:Dictionary;
-        public var ctx:Context;;
-
+    public class TextureManager extends ResourceManager {
         public function TextureManager(_ctx:Context) {
-            ctx = _ctx;
+            super(_ctx, TextureResource);
             ctx.addListener(Context.CONTEXT_LOST, onContextLost);
-
-            textures = new Dictionary();
-            onReadyCallbacks = new Dictionary();
         }
 
-        public function loadTextureResource(url:String, onReadyCb:Function = null):TextureResource {
-            var tr:TextureResource = textures[url];
-            var cbks:Vector.<Function> = onReadyCallbacks[url];
-            if (tr == null) {
-                tr = textures[url] = new TextureResource(ctx);
-                cbks = onReadyCallbacks[url] = new Vector.<Function>();
-                if (onReadyCb != null) {
-                    cbks.push(onReadyCb);
-                }
-                ctx.loaderMgr.loadImage(url, onTextureImageLoaded);
+        override protected function onResourceLoaded(url:String):void {
+            resources[url].setBitmapSource(ctx.loaderMgr.getLoaderBitmap(url).bitmapData);
+            super.onResourceLoaded(url);
+        }
 
-            } else if (tr.isLoaded == false) {
-                if (onReadyCb != null) {
-                    cbks.push(onReadyCb);
-                }
-            }
-            return tr;
+        override protected function callLoader(url:String, onLoaderComplete:Function):void {
+            ctx.loaderMgr.loadImage(url, onLoaderComplete);
         }
 
         public function getTextureResource(url:String):TextureResource {
-            return textures[url];
+            return resources[url] as TextureResource;
         }
 
-        public function createTextureResource(url:String):TextureResource {
-            var tr:TextureResource = new TextureResource(ctx);
-            textures[url] = tr;
-            return tr;
-        }
-
-        private function onTextureImageLoaded(url:String):void {
-            var tr:TextureResource = textures[url];
-            var cbks:Vector.<Function> = onReadyCallbacks[url];
-            tr.setBitmapSource(ctx.loaderMgr.getLoaderBitmap(url).bitmapData);
-            for (var i:int = 0; i < cbks.length; i += 1) {
-                cbks[i](url);
-            }
-            cbks.length = 0;
+        public function loadTextureResource(url:String, onReadyCb:Function = null):TextureResource {
+            return loadResource(url, onReadyCb) as TextureResource;
         }
 
         private function onContextLost(params:Object = null):void {
-            for (var url:String in textures) {
-                var tr:TextureResource = textures[url];
+            for (var url:String in resources) {
+                var tr:TextureResource = resources[url];
                 tr.restore();
             }
         }

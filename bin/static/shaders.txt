@@ -15,7 +15,30 @@
     "fpTextured": [
         "tex ft0, v0, fs0 <2d, repeat, linear>",
         "mul oc, ft0, fc0"
-    ]
+    ],
 
+    "vpAnimated": [
+        "mul vt3, va2, vc108.x",
+        "m44 vt0, va0, vc[vt3.x]",
+        "mul vt0, vt0, va3.x",
+        "mov vt1, vt0",
+        "m44 vt0, va0, vc[vt3.y]",
+        "mul vt0, vt0, va3.y",
+        "add vt1, vt1, vt0",
+        "m44 vt0, va0, vc[vt3.z]",
+        "mul vt0, vt0, va3.z",
+        "add vt1, vt1, vt0",
+        "m44 vt0, va0, vc[vt3.w]",
+        "mul vt0, vt0, va3.w",
+        "add vt1, vt1, vt0",
+
+        "m44 vt1, vt1, vc104",
+        "m44 op, vt1, vc100",
+        "mov v0, va1"
+    ],
+    "fpAnimated": [
+        "tex ft0, v0, fs0 <2d, repeat, linear>",
+        "mul oc, ft0, fc0"
+    ]
 
 }

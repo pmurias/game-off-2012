@@ -2,19 +2,24 @@ package gremlin.meshes {
     import flash.display3D.Context3DVertexBufferFormat;
     import flash.utils.ByteArray;
     import flash.utils.Endian;
+    import gremlin.animation.SkeletonResource;
     import gremlin.core.Context;
+    import gremlin.core.IResource;
 
     /**
      * ...
      * @author mosowski
      */
-    public class Mesh {
+    public class ModelResource implements IResource {
         public var ctx:Context;
+        public var name:String;
         public var submeshes:Vector.<Submesh>;
         public var vertexBuffer:VertexBuffer;
         public var indexBuffer:IndexBuffer;
+        public var skeletonResource:SkeletonResource;
+        public var isLoaded:Boolean;
 
-        public function Mesh(_ctx:Context) {
+        public function ModelResource(_ctx:Context) {
             ctx = _ctx;
             submeshes = new Vector.<Submesh>();
         }
@@ -23,9 +28,11 @@ package gremlin.meshes {
             var i:int;
             vertexBuffer = new VertexBuffer(ctx);
 
+            name = json[0];
+
             var vertexSize:int = 0;
-            for (i = 0; i < json[0].length; ++i) {
-                var streamSize:int = parseInt(json[0][i][1]);
+            for (i = 0; i < json[1].length; ++i) {
+                var streamSize:int = parseInt(json[1][i][1]);
                 var streamType:String;
                 switch (streamSize) {
                     case 1:
@@ -41,15 +48,15 @@ package gremlin.meshes {
                         streamType = Context3DVertexBufferFormat.FLOAT_4;
                         break;
                 }
-                vertexBuffer.addStream(json[0][i][0], streamType, streamSize);
+                vertexBuffer.addStream(json[1][i][0], streamType, streamSize);
                 vertexSize += streamSize;
             }
 
             var vertexData:ByteArray = new ByteArray();
             vertexData.endian = Endian.LITTLE_ENDIAN;
 
-            for (i = 0; i < json[1].length; ++i) {
-                vertexData.writeFloat(json[1][i]);
+            for (i = 0; i < json[2].length; ++i) {
+                vertexData.writeFloat(json[2][i]);
             }
             vertexBuffer.setData(vertexData, vertexSize);
 
@@ -59,19 +66,29 @@ package gremlin.meshes {
 
             indexBuffer = new IndexBuffer(ctx);
 
-            for (var materialName:String in json[2]) {
+            for (var materialName:String in json[3]) {
 				var submesh:Submesh = new Submesh();
-                submesh.mesh = this;
+                submesh.modelResource = this;
                 submesh.indexOffset = indexOffset;
-                submesh.numTriangles = json[2][materialName].length / 3;
+                submesh.numTriangles = json[3][materialName].length / 3;
                 submesh.material = ctx.materialMgr.getMaterial(materialName);
-				for (i = 0; i < json[2][materialName].length; ++i) {
-                    indexData.writeShort(json[2][materialName][i]);
+				for (i = 0; i < json[3][materialName].length; ++i) {
+                    indexData.writeShort(json[3][materialName][i]);
 				}
-                indexOffset += json[2][materialName].length;
+                indexOffset += json[3][materialName].length;
 				submeshes.push(submesh);
 			}
             indexBuffer.setData(indexData);
+
+            if (json[4].length > 0) {
+                skeletonResource = ctx.skeletonMgr.skeletonResourcesByName[json[4]];
+            }
+
+            isLoaded = true;
+        }
+
+        public function isResourceLoaded():Boolean {
+            return isLoaded;
         }
     }
 

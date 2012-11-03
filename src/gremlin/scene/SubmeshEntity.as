@@ -9,7 +9,7 @@ package gremlin.scene {
      * @author mosowski
      */
     public class SubmeshEntity implements IRenderable {
-        public var meshEntity:MeshEntity;
+        public var modelEntity:ModelEntity;
         public var submesh:Submesh;
         public var material:Material;
 
@@ -30,13 +30,13 @@ package gremlin.scene {
         }
 
         public function render(ctx:Context):void {
-            ctx.autoParams.modelMatrix.value = meshEntity.node.getTransformationMatrix();
+            modelEntity.setLocalAutoParams(ctx);
             ctx.activeShader.uploadLocalAutoParams();
 
             for (var attrName:String in ctx.activeShader.vertexProgram.attrs) {
-                ctx.activeShader.vertexProgram.setVertexAttr(attrName, meshEntity.mesh.vertexBuffer);
+                ctx.activeShader.vertexProgram.setVertexAttr(attrName, modelEntity.modelResource.vertexBuffer);
             }
-            ctx.drawTriangles(meshEntity.mesh.indexBuffer.indexBuffer3d, submesh.indexOffset, submesh.numTriangles);
+            ctx.drawTriangles(modelEntity.modelResource.indexBuffer.indexBuffer3d, submesh.indexOffset, submesh.numTriangles);
         }
     }
 
