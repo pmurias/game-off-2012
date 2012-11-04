@@ -17,11 +17,15 @@ package gremlin.shaders {
         public var localAutoParams:Dictionary;
 
         public var cameraMatrix:ShaderConstM44;
+        public var viewMatrix:ShaderConstM44;
+        public var projectionMatrix:ShaderConstM44;
         public var time:ShaderConstFloat;
         public var modelMatrix:ShaderConstM44;
         public var bonesMatrices:ShaderConstM44Array;
 
         public static const CAMERA_MATRIX:String = "cameraMatrix";
+        public static const VIEW_MATRIX:String = "viewMatrix";
+        public static const PROJECTION_MATRIX:String = "projectionMatrix";
         public static const TIME:String = "time";
         public static const MODEL_MATRIX:String = "modelMatrix";
         public static const BONES_MATRICES:String = "bonesMatrices";
@@ -32,6 +36,8 @@ package gremlin.shaders {
             localAutoParams = new Dictionary();
 
             globalAutoParams[CAMERA_MATRIX] = cameraMatrix = new ShaderConstM44();
+            globalAutoParams[VIEW_MATRIX] = viewMatrix = new ShaderConstM44();
+            globalAutoParams[PROJECTION_MATRIX] = projectionMatrix = new ShaderConstM44();
             globalAutoParams[TIME] = time = new ShaderConstFloat();
 
             localAutoParams[MODEL_MATRIX] = modelMatrix = new ShaderConstM44();
@@ -39,7 +45,9 @@ package gremlin.shaders {
         }
 
         public function updateGlobalAutoParamsValues():void {
-            cameraMatrix.value = ctx.activeCameraMatrix;
+            cameraMatrix.value = ctx.activeCamera.cameraMatrix;
+            viewMatrix.value = ctx.activeCamera.viewMatrix;
+            projectionMatrix.value = ctx.activeCamera.projectionMatrix;
             time.value = ctx.time;
         }
     }

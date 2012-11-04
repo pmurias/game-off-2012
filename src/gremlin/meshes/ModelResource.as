@@ -48,7 +48,7 @@ package gremlin.meshes {
                         streamType = Context3DVertexBufferFormat.FLOAT_4;
                         break;
                 }
-                vertexBuffer.addStream(json[1][i][0], streamType, streamSize);
+                vertexBuffer.addStream(json[1][i][0], streamType);
                 vertexSize += streamSize;
             }
 

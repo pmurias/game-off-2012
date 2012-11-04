@@ -14,9 +14,12 @@ package gremlin.meshes {
         public var data:ByteArray;
         public var numIndices:int;
 
-        public function IndexBuffer(_ctx:Context) {
+        public function IndexBuffer(_ctx:Context, _data:ByteArray = null) {
             ctx = _ctx;
             ctx.restorableResources.push(this);
+            if (_data != null) {
+                setData(_data);
+            }
         }
 
         public function setData(_data:ByteArray):void {

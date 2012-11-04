@@ -45,6 +45,11 @@ package gremlin.shaders {
             params[name] = register;
         }
 
+        public function addAutoParam(name:String, register:int):void {
+            addParam(name, register);
+            autoParams.push(name);
+        }
+
         public function addConst(name:String, register:int, value:IShaderConst):void {
             addParam(name, register);
             consts[name] = value;

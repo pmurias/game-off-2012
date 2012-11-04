@@ -11,8 +11,7 @@ package gremlin.textures {
      */
     public class TextureManager extends ResourceManager {
         public function TextureManager(_ctx:Context) {
-            super(_ctx, TextureResource);
-            ctx.addListener(Context.CONTEXT_LOST, onContextLost);
+            super(this, _ctx, TextureResource);
         }
 
         override protected function onResourceLoaded(url:String):void {
@@ -30,13 +29,6 @@ package gremlin.textures {
 
         public function loadTextureResource(url:String, onReadyCb:Function = null):TextureResource {
             return loadResource(url, onReadyCb) as TextureResource;
-        }
-
-        private function onContextLost(params:Object = null):void {
-            for (var url:String in resources) {
-                var tr:TextureResource = resources[url];
-                tr.restore();
-            }
         }
     }
 

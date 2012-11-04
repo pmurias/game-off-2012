@@ -15,8 +15,10 @@ package gremlin.core {
     import gremlin.events.EventDispatcher;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.MaterialManager;
+    import gremlin.math.MathConstants;
     import gremlin.math.ProjectionUtils;
     import gremlin.meshes.ModelManager;
+    import gremlin.scene.Camera;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.Shader;
     import gremlin.textures.TextureManager;
@@ -41,10 +43,11 @@ package gremlin.core {
 
         // render state variables
         public var activeShader:Shader;
-        public var activeCameraMatrix:Matrix3D;
+        public var activeCamera:Camera;
 
         // utilities
         public var projectionUtils:ProjectionUtils;
+        public var mathConstants:MathConstants;
 
         // used for switching-off vertex streams that are active, but not needed in current call
         // activeVertexStreams remebers also vertex buffer bound to stream
@@ -68,6 +71,8 @@ package gremlin.core {
             stats = new MemoryStats();
             restorableResources = new Vector.<IRestorable>();
 
+            time = getTimer() / 1000;
+
             loaderMgr = new LoaderManager();
             textureMgr = new TextureManager(this);
             skeletonMgr = new SkeletonManager(this);
@@ -76,6 +81,7 @@ package gremlin.core {
             autoParams = new AutoParams(this);
 
             projectionUtils = new ProjectionUtils();
+            mathConstants = new MathConstants();
 
             activeVertexStreams = new Vector.<VertexBuffer3D>(8, true);
             neededVertexStreams = new Vector.<Boolean>(8, true);
@@ -97,6 +103,7 @@ package gremlin.core {
             stage.addEventListener(Event.RESIZE, onStageResize);
 
             ctx3d = stage.stage3Ds[0].context3D;
+            ctx3d.enableErrorChecking = true;
             configureBackBuffer();
             addListener(CONTEXT_LOST, onContextLost);
 
@@ -196,7 +203,7 @@ package gremlin.core {
             }
         }
 
-        public function drawTriangles(indexBuffer3d:IndexBuffer3D, offset:int, numTriangles:int = -1):void {
+        public function drawTriangles(indexBuffer3d:IndexBuffer3D, offset:int=0, numTriangles:int = -1):void {
             for (var i:int = 0; i < 8; ++i) {
                 if (activeVertexStreams[i] != null && !neededVertexStreams[i]) {
                     ctx3d.setVertexBufferAt(i, null);
@@ -208,6 +215,11 @@ package gremlin.core {
                 }
             }
             ctx3d.drawTriangles(indexBuffer3d, offset, numTriangles);
+        }
+
+        public function setCamera(camera:Camera):void {
+            activeCamera = camera;
+            camera.update();
         }
 
         public function beginFrame():void {

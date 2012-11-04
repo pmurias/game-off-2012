@@ -11,7 +11,7 @@ package gremlin.animation {
         public var skeletonResourcesByName:Dictionary;
 
         public function SkeletonManager(_ctx:Context) {
-            super(_ctx, SkeletonResource);
+            super(this, _ctx, SkeletonResource);
             skeletonResourcesByName = new Dictionary();
         }
 

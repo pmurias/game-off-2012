@@ -15,19 +15,23 @@ package {
     import gremlin.materials.Pass;
     import gremlin.math.Quaternion;
     import gremlin.meshes.ModelResource;
+    import gremlin.particles.BillboardParticlesEntity;
+    import gremlin.particles.ParticlesEntity;
     import gremlin.scene.AnimatedEntity;
+    import gremlin.scene.Camera;
     import gremlin.scene.ModelEntity;
     import gremlin.scene.ModelEntity;
     import gremlin.scene.Node;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.consts.ShaderConstFloat;
+    import gremlin.shaders.consts.ShaderConstVec2;
     import gremlin.shaders.consts.ShaderConstVec4;
     import gremlin.shaders.Shader;
     import gremlin.textures.TextureManager;
     import gremlin.textures.TextureResource;
 
     /**
-     * ...
+     *     !!WARNING!!  HIGHLY EXPERIMENTAL AREA  !!WARNING!!
      * @author mosowski
      */
     public class Main extends Sprite {
@@ -67,14 +71,16 @@ package {
         public var orange:Shader;
         public var textured:Shader;
         public var animated:Shader;
+        public var particled:Shader;
         public var mesh:ModelResource;
         public var rootNode:Node;
-        public var cameraMatrix:Matrix3D;
+        public var camera:Camera;
 
         public var node0:Node;
         public var node1:Node;
 
         public var ent0:AnimatedEntity;
+        public var part:BillboardParticlesEntity;
 
         private function onImageLoaded(u:String):void {
             initShaders();
@@ -85,10 +91,12 @@ package {
 
             ctx.modelMgr.loadModelResource("static/Cox.orcm");
 
-            cameraMatrix = new Matrix3D();
+            camera = new Camera();
+            ctx.projectionUtils.makePerspectiveMatrix(camera.projectionMatrix, 0.1, 100.0, 55, stage.stageWidth / stage.stageHeight);
+            ctx.setCamera(camera);
 
             rootNode = new Node();
-            rootNode.setPosition(0, 0, 10);
+            rootNode.setPosition(0, -2, 10);
             node0 = new Node();
             rootNode.addChild(node0);
             node0.setPosition(5, 0, 0);
@@ -97,11 +105,23 @@ package {
             node1.setPosition(1, 0, 0);
             node1.setScale(0.5, 0.5, 1);
 
-            var skele:SkeletonResource;
-
-            ent0 = new AnimatedEntity(ctx.modelMgr.modelResourceByName["Cox"], node0);
-            //ent0 = new ModelEntity(ctx.modelMgr.modelResourceByName["Cox"], node1);
+            ent0 = new AnimatedEntity(ctx.modelMgr.getModelResource("Cox"), node0);
             ent0.setAnimationState("Idle");
+
+
+            part = new BillboardParticlesEntity(ctx);
+            part.minLife = 15;
+            part.maxLife = 16;
+            part.minStartSize = 1;
+            part.maxStartSize = 2;
+            part.minEndSize = 0.5;
+            part.maxEndSize = 0.6;
+            part.minVelocity = 0;
+            part.maxVelocity = 0.1;
+            part.spawnRate = 6;
+            part.node = node0;
+            part.setQuota(100);
+            part.setMaterial(ctx.materialMgr.getMaterial("Particle"));
 
             ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
         }
@@ -113,17 +133,15 @@ package {
             }
             orange = new Shader(ctx);
             orange.setSources(shaders.vpOrange, shaders.fpOrange);
-            orange.vertexProgram.addParam(AutoParams.CAMERA_MATRIX, 0);
-            orange.vertexProgram.addParam(AutoParams.MODEL_MATRIX, 4);
-            orange.vertexProgram.autoParams.push(AutoParams.CAMERA_MATRIX, AutoParams.MODEL_MATRIX);
+            orange.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 0);
+            orange.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 4);
             orange.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
             orange.vertexProgram.addAttr("pos", 0);
 
             textured = new Shader(ctx);
             textured.setSources(shaders.vpTextured, shaders.fpTextured);
-            textured.vertexProgram.addParam(AutoParams.CAMERA_MATRIX, 0);
-            textured.vertexProgram.addParam(AutoParams.MODEL_MATRIX, 4);
-            textured.vertexProgram.autoParams.push(AutoParams.CAMERA_MATRIX, AutoParams.MODEL_MATRIX);
+            textured.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 0);
+            textured.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 4);
             textured.vertexProgram.addAttr("pos", 0);
             textured.vertexProgram.addAttr("uv0", 1);
             textured.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
@@ -132,12 +150,10 @@ package {
 
             animated = new Shader(ctx);
             animated.setSources(shaders.vpAnimated, shaders.fpAnimated);
-            animated.vertexProgram.addParam(AutoParams.BONES_MATRICES, 0);
-            animated.vertexProgram.addParam(AutoParams.CAMERA_MATRIX, 100);
-            animated.vertexProgram.addParam(AutoParams.MODEL_MATRIX, 104);
+            animated.vertexProgram.addAutoParam(AutoParams.BONES_MATRICES, 0);
+            animated.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 100);
+            animated.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 104);
             animated.vertexProgram.addConst("four", 108, new ShaderConstFloat(4));
-
-            animated.vertexProgram.autoParams.push(AutoParams.CAMERA_MATRIX, AutoParams.MODEL_MATRIX, AutoParams.BONES_MATRICES);
 
             animated.vertexProgram.addAttr("pos", 0);
             animated.vertexProgram.addAttr("uv0", 1);
@@ -145,6 +161,20 @@ package {
             animated.vertexProgram.addAttr("weights", 3);
             animated.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
             animated.fragmentProgram.addSampler("tex", 0);
+
+            particled = new Shader(ctx);
+            particled.setSources(shaders.vpParticled, shaders.fpParticled);
+            particled.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 0);
+            particled.vertexProgram.addAutoParam(AutoParams.VIEW_MATRIX, 4);
+            particled.vertexProgram.addAutoParam(AutoParams.PROJECTION_MATRIX, 8);
+            particled.vertexProgram.addAutoParam(AutoParams.TIME, 12);
+            particled.vertexProgram.addConst("numbers", 13, new ShaderConstFloat(0.5));
+            particled.vertexProgram.addAttr("uvBornLife", 0);
+            particled.vertexProgram.addAttr("startPos", 1);
+            particled.vertexProgram.addAttr("deltaPos", 2);
+            particled.vertexProgram.addAttr("size", 3);
+            particled.fragmentProgram.addConst("color", 0, new ShaderConstVec4(0.5, 0.5, 1, 1));
+            particled.fragmentProgram.addSampler("tex", 0);
         }
 
         public function initMaterials():void {
@@ -160,18 +190,24 @@ package {
             p.shader = animated;
             p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
             m.addPass(p);
+
+            m = ctx.materialMgr.createMaterial("Particle");
+            p = new Pass();
+            p.shader = particled;
+            p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
+            m.addPass(p);
         }
 
         private function onEnterFrame(params:Object = null):void {
             var lilRot:Quaternion = new Quaternion();
             var lilRight:Vector3D = new Vector3D(0.02, 0, 1);
             lilRight.normalize();
+
             Quaternion.rotationBetween(lilRot, new Vector3D(0, 0, 1), lilRight);
             rootNode.getRotation().multiplyBy(lilRot);
             rootNode.markAsDirty();
             node0.getRotation().multiplyBy(lilRot);
             node0.getRotation().multiplyBy(lilRot);
-            node0.markAsDirty();
             node1.getRotation().multiplyBy(lilRot);
             node1.getRotation().multiplyBy(lilRot);
             node1.getRotation().multiplyBy(lilRot);
@@ -181,7 +217,7 @@ package {
             node1.getRotation().multiplyBy(lilRot);
             node1.getRotation().multiplyBy(lilRot);
             node1.getPosition().y = Math.sin(ctx.time);
-            node1.markAsDirty()
+            node1.markAsDirty();
             rootNode.updateTransformation();
 
             ent0.currentAnimationState.advance(2);
@@ -189,9 +225,6 @@ package {
             textured.fragmentProgram.consts["color"].x =
             textured.fragmentProgram.consts["color"].y =
             textured.fragmentProgram.consts["color"].z = (0.5*Math.sin(ctx.time*10))+0.5
-
-            ctx.projectionUtils.makePerspectiveMatrix(cameraMatrix, 0.1, 100.0, 55, 4 / 3);
-            ctx.activeCameraMatrix = cameraMatrix;
 
             ctx.beginFrame();
 

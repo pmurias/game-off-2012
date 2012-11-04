@@ -1,5 +1,6 @@
 package gremlin.core {
     import flash.utils.Dictionary;
+    import gremlin.error.EAbstractClass;
 
     /**
      * ...
@@ -11,11 +12,15 @@ package gremlin.core {
         public var resourceClass:Class;
         public var onReadyCallbacks:Dictionary;
 
-        public function ResourceManager(_ctx:Context, _resourceClass:Class) {
-            ctx = _ctx;
-            resourceClass = _resourceClass;
-            resources = new Dictionary();
-            onReadyCallbacks = new Dictionary();
+        public function ResourceManager(self:ResourceManager, _ctx:Context, _resourceClass:Class) {
+            if (self != this) {
+                throw new EAbstractClass(ResourceManager);
+            } else {
+                ctx = _ctx;
+                resourceClass = _resourceClass;
+                resources = new Dictionary();
+                onReadyCallbacks = new Dictionary();
+            }
         }
 
         protected function loadResource(url:String, onReadyCb:Function = null):IResource {

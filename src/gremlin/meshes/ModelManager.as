@@ -11,7 +11,7 @@ package gremlin.meshes {
         public var modelResourceByName:Dictionary;
 
         public function ModelManager(_ctx:Context) {
-            super(_ctx, ModelResource);
+            super(this, _ctx, ModelResource);
 
             modelResourceByName = new Dictionary();
         }
@@ -28,7 +28,11 @@ package gremlin.meshes {
         }
 
         public function getModelResource(url:String):ModelResource {
-            return resources[url] as ModelResource;
+            var modelResource:ModelResource = resources[url];
+            if (modelResource == null) {
+                modelResource = modelResourceByName[url];
+            }
+            return modelResource;
         }
 
         public function loadModelResource(url:String, onReadyCb:Function = null):ModelResource {
