@@ -1,0 +1,71 @@
+{
+    "vpOrange": [
+        "m44 vt0, va0, vc4",
+        "m44 op, vt0, vc0"
+    ],
+    "fpOrange": [
+        "mov oc, fc0"
+    ],
+
+    "vpTextured": [
+        "mov v0, va1",
+        "m44 vt0, va0, vc4",
+        "m44 op, vt0, vc0"
+    ],
+    "fpTextured": [
+        "tex ft0, v0, fs0 <2d, repeat, linear>",
+        "mul oc, ft0, fc0"
+    ],
+
+    "vpAnimated": [
+        "mul vt3, va2, vc108.x",
+        "m44 vt0, va0, vc[vt3.x]",
+        "mul vt0, vt0, va3.x",
+        "mov vt1, vt0",
+        "m44 vt0, va0, vc[vt3.y]",
+        "mul vt0, vt0, va3.y",
+        "add vt1, vt1, vt0",
+        "m44 vt0, va0, vc[vt3.z]",
+        "mul vt0, vt0, va3.z",
+        "add vt1, vt1, vt0",
+        "m44 vt0, va0, vc[vt3.w]",
+        "mul vt0, vt0, va3.w",
+        "add vt1, vt1, vt0",
+
+        "m44 vt1, vt1, vc104",
+        "m44 op, vt1, vc100",
+        "mov v0, va1"
+    ],
+    "fpAnimated": [
+        "tex ft0, v0, fs0 <2d, repeat, linear>",
+        "mul oc, ft0, fc0"
+    ],
+
+    "vpParticled": [
+        "sub vt1.x, vc12.x, va0.z",
+        "div vt1.x, vt1.x, va0.w",
+
+        "mov vt0.w, va2.w",
+        "mul vt0.xyz, va2.xyz, vt1.xxx",
+        "add vt0.xyz, vt0.xyz, va1.xyz",
+        "m44 vt0, vt0, vc0",
+        "m44 vt0, vt0, vc4",
+
+        "mul vt3.x, va3.y, vt1.x",
+        "add vt3.x, vt3.x, va3.x",
+        "slt vt2.x, vt1.x, vc13.y",
+        "mul vt3.x, vt3.x, vt2.x",
+
+        "sub vt2.xy, va0.xy, vc13.xx",
+        "mul vt2.xy, vt2.xy, vt3.xx",
+        "add vt0.xy, vt0.xy, vt2.xy",
+
+        "mov v0, va0",
+        "m44 op, vt0, vc8"
+    ],
+    "fpParticled": [
+        "tex ft0, v0, fs0 <2d, repeat, linear>",
+        "mul oc, ft0, fc0"
+    ]
+
+}
