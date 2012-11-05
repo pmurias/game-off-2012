@@ -2,6 +2,7 @@ package gremlin.materials {
     import flash.utils.Dictionary;
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
+    import gremlin.textures.TextureResource;
 
     /**
      * ...
@@ -77,7 +78,13 @@ package gremlin.materials {
                     pass.shader.activate();
 
                     for (var samplerName:String in pass.samplers) {
-                        pass.shader.fragmentProgram.setSampler(samplerName, pass.samplers[samplerName].texture3d);
+                        var samplerTexture:TextureResource = pass.samplers[samplerName];
+                        if (samplerTexture == ctx.activeRenderTargetTexture) {
+                            pass.shader.fragmentProgram.setSampler(samplerName, ctx.textureMgr.fallbackTexture);
+                        } else {
+                            pass.shader.fragmentProgram.setSampler(samplerName, samplerTexture);
+                        }
+
                     }
                     for (j = 0; j < renderables.length; ++j) {
                         renderables[j].render(ctx);

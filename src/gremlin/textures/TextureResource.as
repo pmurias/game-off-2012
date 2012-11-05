@@ -54,17 +54,21 @@ package gremlin.textures {
             width = src.width;
             height = src.height;
             bitmapSource = src;
+            uploadFromSource();
+            isLoaded = true;
+        }
+
+        public function uploadFromSource():void {
             if (texture3d == null) {
                 texture3d = ctx.createTexture(
-                    src.width,
-                    src.height,
+                    bitmapSource.width,
+                    bitmapSource.height,
                     Context3DTextureFormat.BGRA,
                     false
                 );
             }
 
-            texture3d.uploadFromBitmapData(src);
-            isLoaded = true;
+            texture3d.uploadFromBitmapData(bitmapSource);
         }
 
         public function restore():void {

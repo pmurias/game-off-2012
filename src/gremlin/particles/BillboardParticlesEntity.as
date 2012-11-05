@@ -107,7 +107,7 @@ package gremlin.particles {
             for (var attrName:String in ctx.activeShader.vertexProgram.attrs) {
                 ctx.activeShader.vertexProgram.setVertexAttr(attrName, vertexBuffer);
             }
-            ctx.drawTriangles(indexBuffer.indexBuffer3d);
+            ctx.drawTriangles(indexBuffer);
         }
 
     }

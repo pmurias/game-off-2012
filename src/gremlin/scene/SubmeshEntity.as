@@ -36,7 +36,7 @@ package gremlin.scene {
             for (var attrName:String in ctx.activeShader.vertexProgram.attrs) {
                 ctx.activeShader.vertexProgram.setVertexAttr(attrName, modelEntity.modelResource.vertexBuffer);
             }
-            ctx.drawTriangles(modelEntity.modelResource.indexBuffer.indexBuffer3d, submesh.indexOffset, submesh.numTriangles);
+            ctx.drawTriangles(modelEntity.modelResource.indexBuffer, submesh.indexOffset, submesh.numTriangles);
         }
     }
 

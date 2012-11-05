@@ -17,11 +17,14 @@ package gremlin.core {
     import gremlin.materials.MaterialManager;
     import gremlin.math.MathConstants;
     import gremlin.math.ProjectionUtils;
+    import gremlin.meshes.IndexBuffer;
     import gremlin.meshes.ModelManager;
+    import gremlin.rendertargets.RenderTargetManager;
     import gremlin.scene.Camera;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.Shader;
     import gremlin.textures.TextureManager;
+    import gremlin.textures.TextureResource;
 
     /**
      * ...
@@ -39,11 +42,13 @@ package gremlin.core {
         public var skeletonMgr:SkeletonManager;
         public var modelMgr:ModelManager;
         public var materialMgr:MaterialManager;
+        public var renderTargetMgr:RenderTargetManager;
         public var autoParams:AutoParams;
 
         // render state variables
         public var activeShader:Shader;
         public var activeCamera:Camera;
+        public var activeRenderTargetTexture:TextureResource;
 
         // utilities
         public var projectionUtils:ProjectionUtils;
@@ -78,6 +83,7 @@ package gremlin.core {
             skeletonMgr = new SkeletonManager(this);
             modelMgr = new ModelManager(this);
             materialMgr = new MaterialManager(this);
+            renderTargetMgr = new RenderTargetManager(this);
             autoParams = new AutoParams(this);
 
             projectionUtils = new ProjectionUtils();
@@ -139,6 +145,7 @@ package gremlin.core {
         }
 
         public function onEnterFrame(e:Event):void {
+            time = getTimer() / 1000;
             dispatch(ENTER_FRAME);
         }
 
@@ -203,7 +210,7 @@ package gremlin.core {
             }
         }
 
-        public function drawTriangles(indexBuffer3d:IndexBuffer3D, offset:int=0, numTriangles:int = -1):void {
+        public function drawTriangles(indexBuffer:IndexBuffer, offset:int=0, numTriangles:int = -1):void {
             for (var i:int = 0; i < 8; ++i) {
                 if (activeVertexStreams[i] != null && !neededVertexStreams[i]) {
                     ctx3d.setVertexBufferAt(i, null);
@@ -214,22 +221,31 @@ package gremlin.core {
                     activeSamplers[i] = null;
                 }
             }
-            ctx3d.drawTriangles(indexBuffer3d, offset, numTriangles);
+            ctx3d.drawTriangles(indexBuffer.indexBuffer3d, offset, numTriangles);
+        }
+
+        public function setRenderToTexture(textureResource:TextureResource, depthAndStencilEnabled:Boolean = false, antiAlias:int = 0):void {
+            ctx3d.setRenderToTexture(textureResource.texture3d, depthAndStencilEnabled, antiAlias);
+            activeRenderTargetTexture = textureResource;
+        }
+
+        public function setRenderToBackBuffer():void {
+            ctx3d.setRenderToBackBuffer();
+            activeRenderTargetTexture = null;
+        }
+
+        public function clear(red:Number = 0, green:Number = 0, blue:Number = 0, alpha:Number = 1, depth:Number = 1, stencil:uint = 0):void {
+            ctx3d.clear(red, green, blue, alpha, depth, stencil);
+        }
+
+        public function present():void {
+            ctx3d.present();
         }
 
         public function setCamera(camera:Camera):void {
             activeCamera = camera;
             camera.update();
-        }
-
-        public function beginFrame():void {
-            ctx3d.clear(0.4, 0.2, 0.8);
             autoParams.updateGlobalAutoParamsValues();
-            time = getTimer() / 1000;
-        }
-
-        public function endFrame():void {
-            ctx3d.present();
         }
 
     }

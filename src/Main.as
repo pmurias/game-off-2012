@@ -92,6 +92,7 @@ package {
             ctx.modelMgr.loadModelResource("static/Cox.orcm");
 
             camera = new Camera();
+            ctx.addListener(Context.RESIZE, onResize);
             ctx.projectionUtils.makePerspectiveMatrix(camera.projectionMatrix, 0.1, 100.0, 55, stage.stageWidth / stage.stageHeight);
             ctx.setCamera(camera);
 
@@ -108,7 +109,6 @@ package {
             ent0 = new AnimatedEntity(ctx.modelMgr.getModelResource("Cox"), node0);
             ent0.setAnimationState("Idle");
 
-
             part = new BillboardParticlesEntity(ctx);
             part.minLife = 15;
             part.maxLife = 16;
@@ -124,6 +124,10 @@ package {
             part.setMaterial(ctx.materialMgr.getMaterial("Particle"));
 
             ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
+        }
+
+        public function onResize(params:Object = null):void {
+            ctx.projectionUtils.makePerspectiveMatrix(camera.projectionMatrix, 0.1, 100.0, 55, stage.stageWidth / stage.stageHeight);
         }
 
         public function initShaders():void {
@@ -191,11 +195,15 @@ package {
             p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
             m.addPass(p);
 
+            ctx.textureMgr.createRenderTargetTextureResource("rtt", 256, 256);
+
             m = ctx.materialMgr.createMaterial("Particle");
             p = new Pass();
             p.shader = particled;
-            p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
+            p.samplers["tex"] = ctx.textureMgr.getTextureResource("rtt");
             m.addPass(p);
+
+            ctx.renderTargetMgr.createRenderTargetFromTexture("target", ctx.textureMgr.getTextureResource("rtt"));
         }
 
         private function onEnterFrame(params:Object = null):void {
@@ -224,13 +232,16 @@ package {
 
             textured.fragmentProgram.consts["color"].x =
             textured.fragmentProgram.consts["color"].y =
-            textured.fragmentProgram.consts["color"].z = (0.5*Math.sin(ctx.time*10))+0.5
+            textured.fragmentProgram.consts["color"].z = (0.5 * Math.sin(ctx.time * 10)) + 0.5;
 
-            ctx.beginFrame();
-
+            ctx.setCamera(camera);
+            ctx.renderTargetMgr.getRenderTarget("target").beginFrame();
             ctx.materialMgr.renderMaterials();
+            ctx.renderTargetMgr.getRenderTarget("target").endFrame();
 
-            ctx.endFrame();
+            ctx.renderTargetMgr.defaultRenderTarget.beginFrame();
+            ctx.materialMgr.renderMaterials();
+            ctx.renderTargetMgr.defaultRenderTarget.endFrame();
         }
 
 

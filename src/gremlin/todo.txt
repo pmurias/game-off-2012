@@ -1,0 +1,24 @@
+
+TODO:
+-pass properties
+-light system
+-loader as textureresource source
+-render targets
+-oriented particle system
+-2d particle system
+-compositors
+-2d geometry
+-shadows (not important now)
+-text rendering (not sure if really needed)
+
+DONE:
+-mesh loading
+-skeleton loading
+-bone animation processing
+-billboard particle system
+-scene node
+-shader and uniform management
+-resource manager
+-loaders
+
+

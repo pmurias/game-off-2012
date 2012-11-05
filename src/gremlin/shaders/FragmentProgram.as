@@ -3,6 +3,7 @@ package gremlin.shaders {
     import flash.display3D.textures.Texture;
     import flash.utils.Dictionary;
     import gremlin.core.Context;
+    import gremlin.textures.TextureResource;
 
     /**
      * ...
@@ -21,9 +22,9 @@ package gremlin.shaders {
             samplers[name] = register;
         }
 
-        public function setSampler(name:String, texture:Texture):void {
+        public function setSampler(name:String, texture:TextureResource):void {
             if (samplers[name] != null) {
-                ctx.setTextureAt(samplers[name], texture);
+                ctx.setTextureAt(samplers[name], texture.texture3d);
             }
         }
 
