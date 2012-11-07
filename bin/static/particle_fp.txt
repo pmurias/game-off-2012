@@ -1,0 +1,4 @@
+
+sampler tex
+
+out = tex2D(varying0.xy, tex)

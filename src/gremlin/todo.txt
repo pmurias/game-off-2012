@@ -3,6 +3,7 @@ TODO:
 -pass properties
 -light system
 -loader as textureresource source
+-disposing on context (stats)
 -render targets
 -oriented particle system
 -2d particle system

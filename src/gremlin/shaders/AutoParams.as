@@ -50,6 +50,10 @@ package gremlin.shaders {
             projectionMatrix.value = ctx.activeCamera.projectionMatrix;
             time.value = ctx.time;
         }
+
+        public function isAutoParam(name:String):Boolean {
+            return name in globalAutoParams || name in localAutoParams;
+        }
     }
 
 }

@@ -27,6 +27,7 @@ package {
     import gremlin.shaders.consts.ShaderConstVec2;
     import gremlin.shaders.consts.ShaderConstVec4;
     import gremlin.shaders.Shader;
+    import gremlin.shaders.ShaderTranslator;
     import gremlin.textures.TextureManager;
     import gremlin.textures.TextureResource;
 
@@ -61,6 +62,8 @@ package {
             lb.addDataUrl("static/Cox.orcm");
             lb.addDataUrl("static/CoxSkeleton.orcs");
             lb.addDataUrl("static/shaders.txt");
+            lb.addDataUrl("static/particle_vp.txt");
+            lb.addDataUrl("static/particle_fp.txt");
             lb.load();
         }
 
@@ -114,8 +117,8 @@ package {
             part.maxLife = 16;
             part.minStartSize = 1;
             part.maxStartSize = 2;
-            part.minEndSize = 0.5;
-            part.maxEndSize = 0.6;
+            part.minEndSize = 0.1;
+            part.maxEndSize = 0.1;
             part.minVelocity = 0;
             part.maxVelocity = 0.1;
             part.spawnRate = 6;
@@ -167,18 +170,26 @@ package {
             animated.fragmentProgram.addSampler("tex", 0);
 
             particled = new Shader(ctx);
-            particled.setSources(shaders.vpParticled, shaders.fpParticled);
-            particled.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 0);
-            particled.vertexProgram.addAutoParam(AutoParams.VIEW_MATRIX, 4);
-            particled.vertexProgram.addAutoParam(AutoParams.PROJECTION_MATRIX, 8);
-            particled.vertexProgram.addAutoParam(AutoParams.TIME, 12);
-            particled.vertexProgram.addConst("numbers", 13, new ShaderConstFloat(0.5));
-            particled.vertexProgram.addAttr("uvBornLife", 0);
-            particled.vertexProgram.addAttr("startPos", 1);
-            particled.vertexProgram.addAttr("deltaPos", 2);
-            particled.vertexProgram.addAttr("size", 3);
-            particled.fragmentProgram.addConst("color", 0, new ShaderConstVec4(0.5, 0.5, 1, 1));
-            particled.fragmentProgram.addSampler("tex", 0);
+            //particled.fromJSON(ctx.loaderMgr.getLoaderJSON("static/particle_vp.json"), ctx.loaderMgr.getLoaderJSON("static/particle_fp.json"));
+
+            var translator:ShaderTranslator = new ShaderTranslator();
+            translator.translate(ctx.loaderMgr.getLoaderString("static/particle_vp.txt"), ShaderTranslator.VERTEX);
+
+            particled.fromJSON(
+                translator.translate(ctx.loaderMgr.getLoaderString("static/particle_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/particle_fp.txt"), ShaderTranslator.FRAGMENT));
+            //particled.setSources(translator.code, shaders.fpParticled);
+            //particled.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 0);
+            //particled.vertexProgram.addAutoParam(AutoParams.VIEW_MATRIX, 4);
+            //particled.vertexProgram.addAutoParam(AutoParams.PROJECTION_MATRIX, 8);
+            //particled.vertexProgram.addAutoParam(AutoParams.TIME, 12);
+            //particled.vertexProgram.addConst("numbers", 13, new ShaderConstFloat(0.5));
+            //particled.vertexProgram.addAttr("uvBornLife", 0);
+            //particled.vertexProgram.addAttr("startPos", 1);
+            //particled.vertexProgram.addAttr("deltaPos", 2);
+            //particled.vertexProgram.addAttr("size", 3);
+            //particled.fragmentProgram.addSampler("tex", 0);
+
         }
 
         public function initMaterials():void {

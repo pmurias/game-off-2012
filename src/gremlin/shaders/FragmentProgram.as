@@ -13,9 +13,17 @@ package gremlin.shaders {
         public var samplers:Dictionary;
 
         public function FragmentProgram(_ctx:Context) {
-            super(_ctx);
+            super(this, _ctx);
             samplers = new Dictionary();
             type = Context3DProgramType.FRAGMENT;
+        }
+
+        override public function fromJSON(json:Object):void {
+            super.fromJSON(json);
+
+            for (var i:int = 0; i < json.samplers.length; ++i) {
+                addSampler(json.samplers[i].name, json.samplers[i].register);
+            }
         }
 
         public function addSampler(name:String, register:int):void {

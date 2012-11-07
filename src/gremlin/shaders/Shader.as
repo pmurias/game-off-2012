@@ -17,17 +17,20 @@ package gremlin.shaders {
         public function Shader(_ctx:Context) {
             ctx = _ctx;
             ctx.addRestorableResource(this);
+            vertexProgram = new VertexProgram(ctx);
+            fragmentProgram = new FragmentProgram(ctx);
         }
 
         public function setSources(vertexProgramSource:String, fragmentProgramSource:String):void {
-            vertexProgram = new VertexProgram(ctx);
             vertexProgram.setSource(vertexProgramSource);
-            fragmentProgram = new FragmentProgram(ctx);
             fragmentProgram.setSource(fragmentProgramSource);
 
-            if (program3d != null) {
-                program3d.dispose();
-            }
+            build();
+        }
+
+        public function fromJSON(vertexProgramJSON:Object, fragmentProgramJSON:Object):void {
+            vertexProgram.fromJSON(vertexProgramJSON);
+            fragmentProgram.fromJSON(fragmentProgramJSON);
 
             build();
         }
@@ -45,6 +48,10 @@ package gremlin.shaders {
         }
 
         public function build():void {
+            if (program3d != null) {
+                program3d.dispose();
+            }
+
             program3d = ctx.createProgram(vertexProgram.getAssembly(), fragmentProgram.getAssembly());
         }
 

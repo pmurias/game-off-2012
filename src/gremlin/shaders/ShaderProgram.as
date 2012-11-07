@@ -6,7 +6,9 @@ package gremlin.shaders {
     import flash.utils.Endian;
     import gremlin.core.Context;
     import gremlin.core.IRestorable;
+    import gremlin.error.EAbstractClass;
     import gremlin.shaders.consts.IShaderConst;
+    import gremlin.shaders.consts.ShaderConstVec4;
 
     /**
      * ...
@@ -14,11 +16,14 @@ package gremlin.shaders {
      */
     public class ShaderProgram {
         public var ctx:Context;
-        public var source:String;
         public var params:Dictionary;
         public var type:String;
         public var autoParams:Vector.<String>;
         public var consts:Dictionary;
+
+        public var source:String;
+        public var assembly:ByteArray;
+        public var jsonSource:Object;
 
         private static const _uploadAux128:ByteArray = new ByteArray();
 
@@ -30,15 +35,39 @@ package gremlin.shaders {
             _uploadAux128.writeFloat(0);
         }
 
-        public function ShaderProgram(_ctx:Context) {
-            ctx = _ctx;
-            params = new Dictionary();
-            autoParams = new Vector.<String>();
-            consts = new Dictionary();
+        public function ShaderProgram(self:ShaderProgram, _ctx:Context) {
+            if (self != this) {
+                throw new EAbstractClass(ShaderProgram);
+            } else {
+                ctx = _ctx;
+                params = new Dictionary();
+                autoParams = new Vector.<String>();
+                consts = new Dictionary();
+            }
         }
 
         public function setSource(_source:String):void {
             source = _source;
+        }
+
+        public function fromJSON(json:Object):void {
+
+            setSource(json.code);
+
+            var i:int, param:Object;
+            for (i = 0; i < json.params.length; ++i) {
+                param = json.params[i];
+                if (ctx.autoParams.isAutoParam(param.name)) {
+                    addAutoParam(param.name, parseInt(param.register));
+                } else {
+                    addParam(param.name, parseInt(param.register));
+                }
+            }
+
+            for (i = 0; i < json.consts.length; ++i) {
+                param = json.consts[i];
+                addConst(param.name, param.register, new ShaderConstVec4(param.values[0], param.values[1], param.values[2], param.values[3]));
+            }
         }
 
         public function addParam(name:String, register:int):void {
@@ -148,10 +177,17 @@ package gremlin.shaders {
             }
         }
 
+        public function setAssembly(_assembly:ByteArray):void {
+            assembly = new ByteArray();
+            assembly.endian = Endian.LITTLE_ENDIAN;
+            assembly.writeBytes(_assembly);
+        }
+
         public function getAssembly():ByteArray {
             var assembler:AGALMiniAssembler = new AGALMiniAssembler();
             assembler.assemble(type, source);
-            return assembler.agalcode;
+            assembly = assembler.agalcode;
+            return assembly;
         }
     }
 
