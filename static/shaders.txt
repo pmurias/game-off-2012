@@ -63,9 +63,39 @@
         "mov v0, va0",
         "m44 op, vt0, vc8"
     ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     "fpParticled": [
-        "tex ft0, v0, fs0 <2d, repeat, linear>",
-        "mul oc, ft0, fc0"
+        "tex oc, v0, fs0 <2d, repeat, linear>"
     ]
 
 }
