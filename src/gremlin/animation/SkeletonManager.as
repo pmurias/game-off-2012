@@ -1,6 +1,7 @@
 package gremlin.animation {
     import flash.utils.Dictionary;
     import gremlin.core.Context;
+    import gremlin.core.Key;
     import gremlin.core.ResourceManager;
 
     /**
@@ -8,17 +9,17 @@ package gremlin.animation {
      * @author mosowski
      */
     public class SkeletonManager extends ResourceManager {
-        public var skeletonResourcesByName:Dictionary;
+        private var skeletonResourcesByName:Dictionary;
 
         public function SkeletonManager(_ctx:Context) {
             super(this, _ctx, SkeletonResource);
-            skeletonResourcesByName = new Dictionary();
+            skeletonResourcesByName = new Dictionary(true);
         }
 
         override protected function onResourceLoaded(url:String):void {
             var skeletonResource:SkeletonResource = resources[url];
             skeletonResource.fromJSON(ctx.loaderMgr.getLoaderJSON(url));
-            skeletonResourcesByName[skeletonResource.name] = skeletonResource;
+            skeletonResourcesByName[Key.of(skeletonResource.name)] = skeletonResource;
             super.onResourceLoaded(url);
         }
 
@@ -26,8 +27,12 @@ package gremlin.animation {
             ctx.loaderMgr.loadData(url, onLoaderComplete);
         }
 
-        public function getSkeletonResource(url:String):SkeletonResource {
+        public function getSkeletonResourceByUrl(url:String):SkeletonResource {
             return resources[url] as SkeletonResource;
+        }
+
+        public function getSkeletonResourceByName(name:Key):SkeletonResource {
+            return skeletonResourcesByName[name];
         }
 
         public function loadSkeletonResource(url:String, onReadyCb:Function = null):SkeletonResource {

@@ -1,6 +1,7 @@
 package gremlin.shaders {
     import flash.utils.Dictionary;
     import gremlin.core.Context;
+    import gremlin.core.Key;
     import gremlin.shaders.consts.ShaderConstFloat;
     import gremlin.shaders.consts.ShaderConstM44;
     import gremlin.shaders.consts.ShaderConstM44Array;
@@ -23,17 +24,17 @@ package gremlin.shaders {
         public var modelMatrix:ShaderConstM44;
         public var bonesMatrices:ShaderConstM44Array;
 
-        public static const CAMERA_MATRIX:String = "cameraMatrix";
-        public static const VIEW_MATRIX:String = "viewMatrix";
-        public static const PROJECTION_MATRIX:String = "projectionMatrix";
-        public static const TIME:String = "time";
-        public static const MODEL_MATRIX:String = "modelMatrix";
-        public static const BONES_MATRICES:String = "bonesMatrices";
+        public static const CAMERA_MATRIX:Key = Key.of("cameraMatrix");
+        public static const VIEW_MATRIX:Key = Key.of("viewMatrix");
+        public static const PROJECTION_MATRIX:Key = Key.of("projectionMatrix");
+        public static const TIME:Key = Key.of("time");
+        public static const MODEL_MATRIX:Key = Key.of("modelMatrix");
+        public static const BONES_MATRICES:Key = Key.of("bonesMatrices");
 
         public function AutoParams(_ctx:Context) {
             ctx = _ctx;
-            globalAutoParams = new Dictionary();
-            localAutoParams = new Dictionary();
+            globalAutoParams = new Dictionary(true);
+            localAutoParams = new Dictionary(true);
 
             globalAutoParams[CAMERA_MATRIX] = cameraMatrix = new ShaderConstM44();
             globalAutoParams[VIEW_MATRIX] = viewMatrix = new ShaderConstM44();
@@ -51,7 +52,7 @@ package gremlin.shaders {
             time.value = ctx.time;
         }
 
-        public function isAutoParam(name:String):Boolean {
+        public function isAutoParam(name:Key):Boolean {
             return name in globalAutoParams || name in localAutoParams;
         }
     }

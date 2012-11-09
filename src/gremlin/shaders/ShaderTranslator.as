@@ -22,9 +22,19 @@ package gremlin.shaders {
 
         public static const VERTEX:String = "vertex";
         public static const FRAGMENT:String = "fragment";
+		
+		private static var instructionTypeByFunction:Dictionary;
 
         public function ShaderTranslator() {
             tp = 0;
+			if (instructionTypeByFunction == null) {
+				instructionTypeByFunction = new Dictionary();
+				instructionTypeByFunction["sqrt"] = InstructionSqrt;
+				instructionTypeByFunction["tex2D"] = InstructionTex;
+				instructionTypeByFunction["kill"] = InstructionKill;
+				instructionTypeByFunction["sin"] = InstructionSin;
+				instructionTypeByFunction["cos"] = InstructionCos;
+			}
         }
 
         public function translate(_src:String, mode:String):Object {
@@ -52,7 +62,7 @@ package gremlin.shaders {
                     var param:VariableParam = new VariableParam();
                     param.name = tokens[pp++].valueStr;
                     param.registerIndex = freeConstRegister;
-                    param.type = paramType;
+                    param.type = paramType; 
                     freeConstRegister += paramType.size;
                     context[param.name] = param;
                 } else if (tokens[pp].valueStr == "attr") {
@@ -75,17 +85,10 @@ package gremlin.shaders {
                     var outOp:Operand = parseOperand(true);
                     if (tokens[pp].valueStr == "=") {
                         pp++;
-                        if (tokens[pp].valueStr == "sqrt") {
-                            //etc
-                        } else if (tokens[pp].valueStr == "tex2D") {
-                            pp++;
-                            instruction = new InstructionTex();
-                            instruction.dest = outOp;
-                            pp++; // (
-                            instruction.src1 = parseOperand();
-                            pp++; // ,
-                            instruction.src2 = parseOperand();
-                            pp++; // )
+                        if (tokens[pp].valueStr in instructionTypeByFunction) {							
+							instruction = new instructionTypeByFunction[tokens[pp++].valueStr]();
+							instruction.dest = outOp;
+							parseArguments(instruction);
                         } else {
                             var src1Op:Operand = parseOperand();
                             if (pp < tokens.length && tokens[pp] is TokenSymbol) {
@@ -159,6 +162,15 @@ package gremlin.shaders {
             }
             return json;
         }
+		
+		private function parseArguments(instruction:Instruction):void {
+			pp++; // (
+			instruction.src1 = parseOperand();
+			if (tokens[pp++].valueStr == ",") {			
+				instruction.src2 = parseOperand();
+				pp++; // )
+			}
+		}
 
         private function parseOperand(output:Boolean = false):Operand {
             var varName:String = tokens[pp].valueStr;
@@ -488,7 +500,10 @@ class Instruction {
         return "";
     }
     public function getCode(mode:String):String {
-        return getInstructionName() + " " + (dest != null ? (dest.getCode(mode) + ", " + src1.getCode(mode) + (src2 != null ? ", " + src2.getCode(mode) : "")) : "");
+        return getInstructionName() +
+			(dest != null ? " " + dest.getCode(mode) : "") +
+			(src1 != null ? ", " +src1.getCode(mode) : "") +
+			(src2 != null ? ", " +src2.getCode(mode) : "");
     }
 }
 
@@ -534,6 +549,30 @@ class InstructionSlt extends Instruction {
 class InstructionSge extends Instruction {
     override public function getInstructionName():String {
         return "sge";
+    }
+}
+
+class InstructionKill extends Instruction {
+    override public function getInstructionName():String {
+        return "kil";
+    }
+}
+
+class InstructionSin extends Instruction {
+    override public function getInstructionName():String {
+        return "sin";
+    }
+}
+
+class InstructionCos extends Instruction {
+    override public function getInstructionName():String {
+        return "cos";
+    }
+}
+
+class InstructionSqrt extends Instruction {
+    override public function getInstructionName():String {
+        return "sqt";
     }
 }
 

@@ -9,6 +9,7 @@ package {
     import flash.text.TextField;
     import gremlin.animation.SkeletonResource;
     import gremlin.core.Context;
+    import gremlin.core.Key;
     import gremlin.loading.LoaderBatch;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.Material;
@@ -109,7 +110,7 @@ package {
             node1.setPosition(1, 0, 0);
             node1.setScale(0.5, 0.5, 1);
 
-            ent0 = new AnimatedEntity(ctx.modelMgr.getModelResource("Cox"), node0);
+            ent0 = new AnimatedEntity(ctx.modelMgr.getModelResourceByName(Key.of("Cox")), node0);
             ent0.setAnimationState("Idle");
 
             part = new BillboardParticlesEntity(ctx);
@@ -142,17 +143,17 @@ package {
             orange.setSources(shaders.vpOrange, shaders.fpOrange);
             orange.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 0);
             orange.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 4);
-            orange.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
-            orange.vertexProgram.addAttr("pos", 0);
+            orange.fragmentProgram.addConst(Key.of("color"), 0, new ShaderConstVec4(1, 0.5, 0, 1));
+            orange.vertexProgram.addAttr(Key.of("pos"), 0);
 
             textured = new Shader(ctx);
             textured.setSources(shaders.vpTextured, shaders.fpTextured);
             textured.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 0);
             textured.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 4);
-            textured.vertexProgram.addAttr("pos", 0);
-            textured.vertexProgram.addAttr("uv0", 1);
-            textured.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
-            textured.fragmentProgram.addSampler("tex", 0);
+            textured.vertexProgram.addAttr(Key.of("pos"), 0);
+            textured.vertexProgram.addAttr(Key.of("uv0"), 1);
+            textured.fragmentProgram.addConst(Key.of("color"), 0, new ShaderConstVec4(1, 0.5, 0, 1));
+            textured.fragmentProgram.addSampler(Key.of("tex"), 0);
 
 
             animated = new Shader(ctx);
@@ -160,14 +161,14 @@ package {
             animated.vertexProgram.addAutoParam(AutoParams.BONES_MATRICES, 0);
             animated.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 100);
             animated.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 104);
-            animated.vertexProgram.addConst("four", 108, new ShaderConstFloat(4));
+            animated.vertexProgram.addConst(Key.of("four"), 108, new ShaderConstFloat(4));
 
-            animated.vertexProgram.addAttr("pos", 0);
-            animated.vertexProgram.addAttr("uv0", 1);
-            animated.vertexProgram.addAttr("bones", 2);
-            animated.vertexProgram.addAttr("weights", 3);
-            animated.fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
-            animated.fragmentProgram.addSampler("tex", 0);
+            animated.vertexProgram.addAttr(Key.of("pos"), 0);
+            animated.vertexProgram.addAttr(Key.of("uv0"), 1);
+            animated.vertexProgram.addAttr(Key.of("bones"), 2);
+            animated.vertexProgram.addAttr(Key.of("weights"), 3);
+            animated.fragmentProgram.addConst(Key.of("color"), 0, new ShaderConstVec4(1, 0.5, 0, 1));
+            animated.fragmentProgram.addSampler(Key.of("tex"), 0);
 
             particled = new Shader(ctx);
             //particled.fromJSON(ctx.loaderMgr.getLoaderJSON("static/particle_vp.json"), ctx.loaderMgr.getLoaderJSON("static/particle_fp.json"));
@@ -203,7 +204,7 @@ package {
             m = ctx.materialMgr.createMaterial("Cox");
             p = new Pass();
             p.shader = animated;
-            p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
+            p.samplers[Key.of("tex")] = ctx.textureMgr.getTextureResource("static/chess.png");
             m.addPass(p);
 
             ctx.textureMgr.createRenderTargetTextureResource("rtt", 256, 256);
@@ -211,7 +212,7 @@ package {
             m = ctx.materialMgr.createMaterial("Particle");
             p = new Pass();
             p.shader = particled;
-            p.samplers["tex"] = ctx.textureMgr.getTextureResource("rtt");
+            p.samplers[Key.of("tex")] = ctx.textureMgr.getTextureResource("rtt");
             m.addPass(p);
 
             ctx.renderTargetMgr.createRenderTargetFromTexture("target", ctx.textureMgr.getTextureResource("rtt"));
@@ -241,9 +242,9 @@ package {
 
             ent0.currentAnimationState.advance(2);
 
-            textured.fragmentProgram.consts["color"].x =
-            textured.fragmentProgram.consts["color"].y =
-            textured.fragmentProgram.consts["color"].z = (0.5 * Math.sin(ctx.time * 10)) + 0.5;
+            textured.fragmentProgram.consts[Key.of("color")].x =
+            textured.fragmentProgram.consts[Key.of("color")].y =
+            textured.fragmentProgram.consts[Key.of("color")].z = (0.5 * Math.sin(ctx.time * 10)) + 0.5;
 
             ctx.setCamera(camera);
             ctx.renderTargetMgr.getRenderTarget("target").beginFrame();

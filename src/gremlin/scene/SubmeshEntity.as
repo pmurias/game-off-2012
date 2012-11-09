@@ -1,6 +1,7 @@
 package gremlin.scene {
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
+    import gremlin.core.Key;
     import gremlin.materials.Material;
     import gremlin.meshes.Submesh;
 
@@ -32,10 +33,7 @@ package gremlin.scene {
         public function render(ctx:Context):void {
             modelEntity.setLocalAutoParams(ctx);
             ctx.activeShader.uploadLocalAutoParams();
-
-            for (var attrName:String in ctx.activeShader.vertexProgram.attrs) {
-                ctx.activeShader.vertexProgram.setVertexAttr(attrName, modelEntity.modelResource.vertexBuffer);
-            }
+            ctx.activeShader.vertexProgram.setVertexBuffer(modelEntity.modelResource.vertexBuffer);
             ctx.drawTriangles(modelEntity.modelResource.indexBuffer, submesh.indexOffset, submesh.numTriangles);
         }
     }

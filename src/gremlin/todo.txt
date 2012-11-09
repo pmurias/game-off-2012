@@ -13,6 +13,7 @@ TODO:
 -text rendering (not sure if really needed)
 
 DONE:
+-shader translator
 -mesh loading
 -skeleton loading
 -bone animation processing

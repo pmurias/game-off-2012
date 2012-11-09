@@ -5,6 +5,7 @@ package gremlin.meshes {
     import gremlin.animation.SkeletonResource;
     import gremlin.core.Context;
     import gremlin.core.IResource;
+    import gremlin.core.Key;
 
     /**
      * ...
@@ -48,7 +49,7 @@ package gremlin.meshes {
                         streamType = Context3DVertexBufferFormat.FLOAT_4;
                         break;
                 }
-                vertexBuffer.addStream(json[1][i][0], streamType);
+                vertexBuffer.addStream(Key.of(json[1][i][0]), streamType);
                 vertexSize += streamSize;
             }
 
@@ -81,7 +82,7 @@ package gremlin.meshes {
             indexBuffer.setData(indexData);
 
             if (json[4].length > 0) {
-                skeletonResource = ctx.skeletonMgr.skeletonResourcesByName[json[4]];
+                skeletonResource = ctx.skeletonMgr.getSkeletonResourceByName(Key.of(json[4]));
             }
 
             isLoaded = true;

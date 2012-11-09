@@ -15,7 +15,7 @@ package gremlin.materials {
         public var index:int;
 
         public function Pass() {
-            samplers = new Dictionary();
+            samplers = new Dictionary(true);
         }
     }
 

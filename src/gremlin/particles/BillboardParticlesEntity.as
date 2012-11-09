@@ -4,6 +4,7 @@ package gremlin.particles {
     import flash.utils.ByteArray;
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
+    import gremlin.core.Key;
     import gremlin.materials.Material;
     import gremlin.shaders.Shader;
 
@@ -51,10 +52,10 @@ package gremlin.particles {
         }
 
         override protected function addVertexBufferStreams():void {
-            vertexBuffer.addStream("uvBornLife", Context3DVertexBufferFormat.FLOAT_4);
-            vertexBuffer.addStream("startPos", Context3DVertexBufferFormat.FLOAT_3);
-            vertexBuffer.addStream("deltaPos", Context3DVertexBufferFormat.FLOAT_3);
-            vertexBuffer.addStream("size", Context3DVertexBufferFormat.FLOAT_2);
+            vertexBuffer.addStream(Key.of("uvBornLife"), Context3DVertexBufferFormat.FLOAT_4);
+            vertexBuffer.addStream(Key.of("startPos"), Context3DVertexBufferFormat.FLOAT_3);
+            vertexBuffer.addStream(Key.of("deltaPos"), Context3DVertexBufferFormat.FLOAT_3);
+            vertexBuffer.addStream(Key.of("size"), Context3DVertexBufferFormat.FLOAT_2);
         }
 
         override protected function writeParticleData(index:int, time:Number):void {
@@ -104,9 +105,7 @@ package gremlin.particles {
             ctx.autoParams.modelMatrix.value = ctx.mathConstants.identityMatrix;
             ctx.activeShader.uploadLocalAutoParams();
 
-            for (var attrName:String in ctx.activeShader.vertexProgram.attrs) {
-                ctx.activeShader.vertexProgram.setVertexAttr(attrName, vertexBuffer);
-            }
+            ctx.activeShader.vertexProgram.setVertexBuffer(vertexBuffer);
             ctx.drawTriangles(indexBuffer);
         }
 
