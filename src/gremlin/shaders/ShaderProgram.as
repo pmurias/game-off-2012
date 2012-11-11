@@ -6,7 +6,6 @@ package gremlin.shaders {
     import flash.utils.Endian;
     import gremlin.core.Context;
     import gremlin.core.IRestorable;
-    import gremlin.core.Key;
     import gremlin.error.EAbstractClass;
     import gremlin.shaders.consts.IShaderConst;
     import gremlin.shaders.consts.ShaderConstVec4;
@@ -19,21 +18,27 @@ package gremlin.shaders {
         public var ctx:Context;
         public var params:Dictionary;
         public var type:String;
-        public var autoParams:Vector.<Key>;
+        public var autoParams:Vector.<String>;
         public var consts:Dictionary;
 
         public var source:String;
         public var assembly:ByteArray;
         public var jsonSource:Object;
 
-        private static const _uploadAux128:ByteArray = new ByteArray();
+        private static const _uploadAux256:ByteArray = new ByteArray();
 
         {
-            _uploadAux128.endian = Endian.LITTLE_ENDIAN;
-            _uploadAux128.writeFloat(0);
-            _uploadAux128.writeFloat(0);
-            _uploadAux128.writeFloat(0);
-            _uploadAux128.writeFloat(0);
+            _uploadAux256.endian = Endian.LITTLE_ENDIAN;
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(0);
+
+
         }
 
         public function ShaderProgram(self:ShaderProgram, _ctx:Context) {
@@ -41,9 +46,9 @@ package gremlin.shaders {
                 throw new EAbstractClass(ShaderProgram);
             } else {
                 ctx = _ctx;
-                params = new Dictionary(true);
-                autoParams = new Vector.<Key>();
-                consts = new Dictionary(true);
+                params = new Dictionary();
+                autoParams = new Vector.<String>();
+                consts = new Dictionary();
             }
         }
 
@@ -58,102 +63,95 @@ package gremlin.shaders {
             var i:int, param:Object;
             for (i = 0; i < json.params.length; ++i) {
                 param = json.params[i];
-                if (ctx.autoParams.isAutoParam(Key.of(param.name))) {
-                    addAutoParam(Key.of(param.name), parseInt(param.register));
+                if (ctx.autoParams.isAutoParam(param.name)) {
+                    addAutoParam(param.name, parseInt(param.register));
                 } else {
-                    addParam(Key.of(param.name), parseInt(param.register));
+                    addParam(param.name, parseInt(param.register));
                 }
             }
 
             for (i = 0; i < json.consts.length; ++i) {
                 param = json.consts[i];
-                addConst(Key.of(param.name), param.register, new ShaderConstVec4(param.values[0], param.values[1], param.values[2], param.values[3]));
+                addConst(param.name, param.register, new ShaderConstVec4(param.values[0], param.values[1], param.values[2], param.values[3]));
             }
         }
 
-        public function addParam(name:Key, register:int):void {
+        public function addParam(name:String, register:int):void {
             params[name] = register;
         }
 
-        public function addAutoParam(name:Key, register:int):void {
+        public function addAutoParam(name:String, register:int):void {
             addParam(name, register);
             autoParams.push(name);
         }
 
-        public function addConst(name:Key, register:int, value:IShaderConst):void {
+        public function addConst(name:String, register:int, value:IShaderConst):void {
             addParam(name, register);
             consts[name] = value;
         }
 
-        public function setParamFloat(name:Key, x:Number):void {
-            if (params[name] != null) {
-                _uploadAux128.position = 0;
-                _uploadAux128.writeFloat(x);
-                ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux128, 0);
-            }
+        public function setParamFloat(name:String, x:Number):void {
+            _uploadAux256.position = 0;
+            _uploadAux256.writeFloat(x);
+            ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux256, 0);
         }
 
-        public function setParamVec2(name:Key, x:Number, y:Number):void {
-            if (params[name] != null) {
-                _uploadAux128.position = 0;
-                _uploadAux128.writeFloat(x);
-                _uploadAux128.writeFloat(y);
-                ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux128, 0);
-            }
+        public function setParamVec2(name:String, x:Number, y:Number):void {
+            _uploadAux256.position = 0;
+            _uploadAux256.writeFloat(x);
+            _uploadAux256.writeFloat(y);
+            ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux256, 0);
         }
 
-        public function setParamVec3(name:Key, x:Number, y:Number, z:Number):void {
-            if (params[name] != null) {
-                _uploadAux128.position = 0;
-                _uploadAux128.writeFloat(x);
-                _uploadAux128.writeFloat(y);
-                _uploadAux128.writeFloat(z);
-                ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux128, 0);
-            }
+        public function setParamVec3(name:String, x:Number, y:Number, z:Number):void {
+            _uploadAux256.position = 0;
+            _uploadAux256.writeFloat(x);
+            _uploadAux256.writeFloat(y);
+            _uploadAux256.writeFloat(z);
+            ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux256, 0);
         }
 
-        public function setParamVec4(name:Key, x:Number, y:Number, z:Number, w:Number):void {
-            if (params[name] != null) {
-                _uploadAux128.position = 0;
-                _uploadAux128.writeFloat(x);
-                _uploadAux128.writeFloat(y);
-                _uploadAux128.writeFloat(z);
-                _uploadAux128.writeFloat(w);
-                ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux128, 0);
-            }
+        public function setParamVec4(name:String, x:Number, y:Number, z:Number, w:Number):void {
+            _uploadAux256.position = 0;
+            _uploadAux256.writeFloat(x);
+            _uploadAux256.writeFloat(y);
+            _uploadAux256.writeFloat(z);
+            _uploadAux256.writeFloat(w);
+            ctx.setProgramConstantFromByteArray(type, params[name], 1, _uploadAux256, 0);
         }
 
-        public function setParamByteArray(name:Key, data:ByteArray, offset:int = 0):void {
-            if (params[name] != null) {
-                ctx.setProgramConstantFromByteArray(type, params[name], data.length / 16, data, offset);
-            }
+        public function setParamByteArray(name:String, data:ByteArray, offset:int = 0):void {
+            ctx.setProgramConstantFromByteArray(type, params[name], data.length / 16, data, offset);
         }
 
-        public function setParamVector(name:Key, data:Vector.<Number>, numRegisters:int = -1):void {
-            if (params[name] != null) {
-                ctx.setProgramConstantFromVector(type, params[name], data, numRegisters);
-            }
+        public function setParamVector(name:String, data:Vector.<Number>, numRegisters:int = -1):void {
+            ctx.setProgramConstantFromVector(type, params[name], data, numRegisters);
         }
 
-        public function setParamM44(name:Key, m44:Matrix3D):void {
-            if (params[name] != null) {
-                ctx.setProgramConstantFromMatrix(type, params[name], m44);
-            }
+        public function setParamM44(name:String, m44:Matrix3D):void {
+            ctx.setProgramConstantFromMatrix(type, params[name], m44);
         }
 
-        public function setParamM44Array(name:Key, array:Vector.<Matrix3D>):void {
-            if (params[name] != null) {
-                var register:int = params[name];
-                for (var i:int = 0; i < array.length; ++i) {
-                    if (array[i] != null) {
-                        ctx.setProgramConstantFromMatrix(type, register + i * 4, array[i]);
-                    }
+        public function setParamM44Array(name:String, array:Vector.<Matrix3D>):void {
+            var register:int = params[name];
+            for (var i:int = 0; i < array.length; ++i) {
+                if (array[i] != null) {
+                    ctx.setProgramConstantFromMatrix(type, register + i * 4, array[i]);
                 }
             }
         }
 
-        public function setParamM42(name:Key, m42:Matrix):void {
-            throw "Not implemented yet."
+        public function setParamM42(name:String, m42:Matrix):void {
+            _uploadAux256.position = 0;
+            _uploadAux256.writeFloat(m42.a);
+            _uploadAux256.writeFloat(m42.c);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(m42.tx);
+            _uploadAux256.writeFloat(m42.b);
+            _uploadAux256.writeFloat(m42.d);
+            _uploadAux256.writeFloat(0);
+            _uploadAux256.writeFloat(m42.ty);
+            ctx.setProgramConstantFromByteArray(type, params[name], 2, _uploadAux256, 0);
         }
 
         public function uploadGlobalAutoParams():void {
@@ -163,9 +161,9 @@ package gremlin.shaders {
                     autoParam.uploadValue(this, autoParams[i]);
                 }
             }
-            for (var constName:Object in consts) {
+            for (var constName:String in consts) {
                 var constVal:IShaderConst = consts[constName];
-                constVal.uploadValue(this, constName as Key);
+                constVal.uploadValue(this, constName);
             }
         }
 

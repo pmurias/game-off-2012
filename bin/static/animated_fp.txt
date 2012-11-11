@@ -1,0 +1,6 @@
+param vec4 color
+
+sampler tex
+
+texColor = tex2D(varying0.xy, tex)
+out = texColor * color

@@ -24,6 +24,7 @@ package gremlin.shaders {
         public static const FRAGMENT:String = "fragment";
 		
 		private static var instructionTypeByFunction:Dictionary;
+        private static var typeClassByName:Dictionary;
 
         public function ShaderTranslator() {
             tp = 0;
@@ -34,7 +35,17 @@ package gremlin.shaders {
 				instructionTypeByFunction["kill"] = InstructionKill;
 				instructionTypeByFunction["sin"] = InstructionSin;
 				instructionTypeByFunction["cos"] = InstructionCos;
+                instructionTypeByFunction["dot4"] = InstructionDot4;
 			}
+            if (typeClassByName == null) {
+                typeClassByName = new Dictionary();
+                typeClassByName["float"] = TypeFloat;
+                typeClassByName["vec2"] = TypeVec2;
+                typeClassByName["vec3"] = TypeVec3;
+                typeClassByName["vec4"] = TypeVec4;
+                typeClassByName["m44"] = TypeM44;
+                typeClassByName["m42"] = TypeM42;
+            }
         }
 
         public function translate(_src:String, mode:String):Object {
@@ -62,7 +73,7 @@ package gremlin.shaders {
                     var param:VariableParam = new VariableParam();
                     param.name = tokens[pp++].valueStr;
                     param.registerIndex = freeConstRegister;
-                    param.type = paramType; 
+                    param.type = paramType;
                     freeConstRegister += paramType.size;
                     context[param.name] = param;
                 } else if (tokens[pp].valueStr == "attr") {
@@ -85,7 +96,7 @@ package gremlin.shaders {
                     var outOp:Operand = parseOperand(true);
                     if (tokens[pp].valueStr == "=") {
                         pp++;
-                        if (tokens[pp].valueStr in instructionTypeByFunction) {							
+                        if (tokens[pp].valueStr in instructionTypeByFunction) {
 							instruction = new instructionTypeByFunction[tokens[pp++].valueStr]();
 							instruction.dest = outOp;
 							parseArguments(instruction);
@@ -166,17 +177,17 @@ package gremlin.shaders {
 		private function parseArguments(instruction:Instruction):void {
 			pp++; // (
 			instruction.src1 = parseOperand();
-			if (tokens[pp++].valueStr == ",") {			
+			if (tokens[pp++].valueStr == ",") {
 				instruction.src2 = parseOperand();
 				pp++; // )
 			}
 		}
 
-        private function parseOperand(output:Boolean = false):Operand {
+        private function parseOperand(output:Boolean = false, isOffset:Boolean = false):Operand {
             var varName:String = tokens[pp].valueStr;
-            if (varName == "(") {
+            if (varName == "(" || tokens[pp] is TokenNumber) {
                 if (output == false) {
-                    return parseNumericalConstant();
+                    return parseNumericalConstant(isOffset);
                 } else {
                     throw "LValue required.";
                 }
@@ -192,6 +203,12 @@ package gremlin.shaders {
                 }
                 var operand:Operand = new Operand();
                 operand.variable = variable;
+                if (pp < tokens.length && tokens[pp].valueStr == "[") {
+                    operand.offset = parseOffsetOperand();
+                } else {
+                    operand.offset = new RegisterOffset();
+                }
+
                 if (variable is VariableSampler) {
                     operand.mask = "";
                 } else {
@@ -200,31 +217,53 @@ package gremlin.shaders {
                         operand.mask = tokens[pp].valueStr;
                         pp++;
                     } else {
-                        operand.mask = "xyzw";
+                        operand.mask = "";
                     }
                 }
             }
             return operand;
         }
 
-        private function parseNumericalConstant():Operand {
-            pp++; // skip (
+        private function parseOffsetOperand():RegisterOffset {
+            pp++; // [
+            var operand:Operand = parseOperand(false, true);
+            pp++; // ]
+            if (operand.variable is VariableNumerical) {
+                var offsetConst:RegisterOffsetConst = new RegisterOffsetConst();
+                offsetConst.offset = (operand.variable as VariableNumerical).values[0];
+                return offsetConst;
+            } else {
+                var offsetVar:RegisterOffsetVar = new RegisterOffsetVar();
+                offsetVar.operand = operand;
+                return offsetVar;
+            }
+        }
+
+        private function parseNumericalConstant(isOffset:Boolean = false):Operand {
             var values:Vector.<Number> = new Vector.<Number>();
-            while (tokens[pp].valueStr != ")") {
+            if (tokens[pp] is TokenNumber) {
                 values.push(tokens[pp].valueNum);
                 pp++;
-                if (tokens[pp].valueStr == ",") {
+            } else {
+                pp++; // skip (
+                while (tokens[pp].valueStr != ")") {
+                    values.push(tokens[pp].valueNum);
                     pp++;
+                    if (tokens[pp].valueStr == ",") {
+                        pp++;
+                    }
                 }
+                pp++; // skip )
             }
-            pp++;
             var variable:VariableNumerical = new VariableNumerical();
             for (var i:int = 0 ; i < values.length; ++i) {
                 variable.values[i] = values[i];
             }
-            variable.registerIndex = freeConstRegister;
-            freeConstRegister++;
-            numericals.push(variable);
+            if (isOffset == false) {
+                variable.registerIndex = freeConstRegister;
+                freeConstRegister++;
+                numericals.push(variable);
+            }
             var operand:Operand = new Operand();
             operand.variable = variable;
             operand.mask = "xyzw".substr(0, values.length);
@@ -234,19 +273,16 @@ package gremlin.shaders {
         private function parseType():Type {
             var typeName:String = tokens[pp].valueStr;
             pp++;
-            switch(typeName) {
-                case "float":
-                    return new TypeFloat();
-                case "vec2":
-                    return new TypeVec2();
-                case "vec3":
-                    return new TypeVec3();
-                case "vec4":
-                    return new TypeVec4();
-                case "m44":
-                    return new TypeM44();
+            var baseType:Type = new typeClassByName[typeName]();
+            if (tokens[pp].valueStr == "[") {
+                pp++;
+                var arrayLength:int =  tokens[pp++].valueNum;
+                var arrayType:TypeArray = new TypeArray(baseType, arrayLength);
+                pp++; // ]
+                return arrayType;
+            } else {
+                return baseType;
             }
-            throw "Unknown type."
         }
 
 
@@ -399,9 +435,10 @@ class TokenSymbol extends Token {
 class Operand {
     public var variable:Variable;
     public var mask:String;
+    public var offset:RegisterOffset;
 
     public function getCode(mode:String):String {
-        return variable.getCode(mode) + (mask != "" ? "." + mask : "");
+        return variable.getCode(mode, offset) + (mask != "" ? "." + mask : "");
     }
 }
 
@@ -410,38 +447,38 @@ class Variable {
     public var registerIndex:int;
     public var type:Type;
 
-    public function getCode(mode:String):String {
+    public function getCode(mode:String, offset:RegisterOffset):String {
         return "";
     }
 }
 
 class VariableAttr extends Variable {
-    override public function getCode(mode:String):String {
-        return "va" + registerIndex;
+    override public function getCode(mode:String, offset:RegisterOffset):String {
+        return offset.getOffsetedRegisterCode(mode, "va", registerIndex);
     }
 }
 
 class VariableParam extends Variable {
-    override public function getCode(mode:String):String {
-        return (mode == ShaderTranslator.VERTEX ? "vc" : "fc") + registerIndex;
+    override public function getCode(mode:String, offset:RegisterOffset):String {
+        return offset.getOffsetedRegisterCode(mode, mode == ShaderTranslator.VERTEX ? "vc" : "fc", registerIndex);
     }
 }
 
 class VariableTemp extends Variable {
-    override public function getCode(mode:String):String {
-        return (mode == ShaderTranslator.VERTEX ? "vt" : "ft") + registerIndex;
+    override public function getCode(mode:String, offset:RegisterOffset):String {
+        return offset.getOffsetedRegisterCode(mode, mode == ShaderTranslator.VERTEX ? "vt" : "ft", registerIndex);
     }
 }
 
 class VariableVarying extends Variable {
-    override public function getCode(mode:String):String {
-        return "v" + registerIndex;
+    override public function getCode(mode:String, offset:RegisterOffset):String {
+        return offset.getOffsetedRegisterCode(mode, "v", registerIndex);
     }
 }
 
 class VariableSampler extends Variable {
-    override public function getCode(mode:String):String {
-        return "fs" + registerIndex;
+    override public function getCode(mode:String, offset:RegisterOffset):String {
+       return offset.getOffsetedRegisterCode(mode, "fs", registerIndex);
     }
 }
 
@@ -451,13 +488,33 @@ class VariableNumerical extends Variable {
         values = new Vector.<Number>(4, true);
         values[0] = values[1] = values[2] = values[3] = 0;
     }
-    override public function getCode(mode:String):String {
+    override public function getCode(mode:String, offset:RegisterOffset):String {
         return (mode == ShaderTranslator.VERTEX ? "vc" : "fc") + registerIndex;
     }
 }
 class VariableOut extends Variable {
-    override public function getCode(mode:String):String {
+    override public function getCode(mode:String, offset:RegisterOffset):String {
         return mode == ShaderTranslator.VERTEX ? "op" : "oc";
+    }
+}
+
+class RegisterOffset {
+    public function getOffsetedRegisterCode(mode:String, registerCode:String,index:int):String {
+        return registerCode + index.toString();
+    }
+}
+
+class RegisterOffsetConst extends RegisterOffset {
+    public var offset:int;
+    override public function getOffsetedRegisterCode(mode:String, registerCode:String, index:int):String {
+        return registerCode + (index + offset).toString();
+    }
+}
+
+class RegisterOffsetVar extends RegisterOffset {
+    public var operand:Operand;
+    override public function getOffsetedRegisterCode(mode:String, registerCode:String, index:int):String {
+        return registerCode + "[" + operand.getCode(mode) +"]";
     }
 }
 
@@ -490,6 +547,21 @@ class TypeM44 extends Type {
         size = 4;
     }
 }
+class TypeM42 extends Type {
+    public function TypeM42() {
+        size = 2;
+    }
+}
+
+class TypeArray extends Type {
+    public var type:Type;
+    public var length:int;
+    public function TypeArray(_type:Type, _length:int) {
+        type = _type;
+        length = _length;
+        size = _type.size * length;
+    }
+}
 
 class Instruction {
     public var dest:Operand;
@@ -519,7 +591,8 @@ class InstructionSub extends Instruction {
 }
 class InstructionMul extends Instruction {
     override public function getCode(mode:String):String {
-        if (src1.variable.type is TypeM44 || src2.variable.type is TypeM44) {
+        if (src1.variable.type is TypeM44 || src2.variable.type is TypeM44
+        || (src1.variable.type is TypeArray && (src1.variable.type as TypeArray).type is TypeM44)) {
             src1.mask = "";
             return "m44 " + dest.getCode(mode) + ", " + src2.getCode(mode) +", " + src1.getCode(mode);
         } else {
@@ -573,6 +646,12 @@ class InstructionCos extends Instruction {
 class InstructionSqrt extends Instruction {
     override public function getInstructionName():String {
         return "sqt";
+    }
+}
+
+class InstructionDot4 extends Instruction {
+    override public function getInstructionName():String {
+        return "dp4";
     }
 }
 

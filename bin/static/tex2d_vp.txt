@@ -1,0 +1,21 @@
+
+param m42 screenMatrix
+param m42 imageMatrix
+param vec4 uvRect
+
+attr vec2 position
+attr vec2 uvMask
+
+uv = uvRect.zw * uvMask.xy
+varying0 = uvRect.xy + uv.zw
+
+vertex = position
+vertex.x = dot4(position, imageMatrix[0])
+vertex.y = dot4(position, imageMatrix[1])
+
+screenVertex = position
+screenVertex.x = dot4(vertex, screenMatrix[0])
+screenVertex.y = dot4(vertex, screenMatrix[1])
+
+out = screenVertex
+varying0 = uv

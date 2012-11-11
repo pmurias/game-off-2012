@@ -1,13 +1,15 @@
 package gremlin.scene {
     import gremlin.core.Context;
+    import gremlin.core.IRenderableContainer;
     import gremlin.meshes.ModelResource;
 
     /**
      * ...
      * @author mosowski
      */
-    public class ModelEntity {
+    public class ModelEntity implements IRenderableContainer {
         public var node:Node;
+        public var scene:Scene;
         public var modelResource:ModelResource;
         public var submeshEntities:Vector.<SubmeshEntity>;
 
@@ -41,8 +43,17 @@ package gremlin.scene {
                 var submeshEntity:SubmeshEntity = new SubmeshEntity();
                 submeshEntity.modelEntity = this;
                 submeshEntity.setSubmesh(modelResource.submeshes[i]);
+                submeshEntity.setScene(scene);
                 submeshEntities.push(submeshEntity);
             }
+        }
+
+        public function setScene(_scene:Scene):void {
+            var i:int;
+            for (i = 0; i < submeshEntities.length; ++i) {
+                submeshEntities[i].setScene(_scene);
+            }
+            scene = _scene;
         }
 
         public function setLocalAutoParams(ctx:Context):void {

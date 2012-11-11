@@ -4,8 +4,8 @@ package gremlin.particles {
     import flash.utils.ByteArray;
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
-    import gremlin.core.Key;
     import gremlin.materials.Material;
+    import gremlin.scene.Scene;
     import gremlin.shaders.Shader;
 
     /**
@@ -14,6 +14,7 @@ package gremlin.particles {
      */
     public class BillboardParticlesEntity extends ParticlesEntity implements IRenderable {
         public var material:Material;
+        public var scene:Scene;
 
         public var minLife:Number;
         public var maxLife:Number;
@@ -44,18 +45,33 @@ package gremlin.particles {
         }
 
         public function setMaterial(_material:Material):void {
-            if (material) {
-                material.removeRenderable(this);
-            }
             material = _material;
-            material.addRenderable(this);
+            if (scene != null) {
+                scene.notifyRenderableMaterialChange(this);
+            }
+        }
+
+        public function setScene(_scene:Scene):void {
+            if (scene != _scene) {
+                if (scene != null) {
+                    scene.removeRenderable(this);
+                }
+                scene = _scene;
+                if (scene != null) {
+                    scene.addRenderable(this);
+                }
+            }
+        }
+
+        public function getMaterial():Material {
+            return material;
         }
 
         override protected function addVertexBufferStreams():void {
-            vertexBuffer.addStream(Key.of("uvBornLife"), Context3DVertexBufferFormat.FLOAT_4);
-            vertexBuffer.addStream(Key.of("startPos"), Context3DVertexBufferFormat.FLOAT_3);
-            vertexBuffer.addStream(Key.of("deltaPos"), Context3DVertexBufferFormat.FLOAT_3);
-            vertexBuffer.addStream(Key.of("size"), Context3DVertexBufferFormat.FLOAT_2);
+            vertexBuffer.addStream("uvBornLife", Context3DVertexBufferFormat.FLOAT_4);
+            vertexBuffer.addStream("startPos", Context3DVertexBufferFormat.FLOAT_3);
+            vertexBuffer.addStream("deltaPos", Context3DVertexBufferFormat.FLOAT_3);
+            vertexBuffer.addStream("size", Context3DVertexBufferFormat.FLOAT_2);
         }
 
         override protected function writeParticleData(index:int, time:Number):void {

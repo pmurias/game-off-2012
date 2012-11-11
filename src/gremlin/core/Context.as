@@ -6,6 +6,7 @@ package gremlin.core {
     import flash.display3D.textures.Texture;
     import flash.display3D.VertexBuffer3D;
     import flash.events.Event;
+    import flash.geom.Matrix;
     import flash.geom.Matrix3D;
     import flash.utils.ByteArray;
     import flash.utils.Dictionary;
@@ -13,6 +14,7 @@ package gremlin.core {
     import gremlin.animation.SkeletonManager;
     import gremlin.debug.MemoryStats;
     import gremlin.events.EventDispatcher;
+    import gremlin.gremlin2d.Context2d;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.MaterialManager;
     import gremlin.math.MathConstants;
@@ -23,6 +25,7 @@ package gremlin.core {
     import gremlin.scene.Camera;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.Shader;
+    import gremlin.shaders.ShaderManager;
     import gremlin.textures.TextureManager;
     import gremlin.textures.TextureResource;
 
@@ -41,14 +44,17 @@ package gremlin.core {
         public var textureMgr:TextureManager;
         public var skeletonMgr:SkeletonManager;
         public var modelMgr:ModelManager;
+        public var shaderMgr:ShaderManager;
         public var materialMgr:MaterialManager;
         public var renderTargetMgr:RenderTargetManager;
         public var autoParams:AutoParams;
+        public var ctx2d:Context2d;
 
         // render state variables
         public var activeShader:Shader;
         public var activeCamera:Camera;
         public var activeRenderTargetTexture:TextureResource;
+        public var screenMatrix:Matrix;
 
         // utilities
         public var projectionUtils:ProjectionUtils;
@@ -82,9 +88,13 @@ package gremlin.core {
             textureMgr = new TextureManager(this);
             skeletonMgr = new SkeletonManager(this);
             modelMgr = new ModelManager(this);
+            shaderMgr = new ShaderManager(this);
             materialMgr = new MaterialManager(this);
             renderTargetMgr = new RenderTargetManager(this);
             autoParams = new AutoParams(this);
+            ctx2d = new Context2d(this);
+
+            screenMatrix = new Matrix();
 
             projectionUtils = new ProjectionUtils();
             mathConstants = new MathConstants();
@@ -130,6 +140,10 @@ package gremlin.core {
             ctx3d.configureBackBuffer(stage.stageWidth, stage.stageHeight, 0, true);
             // w*h * (color+depth+stencil)
             stats.frameBufferMemory = stage.stageWidth * stage.stageHeight * (4 + 2 + 1);
+
+            screenMatrix.identity();
+            screenMatrix.scale(2 / stage.stageWidth, -2 / stage.stageHeight);
+            screenMatrix.translate( -1, 1);
         }
 
         public function addRestorableResource(resource:IRestorable):void {

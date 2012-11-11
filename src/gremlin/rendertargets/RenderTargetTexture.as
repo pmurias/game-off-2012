@@ -28,7 +28,7 @@ package gremlin.rendertargets {
 
         public function beginFrame():void {
             ctx.setRenderToTexture(textureResource, depthAndStencilEnabled);
-            ctx.clear(0.5,1,0.1);
+            ctx.clear(0.5,1,0.1,0);
         }
 
         public function endFrame():void {

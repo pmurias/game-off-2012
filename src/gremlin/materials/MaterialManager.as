@@ -2,7 +2,6 @@ package gremlin.materials {
     import flash.utils.Dictionary;
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
-    import gremlin.core.Key;
     import gremlin.textures.TextureResource;
 
     /**
@@ -67,32 +66,11 @@ package gremlin.materials {
             renderingQueueDirty = false;
         }
 
-        public function renderMaterials():void {
-            if (renderingQueueDirty) {
+        public function getPassRenderingQueue():Vector.<Pass> {
+            if (renderingQueueDirty == true) {
                 sortMaterials();
             }
-            var i:int, j:int;
-            for (i = 0; i < passRenderingQueue.length; ++i) {
-                var pass:Pass = passRenderingQueue[i];
-                var renderables:Vector.<IRenderable> = passRenderingQueue[i].material.renderables;
-                if (renderables.length > 0) {
-                    pass.shader.activate();
-
-                    for (var samplerName:Object in pass.samplers) {
-                        var samplerNameKey:Key = samplerName as Key;
-                        var samplerTexture:TextureResource = pass.samplers[samplerNameKey];
-                        if (samplerTexture == ctx.activeRenderTargetTexture) {
-                            pass.shader.fragmentProgram.setSampler(samplerNameKey, ctx.textureMgr.fallbackTexture);
-                        } else {
-                            pass.shader.fragmentProgram.setSampler(samplerNameKey, samplerTexture);
-                        }
-
-                    }
-                    for (j = 0; j < renderables.length; ++j) {
-                        renderables[j].render(ctx);
-                    }
-                }
-            }
+            return passRenderingQueue;
         }
 
     }

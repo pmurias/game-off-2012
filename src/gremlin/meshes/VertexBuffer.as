@@ -5,7 +5,6 @@ package gremlin.meshes {
     import flash.utils.Dictionary;
     import gremlin.core.Context;
     import gremlin.core.IRestorable;
-    import gremlin.core.Key;
 
     /**
      * ...
@@ -24,14 +23,14 @@ package gremlin.meshes {
             ctx = _ctx;
             ctx.restorableResources.push(this);
 
-            streams = new Dictionary(true);
+            streams = new Dictionary();
 
             if (_data != null) {
                 setData(_data, _data32perVertex);
             }
         }
 
-        public function addStream(name:Key, format:String):void {
+        public function addStream(name:String, format:String):void {
             var stream:VertexStream = new VertexStream();
             stream.format = format;
             switch (format) {

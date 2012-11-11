@@ -1,5 +1,4 @@
 package gremlin.shaders.consts {
-    import gremlin.core.Key;
     import gremlin.shaders.ShaderProgram;
 
     /**
@@ -19,7 +18,7 @@ package gremlin.shaders.consts {
             w = _w;
         }
 
-        public function uploadValue(shaderProgram:ShaderProgram, name:Key):void {
+        public function uploadValue(shaderProgram:ShaderProgram, name:String):void {
             shaderProgram.setParamVec4(name, x, y, z, w);
         }
 

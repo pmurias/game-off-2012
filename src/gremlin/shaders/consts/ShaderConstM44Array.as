@@ -1,6 +1,5 @@
 package gremlin.shaders.consts {
     import flash.geom.Matrix3D;
-    import gremlin.core.Key;
     import gremlin.shaders.ShaderProgram;
 
     /**
@@ -14,7 +13,7 @@ package gremlin.shaders.consts {
             value = new Vector.<Matrix3D>(size, true);
         }
 
-        public function uploadValue(shaderProgram:ShaderProgram, name:Key):void {
+        public function uploadValue(shaderProgram:ShaderProgram, name:String):void {
             shaderProgram.setParamM44Array(name, value);
         }
 

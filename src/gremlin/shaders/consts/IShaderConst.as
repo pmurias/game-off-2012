@@ -1,5 +1,4 @@
 package gremlin.shaders.consts {
-    import gremlin.core.Key;
     import gremlin.shaders.ShaderProgram;
 
     /**
@@ -7,7 +6,7 @@ package gremlin.shaders.consts {
      * @author mosowski
      */
     public interface IShaderConst {
-        function uploadValue(shaderProgram:ShaderProgram, name:Key):void;
+        function uploadValue(shaderProgram:ShaderProgram, name:String):void;
     }
 
 }

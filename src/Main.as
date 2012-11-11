@@ -3,13 +3,15 @@ package {
     import flash.display.Sprite;
     import flash.display.StageAlign;
     import flash.display.StageScaleMode;
+    import flash.display3D.Context3DBlendFactor;
+    import flash.display3D.Context3DCompareMode;
     import flash.events.Event;
     import flash.geom.Matrix3D;
     import flash.geom.Vector3D;
     import flash.text.TextField;
     import gremlin.animation.SkeletonResource;
     import gremlin.core.Context;
-    import gremlin.core.Key;
+    import gremlin.gremlin2d.Quad2d;
     import gremlin.loading.LoaderBatch;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.Material;
@@ -23,6 +25,7 @@ package {
     import gremlin.scene.ModelEntity;
     import gremlin.scene.ModelEntity;
     import gremlin.scene.Node;
+    import gremlin.scene.Scene;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.consts.ShaderConstFloat;
     import gremlin.shaders.consts.ShaderConstVec2;
@@ -62,9 +65,12 @@ package {
             lb.addImageUrl("static/chess.png");
             lb.addDataUrl("static/Cox.orcm");
             lb.addDataUrl("static/CoxSkeleton.orcs");
-            lb.addDataUrl("static/shaders.txt");
             lb.addDataUrl("static/particle_vp.txt");
             lb.addDataUrl("static/particle_fp.txt");
+            lb.addDataUrl("static/tex2d_vp.txt");
+            lb.addDataUrl("static/tex2d_fp.txt");
+            lb.addDataUrl("static/animated_vp.txt");
+            lb.addDataUrl("static/animated_fp.txt");
             lb.load();
         }
 
@@ -74,7 +80,6 @@ package {
 
         public var orange:Shader;
         public var textured:Shader;
-        public var animated:Shader;
         public var particled:Shader;
         public var mesh:ModelResource;
         public var rootNode:Node;
@@ -85,6 +90,10 @@ package {
 
         public var ent0:AnimatedEntity;
         public var part:BillboardParticlesEntity;
+
+        public var scene0:Scene;
+        public var scene1:Scene;
+        public var scene2:Scene;
 
         private function onImageLoaded(u:String):void {
             initShaders();
@@ -100,6 +109,10 @@ package {
             ctx.projectionUtils.makePerspectiveMatrix(camera.projectionMatrix, 0.1, 100.0, 55, stage.stageWidth / stage.stageHeight);
             ctx.setCamera(camera);
 
+            scene0 = new Scene(ctx);
+            scene1 = new Scene(ctx);
+            scene2 = new Scene(ctx);
+
             rootNode = new Node();
             rootNode.setPosition(0, -2, 10);
             node0 = new Node();
@@ -110,8 +123,9 @@ package {
             node1.setPosition(1, 0, 0);
             node1.setScale(0.5, 0.5, 1);
 
-            ent0 = new AnimatedEntity(ctx.modelMgr.getModelResourceByName(Key.of("Cox")), node0);
+            ent0 = new AnimatedEntity(ctx.modelMgr.getModelResource("Cox"), node0);
             ent0.setAnimationState("Idle");
+            ent0.setScene(scene2);
 
             part = new BillboardParticlesEntity(ctx);
             part.minLife = 15;
@@ -126,6 +140,19 @@ package {
             part.node = node0;
             part.setQuota(100);
             part.setMaterial(ctx.materialMgr.getMaterial("Particle"));
+            part.setScene(scene0);
+
+            var quad:Quad2d = new Quad2d();
+            quad.transformation.identity();
+            quad.transformation.scale(stage.stageWidth, stage.stageHeight);
+            quad.transformation.translate(stage.stageWidth / 2, stage.stageHeight / 2);
+            quad.setMaterial(ctx.materialMgr.getMaterial("QuadRTT"));
+            quad.setScene(scene1);
+            ctx.addListener(Context.RESIZE, function(params:Object):void {
+                quad.transformation.identity();
+                quad.transformation.scale(stage.stageWidth, stage.stageHeight);
+                quad.transformation.translate(stage.stageWidth / 2, stage.stageHeight / 2);
+                });
 
             ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
         }
@@ -135,84 +162,48 @@ package {
         }
 
         public function initShaders():void {
-            var shaders:Object = ctx.loaderMgr.getLoaderJSON("static/shaders.txt");
-            for (var shaderName:String in shaders) {
-                shaders[shaderName] = shaders[shaderName].join("\n");
-            }
-            orange = new Shader(ctx);
-            orange.setSources(shaders.vpOrange, shaders.fpOrange);
-            orange.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 0);
-            orange.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 4);
-            orange.fragmentProgram.addConst(Key.of("color"), 0, new ShaderConstVec4(1, 0.5, 0, 1));
-            orange.vertexProgram.addAttr(Key.of("pos"), 0);
-
-            textured = new Shader(ctx);
-            textured.setSources(shaders.vpTextured, shaders.fpTextured);
-            textured.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 0);
-            textured.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 4);
-            textured.vertexProgram.addAttr(Key.of("pos"), 0);
-            textured.vertexProgram.addAttr(Key.of("uv0"), 1);
-            textured.fragmentProgram.addConst(Key.of("color"), 0, new ShaderConstVec4(1, 0.5, 0, 1));
-            textured.fragmentProgram.addSampler(Key.of("tex"), 0);
-
-
-            animated = new Shader(ctx);
-            animated.setSources(shaders.vpAnimated, shaders.fpAnimated);
-            animated.vertexProgram.addAutoParam(AutoParams.BONES_MATRICES, 0);
-            animated.vertexProgram.addAutoParam(AutoParams.CAMERA_MATRIX, 100);
-            animated.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 104);
-            animated.vertexProgram.addConst(Key.of("four"), 108, new ShaderConstFloat(4));
-
-            animated.vertexProgram.addAttr(Key.of("pos"), 0);
-            animated.vertexProgram.addAttr(Key.of("uv0"), 1);
-            animated.vertexProgram.addAttr(Key.of("bones"), 2);
-            animated.vertexProgram.addAttr(Key.of("weights"), 3);
-            animated.fragmentProgram.addConst(Key.of("color"), 0, new ShaderConstVec4(1, 0.5, 0, 1));
-            animated.fragmentProgram.addSampler(Key.of("tex"), 0);
-
-            particled = new Shader(ctx);
-            //particled.fromJSON(ctx.loaderMgr.getLoaderJSON("static/particle_vp.json"), ctx.loaderMgr.getLoaderJSON("static/particle_fp.json"));
-
             var translator:ShaderTranslator = new ShaderTranslator();
-            translator.translate(ctx.loaderMgr.getLoaderString("static/particle_vp.txt"), ShaderTranslator.VERTEX);
 
-            particled.fromJSON(
+            ctx.shaderMgr.createShaderFromJSON("Particle",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/particle_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/particle_fp.txt"), ShaderTranslator.FRAGMENT));
-            //particled.setSources(translator.code, shaders.fpParticled);
-            //particled.vertexProgram.addAutoParam(AutoParams.MODEL_MATRIX, 0);
-            //particled.vertexProgram.addAutoParam(AutoParams.VIEW_MATRIX, 4);
-            //particled.vertexProgram.addAutoParam(AutoParams.PROJECTION_MATRIX, 8);
-            //particled.vertexProgram.addAutoParam(AutoParams.TIME, 12);
-            //particled.vertexProgram.addConst("numbers", 13, new ShaderConstFloat(0.5));
-            //particled.vertexProgram.addAttr("uvBornLife", 0);
-            //particled.vertexProgram.addAttr("startPos", 1);
-            //particled.vertexProgram.addAttr("deltaPos", 2);
-            //particled.vertexProgram.addAttr("size", 3);
-            //particled.fragmentProgram.addSampler("tex", 0);
+
+            ctx.shaderMgr.createShaderFromJSON("Tex2d",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_fp.txt"), ShaderTranslator.FRAGMENT));
+
+            ctx.shaderMgr.createShaderFromJSON("Animated",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/animated_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/animated_fp.txt"), ShaderTranslator.FRAGMENT));
+            ctx.shaderMgr.getShader("Animated").fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
 
         }
 
         public function initMaterials():void {
             var m:Material;
             var p:Pass;
-            m = ctx.materialMgr.createMaterial("Coxx");
-            p = new Pass();
-            p.shader = orange;
-            m.addPass(p);
+
+
+            ctx.textureMgr.createRenderTargetTextureResource("rtt", 128, 128);
+
 
             m = ctx.materialMgr.createMaterial("Cox");
             p = new Pass();
-            p.shader = animated;
-            p.samplers[Key.of("tex")] = ctx.textureMgr.getTextureResource("static/chess.png");
+            p.shader = ctx.shaderMgr.getShader("Animated");
+            p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
             m.addPass(p);
 
-            ctx.textureMgr.createRenderTargetTextureResource("rtt", 256, 256);
 
             m = ctx.materialMgr.createMaterial("Particle");
             p = new Pass();
-            p.shader = particled;
-            p.samplers[Key.of("tex")] = ctx.textureMgr.getTextureResource("rtt");
+            p.shader = ctx.shaderMgr.getShader("Particle");
+            p.samplers["tex"] = ctx.textureMgr.getTextureResource("static/chess.png");
+            m.addPass(p);
+
+            m = ctx.materialMgr.createMaterial("QuadRTT");
+            p = new Pass();
+            p.shader = ctx.shaderMgr.getShader("Tex2d");
+            p.samplers["tex"] = ctx.textureMgr.getTextureResource("rtt");
             m.addPass(p);
 
             ctx.renderTargetMgr.createRenderTargetFromTexture("target", ctx.textureMgr.getTextureResource("rtt"));
@@ -241,18 +232,22 @@ package {
             rootNode.updateTransformation();
 
             ent0.currentAnimationState.advance(2);
+            ctx.ctx3d.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);
 
-            textured.fragmentProgram.consts[Key.of("color")].x =
-            textured.fragmentProgram.consts[Key.of("color")].y =
-            textured.fragmentProgram.consts[Key.of("color")].z = (0.5 * Math.sin(ctx.time * 10)) + 0.5;
 
             ctx.setCamera(camera);
+            ctx.renderTargetMgr.defaultRenderTarget.beginFrame();
+            scene0.render();
+
             ctx.renderTargetMgr.getRenderTarget("target").beginFrame();
-            ctx.materialMgr.renderMaterials();
+            scene0.render();
             ctx.renderTargetMgr.getRenderTarget("target").endFrame();
 
             ctx.renderTargetMgr.defaultRenderTarget.beginFrame();
-            ctx.materialMgr.renderMaterials();
+            ctx.ctx3d.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
+            scene1.render();
+            ctx.ctx3d.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
+            scene2.render();
             ctx.renderTargetMgr.defaultRenderTarget.endFrame();
         }
 
