@@ -18,14 +18,14 @@ centerPos = viewMatrix * centerPos
 
 scale.x = size.y * f.x
 scale.x = scale.x + size.x
-fscale.x = f.x < (1)
+fscale.x = f.x < 1
 scale.x = scale.x * fscale.x
 
 vertex.xy = uvBornLife.xy - (0.5,0.5)
 vertex.xy = vertex.xy * scale.xx
 
 centerPos.xy = centerPos.xy + vertex.xy
-centerPos.w = (1)
+centerPos.w = 1
 
 vertex = projectionMatrix * centerPos
 varying0 = uvBornLife
