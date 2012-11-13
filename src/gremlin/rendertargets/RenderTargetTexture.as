@@ -26,12 +26,12 @@ package gremlin.rendertargets {
             textureResource.prepareAsRenderTarget(width, height);
         }
 
-        public function beginFrame():void {
+        public function activate():void {
             ctx.setRenderToTexture(textureResource, depthAndStencilEnabled);
             ctx.clear(0.5,1,0.1,0);
         }
 
-        public function endFrame():void {
+        public function finish():void {
         }
 
     }

@@ -57,7 +57,8 @@ package gremlin.scene {
         }
 
         public function setLocalAutoParams(ctx:Context):void {
-            ctx.autoParams.modelMatrix.value = node.getTransformationMatrix();
+            ctx.autoParams.modelMatrix.value = node.transformationMatrix;
+            ctx.autoParams.normalMatrix.value = node.normalMatrix;
         }
 
     }

@@ -6,6 +6,7 @@ package gremlin.core {
     import flash.display3D.textures.Texture;
     import flash.display3D.VertexBuffer3D;
     import flash.events.Event;
+    import flash.events.KeyboardEvent;
     import flash.geom.Matrix;
     import flash.geom.Matrix3D;
     import flash.utils.ByteArray;
@@ -23,6 +24,7 @@ package gremlin.core {
     import gremlin.meshes.ModelManager;
     import gremlin.rendertargets.RenderTargetManager;
     import gremlin.scene.Camera;
+    import gremlin.scene.Node;
     import gremlin.shaders.AutoParams;
     import gremlin.shaders.Shader;
     import gremlin.shaders.ShaderManager;
@@ -56,6 +58,14 @@ package gremlin.core {
         public var activeRenderTargetTexture:TextureResource;
         public var screenMatrix:Matrix;
 
+        // context3d state variables
+        public var sourceBlendFactor:String;
+        public var destBlendFactor:String;
+        public var depthMask:Boolean;
+        public var depthCompareMode:String;
+
+        public var rootNode:Node;
+
         // utilities
         public var projectionUtils:ProjectionUtils;
         public var mathConstants:MathConstants;
@@ -77,6 +87,9 @@ package gremlin.core {
         public static const ENTER_FRAME:String = "enter_frame";
         public static const RESIZE:String = "resize";
 
+        public static const KEY_DOWN:String = "key_down";
+        public static const KEY_UP:String = "key_up";
+
         public function Context(_stage:Stage) {
             stage = _stage;
             stats = new MemoryStats();
@@ -96,6 +109,8 @@ package gremlin.core {
 
             screenMatrix = new Matrix();
 
+            rootNode = new Node();
+
             projectionUtils = new ProjectionUtils();
             mathConstants = new MathConstants();
 
@@ -106,6 +121,8 @@ package gremlin.core {
             neededSamplers = new Vector.<Boolean>(8, true);
 
             stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+            stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
         }
 
         public function requestContext():void {
@@ -162,6 +179,15 @@ package gremlin.core {
             time = getTimer() / 1000;
             dispatch(ENTER_FRAME);
         }
+
+        public function onKeyDown(ke:KeyboardEvent):void {
+            dispatch(KEY_DOWN, ke);
+        }
+
+        public function onKeyUp(ke:KeyboardEvent):void {
+            dispatch(KEY_UP, ke);
+        }
+
 
         public function createTexture(w:Number, h:Number, fmt:String, rt:Boolean = false):Texture {
             stats.textureMemory += w * h * 4;
@@ -246,6 +272,22 @@ package gremlin.core {
         public function setRenderToBackBuffer():void {
             ctx3d.setRenderToBackBuffer();
             activeRenderTargetTexture = null;
+        }
+
+        public function setBlendFactors(sourceFactor:String, destFactor:String):void {
+            if (sourceBlendFactor != sourceFactor || destBlendFactor != destFactor) {
+                ctx3d.setBlendFactors(sourceFactor, destFactor);
+                sourceBlendFactor = sourceFactor;
+                destBlendFactor = destFactor;
+            }
+        }
+
+        public function setDepthTest(_depthMask:Boolean, _depthCompareMode:String):void {
+            if (_depthMask != depthMask || _depthCompareMode != depthCompareMode) {
+                ctx3d.setDepthTest(_depthMask, _depthCompareMode);
+                depthMask = _depthMask;
+                depthCompareMode = _depthCompareMode;
+            }
         }
 
         public function clear(red:Number = 0, green:Number = 0, blue:Number = 0, alpha:Number = 1, depth:Number = 1, stencil:uint = 0):void {

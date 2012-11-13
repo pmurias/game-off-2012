@@ -1,6 +1,8 @@
 package gremlin.shaders {
+    import flash.geom.Vector3D;
     import flash.utils.Dictionary;
     import gremlin.core.Context;
+    import gremlin.lights.ILight;
     import gremlin.shaders.consts.ShaderConstFloat;
     import gremlin.shaders.consts.ShaderConstM42;
     import gremlin.shaders.consts.ShaderConstM44;
@@ -23,8 +25,12 @@ package gremlin.shaders {
         public var projectionMatrix:ShaderConstM44;
         public var screenMatrix:ShaderConstM42;
         public var time:ShaderConstFloat;
+        public var lightDirection:ShaderConstVec4;
+        public var cameraPosition:ShaderConstVec4;
+
         public var modelMatrix:ShaderConstM44;
         public var imageMatrix:ShaderConstM42;
+        public var normalMatrix:ShaderConstM44;
         public var uvRect:ShaderConstVec4;
         public var bonesMatrices:ShaderConstM44Array;
 
@@ -33,8 +39,12 @@ package gremlin.shaders {
         public static const PROJECTION_MATRIX:String = "projectionMatrix";
         public static const SCREEN_MATRIX:String = "screenMatrix";
         public static const TIME:String = "time";
+        public static const LIGHT_DIRECTION:String = "lightDirection";
+        public static const CAMERA_POSITION:String = "cameraPosition";
+
         public static const MODEL_MATRIX:String = "modelMatrix";
         public static const IMAGE_MATRIX:String = "imageMatrix";
+        public static const NORMAL_MATRIX:String = "normalMatrix";
         public static const UV_RECT:String = "uvRect";
         public static const BONES_MATRICES:String = "bonesMatrices";
 
@@ -48,10 +58,13 @@ package gremlin.shaders {
             globalAutoParams[PROJECTION_MATRIX] = projectionMatrix = new ShaderConstM44();
             globalAutoParams[SCREEN_MATRIX] = screenMatrix = new ShaderConstM42();
             globalAutoParams[TIME] = time = new ShaderConstFloat();
+            globalAutoParams[LIGHT_DIRECTION] = lightDirection = new ShaderConstVec4();
+            globalAutoParams[CAMERA_POSITION] = cameraPosition = new ShaderConstVec4();
 
             localAutoParams[MODEL_MATRIX] = modelMatrix = new ShaderConstM44();
             localAutoParams[BONES_MATRICES] = bonesMatrices = new ShaderConstM44Array(32);
             localAutoParams[IMAGE_MATRIX] = imageMatrix = new ShaderConstM42();
+            localAutoParams[NORMAL_MATRIX] = normalMatrix = new ShaderConstM44();
             localAutoParams[UV_RECT] = uvRect = new ShaderConstVec4();
         }
 
@@ -61,6 +74,16 @@ package gremlin.shaders {
             projectionMatrix.value = ctx.activeCamera.projectionMatrix;
             screenMatrix.value = ctx.screenMatrix;
             time.value = ctx.time;
+            // cameraPosition.value = ?
+        }
+
+        public function setActiveLight(light:ILight):void {
+            var lightPosition:Vector3D = light.getPosition();
+            lightDirection.x = lightPosition.x;
+            lightDirection.y = lightPosition.y;
+            lightDirection.z = lightPosition.z;
+            lightDirection.w = lightPosition.w;
+            lightDirection.uploadValue(ctx.activeShader.vertexProgram, LIGHT_DIRECTION);
         }
 
         public function isAutoParam(name:String):Boolean {

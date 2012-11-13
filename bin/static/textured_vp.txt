@@ -1,0 +1,10 @@
+param m44 cameraMatrix
+param m44 modelMatrix
+
+attr vec3 pos
+attr vec2 uv0
+
+vertex = modelMatrix * pos
+out = cameraMatrix * vertex
+varying0 = uv0
+

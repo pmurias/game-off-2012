@@ -9,7 +9,6 @@ package gremlin.error {
 
         public function EAbstractClass(c:Class) {
             super("Class " + getQualifiedClassName(c) + " is abstract and cannot be instantiated.");
-
         }
 
     }

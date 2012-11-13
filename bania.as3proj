@@ -5,7 +5,7 @@
     <movie outputType="Application" />
     <movie input="" />
     <movie path="bin\bania.swf" />
-    <movie fps="30" />
+    <movie fps="60" />
     <movie width="800" />
     <movie height="600" />
     <movie version="11" />
@@ -79,7 +79,7 @@
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False" />
+  <postBuildCommand alwaysRun="False">python2 $(ProjectDir)\add-opt-in.py $(OutputDir)\bania.swf</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />

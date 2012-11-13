@@ -22,7 +22,8 @@ package gremlin.scene {
         private var visible:Boolean;
 
         private var transformationDirty:Boolean;
-        private var transformationMatrix:Matrix3D;
+        public var transformationMatrix:Matrix3D;
+        public var normalMatrix:Matrix3D;
 
         private static const _tempAuxVector3D:Vector3D = new Vector3D();
 
@@ -41,6 +42,7 @@ package gremlin.scene {
 
             transformationDirty = true;
             transformationMatrix = new Matrix3D();
+            normalMatrix = new Matrix3D();
         }
 
         public function setPosition(x:Number, y:Number, z:Number):void {
@@ -132,6 +134,10 @@ package gremlin.scene {
                 transformationMatrix.appendScale(derivedScale.x, derivedScale.y, derivedScale.z);
 			    transformationMatrix.appendRotation(_tempAuxVector3D.w * (180.0 / Math.PI), _tempAuxVector3D);
 			    transformationMatrix.appendTranslation(derivedPosition.x, derivedPosition.y, derivedPosition.z);
+
+                normalMatrix.copyFrom(transformationMatrix);
+                normalMatrix.invert();
+                normalMatrix.transpose();
             }
 
             for (var i:int = 0; i < children.length; ++i) {

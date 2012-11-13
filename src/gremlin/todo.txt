@@ -1,18 +1,21 @@
 
 TODO:
--pass properties
 -light system
 -loader as textureresource source
 -disposing on context (stats)
--render targets
 -oriented particle system
 -2d particle system
 -compositors
--2d geometry
 -shadows (not important now)
 -text rendering (not sure if really needed)
+-advanced 2d renderables
 
 DONE:
+-pass properties
+-scenes
+-render targets
+-2d geometry
+-shader translator
 -mesh loading
 -skeleton loading
 -bone animation processing

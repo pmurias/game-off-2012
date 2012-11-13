@@ -36,6 +36,10 @@ package gremlin.shaders {
 				instructionTypeByFunction["sin"] = InstructionSin;
 				instructionTypeByFunction["cos"] = InstructionCos;
                 instructionTypeByFunction["dot4"] = InstructionDot4;
+                instructionTypeByFunction["dot3"] = InstructionDot3;
+                instructionTypeByFunction["cross"] = InstructionCross;
+                instructionTypeByFunction["max"] = InstructionMax;
+                instructionTypeByFunction["min"] = InstructionMin;
 			}
             if (typeClassByName == null) {
                 typeClassByName = new Dictionary();
@@ -53,6 +57,7 @@ package gremlin.shaders {
             context = new Dictionary();
             numericals = new Vector.<VariableNumerical>();
             instructions = new Vector.<Instruction>();
+
             freeConstRegister = 0;
             freeAttrRegister = 0;
             freeTempRegister = 0;
@@ -65,6 +70,7 @@ package gremlin.shaders {
 
             tokens = new Vector.<Token>();
             tokenize();
+
             pp = 0;
             while (pp != tokens.length) {
                 if (tokens[pp].valueStr == "param") {
@@ -100,6 +106,11 @@ package gremlin.shaders {
 							instruction = new instructionTypeByFunction[tokens[pp++].valueStr]();
 							instruction.dest = outOp;
 							parseArguments(instruction);
+                        } else if (tokens[pp].valueStr == "-") {
+                            pp++;
+                            instruction = new InstructionNeg();
+                            instruction.dest = outOp;
+                            instruction.src1 = parseOperand();
                         } else {
                             var src1Op:Operand = parseOperand();
                             if (pp < tokens.length && tokens[pp] is TokenSymbol) {
@@ -648,10 +659,35 @@ class InstructionSqrt extends Instruction {
         return "sqt";
     }
 }
+class InstructionNeg extends Instruction {
+    override public function getInstructionName():String {
+        return "neg";
+    }
+}
 
 class InstructionDot4 extends Instruction {
     override public function getInstructionName():String {
         return "dp4";
+    }
+}
+class InstructionDot3 extends Instruction {
+    override public function getInstructionName():String {
+        return "dp3";
+    }
+}
+class InstructionCross extends Instruction {
+    override public function getInstructionName():String {
+        return "crs";
+    }
+}
+class InstructionMax extends Instruction {
+    override public function getInstructionName():String {
+        return "max";
+    }
+}
+class InstructionMin extends Instruction {
+    override public function getInstructionName():String {
+        return "min";
     }
 }
 

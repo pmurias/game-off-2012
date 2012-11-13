@@ -10,6 +10,7 @@ package gremlin.core {
         function setMaterial(material:Material):void;
         function getMaterial():Material;
         function setScene(_scene:Scene):void;
+        function isVisible():Boolean;
         function render(ctx:Context):void;
     }
 

@@ -12,9 +12,9 @@ package gremlin.math {
             matrixData = new Vector.<Number>(16, true);
         }
 
-        public function makePerspectiveMatrix(mtx:Matrix3D,  near:Number, far:Number, fov:Number, aspect:Number):void {
+        public function makePerspectiveMatrix(mtx:Matrix3D, near:Number, far:Number, fov:Number, aspect:Number):void {
             var top:Number = near * Math.tan(fov * Math.PI / 360.0);
-			var right:Number = top * aspect;
+            var right:Number = top * aspect;
 
             matrixData[0] = near / right;
             matrixData[1] = 0;
@@ -36,7 +36,7 @@ package gremlin.math {
             matrixData[14] = -(far * near * 2) / (far - near);
             matrixData[15] = 0;
 
-			mtx.copyRawDataFrom(matrixData);
+            mtx.copyRawDataFrom(matrixData);
         }
 
     }

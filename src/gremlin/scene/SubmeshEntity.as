@@ -57,6 +57,10 @@ package gremlin.scene {
             return material;
         }
 
+        public function isVisible():Boolean {
+            return modelEntity.node.derivedVisible;
+        }
+
         public function render(ctx:Context):void {
             modelEntity.setLocalAutoParams(ctx);
             ctx.activeShader.uploadLocalAutoParams();

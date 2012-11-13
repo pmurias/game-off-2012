@@ -7,7 +7,7 @@ bl_info = {
     "name": "Export Orc Model",
     "author": "Mateusz Osowski",
     "version": (1, 0),
-    "blender": (2, 5, 7),
+    "blender": (2, 6, 2),
     "api": 36079,
     "location": "File > Export > Orc MODEL",
     "description": "Export Orc MODEL (json based)",
@@ -230,7 +230,7 @@ def save(operator,context, data_layout, mirrory, filepath=""):
                 faceId = 0                
                 numFaces = len(uvlayer.data)//3
                 for uvId in range(0,numFaces):
-                    uvs.append(( (uvlayer.data[uvId*3].uv[0], uvlayer.data[uvId*3].uv[1]),(uvlayer.data[uvId*3+1].uv[0],uvMirrorY(uvlayer.data[uvId*3+1].uv[1])),(uvlayer.data[uvId*3+2].uv[0],uvlayer.data[uvId*3+2].uv[1])))
+                    uvs.append(( (uvlayer.data[uvId*3].uv[0], uvMirrorY(uvlayer.data[uvId*3].uv[1])),(uvlayer.data[uvId*3+1].uv[0],uvMirrorY(uvlayer.data[uvId*3+1].uv[1])),(uvlayer.data[uvId*3+2].uv[0],uvMirrorY(uvlayer.data[uvId*3+2].uv[1]))))
                 uvlayers.append(uvs)
 
             verts = []        
@@ -244,7 +244,7 @@ def save(operator,context, data_layout, mirrory, filepath=""):
                         vert['uv'+str(uvi)]=uv[k][i]
                         uvi += 1
 
-                    vert['mat']=bpy.data.materials.keys()[mesh.polygons[k].material_index]
+                    vert['mat']=meshob.data.materials[mesh.polygons[k].material_index].name
                     verts.append(vert)
 
                 if 'uv0' in verts[-3] and 'tan' in comps:
