@@ -110,6 +110,44 @@ def vert_calc_tang(va, vb, vc):
 
     return ( tangent[0], tangent[1], tangent[2] )
     
+def getBonesChain(bone, boneListOrder, boneMatricesByName, mtx, x, y, z):
+    b = { }
+    b['name'] = bone.name            
+    
+    if bone.parent:
+        headTransformed = mtx * bone.head
+        tailTransformed = mtx * bone.tail
+        b['tail'] = (tailTransformed[0], tailTransformed[2], tailTransformed[1])
+        b['head'] = (x + headTransformed[0], y + headTransformed[2], z + headTransformed[1])
+    else:
+        b['tail'] = (bone.tail[0] - bone.head[0], bone.tail[2] - bone.head[2], bone.tail[1] - bone.head[1])
+        b['head'] = (x + bone.head[0], y + bone.head[2], z + bone.head[1])
+        
+    mtx = mtx * bone.matrix
+    boneMatricesByName[bone.name] = mtx.copy()       
+    
+    b['chld'] = [boneChild.name for boneChild in bone.children]
+    boneListOrder.append(b)
+    for boneChild in bone.children:
+        getBonesChain(boneChild, boneListOrder, boneMatricesByName, mtx.copy(), b['head'][0] + b['tail'][0], b['head'][1] + b['tail'][1], b['head'][2] + b['tail'][2])
+        
+        
+def getBones(armature, bonesList, boneNames, boneMatrices):
+    boneListOrder = []
+    boneMatricesByName = { }
+    for bone in armature.bones:
+        if not (bone.parent):
+            getBonesChain(bone, boneListOrder, boneMatricesByName, Math.Matrix().to_3x3(), 0, 0, 0)
+    bid = 0
+    for b in boneListOrder:
+        print('Saving bone ', b['name'])    
+        print('Head = ', b['head'])
+        print('Tail = ', b['tail'])    
+        print('Children = ' , b['chld'])
+        bonesList.append(b)
+        boneMatrices.append(boneMatricesByName[b['name']])
+        boneNames[b['name']] = bid
+        bid += 1    
 
 def save(operator,context, data_layout, mirrory, filepath=""):    
     bones = []
@@ -129,35 +167,22 @@ def save(operator,context, data_layout, mirrory, filepath=""):
     for sel in bpy.context.selected_objects:
         if sel.type == 'ARMATURE':
             bonenames = {}
+            boneMatrices = [ ]
             armature = bpy.data.armatures[sel.name]
             armatureob = bpy.data.objects[sel.name]
             skeletonName = sel.name
+                        
+            print('Saving skeleton ', sel.name)
+            getBones(armature, bones, bonenames, boneMatrices)   
             
-            # zbieranie szkieletu
-            bid = 0
-            for b in armature.bones:
-                bone = {}
-                bone['name'] = b.name
-                bone['head'] = (b.head[0],b.head[2],-b.head[1])
-                if b.parent: bone['tail'] = (b.tail[0],b.tail[2],-b.tail[1])
-                else: bone['tail'] = (b.tail[0]-b.head[0], b.tail[2]-b.head[2], -(b.tail[1]-b.head[1]))
-                rotquat = b.matrix.to_quaternion()
-                bone['rot'] = (rotquat[1],rotquat[3],-rotquat[2],rotquat[0])
-                bone['chld'] = [bc.name for bc in b.children]
-                bones.append(bone)
-                bonenames[b.name] = bid
-                bid += 1
-
-            # zamieniamy nazwy dzieci na ich numery
             for bone in bones:
                 bone['chld'] = [bonenames[chld] for chld in bone['chld']]
-
-            # zbieranie animacji
+            
             anims = {}
             for act in bpy.data.actions:
                 anim = {}
                 anim['name']=act.name
-                anim['len']=act.frame_range[1]
+                anim['len']=act.frame_range[1]                              
 
                 # zbieranie informacji o pozycjach klatek kluczowych
                 # zakladajac, ze klatki pierwszej f-curve sa wszedzie
@@ -171,19 +196,30 @@ def save(operator,context, data_layout, mirrory, filepath=""):
                     namesplit = fcurve.data_path.split('"')
                     if len(namesplit) < 2: continue            
                     bonename = fcurve.data_path.split('"')[-2]
-                    boneid = bonenames[bonename]
-                    for i in range(0,len(kframepts)):
-                        val = fcurve.evaluate(kframepts[i])
-                        if propname == 'location':
-                            tracks[boneid][i]['loc'][fcurve.array_index] = val
-                        if propname == 'rotation_quaternion':
-                            tracks[boneid][i]['rot'][fcurve.array_index] = val
+                    if bonename in bonenames:
+                        boneid = bonenames[bonename]                    
+                        for i in range(0,len(kframepts)):
+                            val = fcurve.evaluate(kframepts[i])
+                            if propname == 'location':                            
+                                tracks[boneid][i]['loc'][fcurve.array_index] = val
+                            if propname == 'rotation_quaternion':
+                                tracks[boneid][i]['rot'][fcurve.array_index] = val                
 
                 # konwertujemy dane do uczciwej bazy
+                boneid = 0
                 for track in tracks:
                     for kf in track:
-                        kf['loc'] = [kf['loc'][0], kf['loc'][2], -kf['loc'][1]]
-                        kf['rot'] = [kf['rot'][1], kf['rot'][3], -kf['rot'][2], kf['rot'][0]]
+                        locVec = Math.Vector((kf['loc'][0], kf['loc'][1], kf['loc'][2]))
+                        locVec = boneMatrices[boneid] * locVec
+                        kf['loc'] = [locVec[0], locVec[2], locVec[1]]
+                        rotAxis = Math.Vector((kf['rot'][1], kf['rot'][2], kf['rot'][3]))                        
+                        rotAxis = boneMatrices[boneid] * rotAxis
+                        kf['rot'] = [-rotAxis[0], -rotAxis[2], -rotAxis[1], kf['rot'][0]]
+                    boneid+=1
+                    
+                print('Saving animation ',  act.name)
+                print('Keyframes count = ',  len(anim['frames']))
+                print('Length = ', anim['len'])
 
                 anim['tracks'] = tracks
                 anims[anim['name']] = anim
@@ -215,16 +251,18 @@ def save(operator,context, data_layout, mirrory, filepath=""):
                         vertBones = []
                         weightSum = 0
                         for i in range(1,min(len(sortbones)+1, 5)): 
-                            vertBones.append( (bonenames[meshob.vertex_groups[sortbones[-i].group].name],sortbones[-i].weight) )
-                            weightSum += sortbones[-i].weight
+                            if meshob.vertex_groups[sortbones[-i].group].name in bonenames:
+                                vertBones.append( (bonenames[meshob.vertex_groups[sortbones[-i].group].name],sortbones[-i].weight) )
+                                weightSum += sortbones[-i].weight
                         # normalizujemy wagi                        
                         vert['bones'] = [ ba[0] for ba in vertBones]
-                        vert['weights'] = [ ba[1]/weightSum for ba in vertBones ]
+                        vert['weights'] = [ ba[1]/weightSum for ba in vertBones ]                        
                     else:
+                        vert['bones'] = [ 0 , 0 , 0 , 0 ]
+                        vert['weights'] = [ 0 , 0 , 0 ,0 ]
                         print('vertex without bon assignment')
                 vertsArr.append(vert)
 
-            print(sel.name)
             for uvlayer in mesh.uv_layers:
                 uvs = []
                 faceId = 0                
@@ -278,7 +316,7 @@ def save(operator,context, data_layout, mirrory, filepath=""):
                 for (name, size) in vFormat:
                     # przerabiamy wektory do bazy uzywanej w silniku
                     if size==3:
-                        vertData.extend([v[name][0], v[name][2], -v[name][1]])
+                        vertData.extend([v[name][0], v[name][2], v[name][1]])
                     else: 
                         for i in range(0,len(v[name])): vertData.append(v[name][i])
                         for i in range(len(v[name]), size): vertData.append(0)
@@ -288,6 +326,11 @@ def save(operator,context, data_layout, mirrory, filepath=""):
             for i in range(0, len(verts)):
                 index = vertmap[get_vert_hash(verts[i])][0]
                 matGroups.setdefault(verts[i]['mat'], []).append(index)
+                
+            print('Saving mesh ', sel.name)            
+            print('Vertex count = ', len(vertmap.values()))
+            print('Triangles count = ', len(mesh.polygons))
+            print('Materials = ', matGroups.keys())
 
             if len(bones)>0:
                 pathdir = os.path.dirname(filepath)

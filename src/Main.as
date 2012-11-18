@@ -40,7 +40,6 @@ package {
     import gremlin.textures.TextureResource;
 
     /**
-     *     !!WARNING!!  HIGHLY EXPERIMENTAL AREA  !!WARNING!!
      * @author mosowski
      */
     public class Main extends Sprite {

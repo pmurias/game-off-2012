@@ -4,6 +4,7 @@ package gremlin.particles {
     import flash.utils.ByteArray;
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
+    import gremlin.core.IRenderableContainer;
     import gremlin.materials.Material;
     import gremlin.scene.Scene;
     import gremlin.shaders.Shader;
@@ -12,9 +13,9 @@ package gremlin.particles {
      * ...
      * @author mosowski
      */
-    public class BillboardParticlesEntity extends ParticlesEntity implements IRenderable {
+    public class BillboardParticlesEntity extends ParticlesEntity implements IRenderable, IRenderableContainer {
         public var material:Material;
-        public var scene:Scene;
+        public var scenes:Vector.<Scene>;
 
         public var minLife:Number;
         public var maxLife:Number;
@@ -42,25 +43,24 @@ package gremlin.particles {
 
         public function BillboardParticlesEntity(_ctx:Context) {
             super(this, _ctx);
+            scenes = new Vector.<Scene>()
         }
 
         public function setMaterial(_material:Material):void {
             material = _material;
-            if (scene != null) {
-                scene.notifyRenderableMaterialChange(this);
+            for (var i:int = 0; i < scenes.length; ++i) {
+                scenes[i].notifyRenderableMaterialChange(this);
             }
         }
 
-        public function setScene(_scene:Scene):void {
-            if (scene != _scene) {
-                if (scene != null) {
-                    scene.removeRenderable(this);
-                }
-                scene = _scene;
-                if (scene != null) {
-                    scene.addRenderable(this);
-                }
-            }
+        public function addToScene(scene:Scene):void {
+            scene.addRenderable(this);
+            scenes.push(scene);
+        }
+
+        public function removeFromScene(scene:Scene):void {
+            scene.removeRenderable(this);
+            scenes.splice(scenes.indexOf(scene), 1);
         }
 
         public function getMaterial():Material {

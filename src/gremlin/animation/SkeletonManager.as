@@ -17,7 +17,7 @@ package gremlin.animation {
 
         override protected function onResourceLoaded(url:String):void {
             var skeletonResource:SkeletonResource = resources[url];
-            skeletonResource.fromJSON(ctx.loaderMgr.getLoaderJSON(url));
+            skeletonResource.fromObject(ctx.loaderMgr.getLoaderJSON(url));
             skeletonResourcesByName[skeletonResource.name] = skeletonResource;
             super.onResourceLoaded(url);
         }

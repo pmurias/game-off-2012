@@ -13,11 +13,7 @@ package gremlin.animation {
         public var name:String;
         public var head:Vector3D;
         public var tail:Vector3D;
-        public var rotation:Quaternion;
         public var children:Vector.<Bone>;
-
-        public var restHead:Vector3D;
-        public var restTail:Vector3D;
 
         public var currentMatrix:Matrix3D;
         public var currentMatrixData:Vector.<Number>;
@@ -25,68 +21,40 @@ package gremlin.animation {
         public function Bone() {
             head = new Vector3D();
             tail = new Vector3D();
-            tail = new Vector3D();
-            rotation = new Quaternion();
             children = new Vector.<Bone>();
-
-            restHead = new Vector3D();
-            restTail = new Vector3D();
 
             currentMatrix = new Matrix3D();
             currentMatrixData = new Vector.<Number>(16, true);
         }
 
-        public function preprocessRestPose(parentTail:Vector3D, parentRot:Quaternion):void {
-            var tmp:Vector3D = tail.clone();
-            parentRot.transformVector(tmp);
-            var newTail:Vector3D = parentTail.add(tmp);
-            var newRot:Quaternion = parentRot.clone();
-            newRot.multiplyBy(rotation);
 
-            restHead = parentTail.clone();
-            restTail = parentTail.subtract(newTail);
-            restTail.normalize();
 
-            for each (var child:Bone in children) {
-                child.preprocessRestPose(newTail, newRot);
-            }
-        }
-
-        public function preprocessTracks(parentTail:Vector3D, parentRot:Quaternion, frame:int, animation:Animation):void {
+        public function preprocessTracks(parentTail:Vector3D, totalRot:Quaternion, frame:int, animation:Animation):void {
             var frameLoc:Vector3D = animation.tracks[id].location[frame];
             var frameRot:Quaternion = animation.tracks[id].rotation[frame];
 
-            var tmpQuat:Quaternion = frameRot.clone();
-            var tmpFrameTail:Vector3D = tail.clone();
-            rotation.transformVector(tmpQuat.values);
-            tmpQuat.transformVector(tmpFrameTail);
-            parentRot.transformVector(tmpFrameTail);
+            //TODO: does blender save frameLoc in bone space or parent space?
+            var transformedTail:Vector3D = parentTail.add(frameLoc);
+            var transformedTotalRot:Quaternion = totalRot.clone();
 
-            var tmpFrameHead:Vector3D = frameLoc.clone();
-            rotation.transformVector(tmpFrameHead);
-            tmpFrameTail.incrementBy(tmpFrameHead);
-            var newTail:Vector3D = parentTail.add(tmpFrameTail);
+            //var translation:Vector3D = transformedTail.subtract(head);
 
-            var newRot:Quaternion = parentRot.clone();
-            newRot.multiplyBy(rotation);
-            newRot.multiplyBy(frameRot);
+            transformedTotalRot.multiplyBy(frameRot);
+            var rotatedTail:Vector3D = tail.clone();
+            transformedTotalRot.transformVector(rotatedTail);
+            transformedTail.incrementBy(rotatedTail);
 
-            var poseHead:Vector3D = parentTail.add(tmpFrameHead);
-            var poseTail:Vector3D = poseHead.subtract(newTail);
-            poseTail.normalize();
-            var poseRot:Quaternion = new Quaternion();
-            Quaternion.rotationBetween(poseRot, restTail, poseTail);
             animation.tracks[id].matrix[frame].identity();
-            animation.tracks[id].matrix[frame].appendTranslation(-restHead.x, -restHead.y, -restHead.z);
             var rotVec:Vector3D = new Vector3D();
-            poseRot.toAngleAxis(rotVec);
+            transformedTotalRot.toAngleAxis(rotVec);
+            animation.tracks[id].matrix[frame].appendTranslation(-head.x, -head.y, -head.z);
             animation.tracks[id].matrix[frame].appendRotation(rotVec.w * (180.0 / Math.PI), rotVec);
-            animation.tracks[id].matrix[frame].appendTranslation(poseHead.x, poseHead.y, poseHead.z);
+            animation.tracks[id].matrix[frame].appendTranslation(parentTail.x, parentTail.y, parentTail.z);
 
             animation.tracks[id].rawMatrix[frame] = animation.tracks[id].matrix[frame].rawData;
 
             for each (var child:Bone in children) {
-                child.preprocessTracks(newTail, newRot, frame, animation);
+                child.preprocessTracks(transformedTail, transformedTotalRot, frame, animation);
             }
         }
 

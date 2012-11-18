@@ -16,7 +16,7 @@ package gremlin.rendertargets {
         public function activate():void {
             ctx.setRenderToBackBuffer();
             if (requiresClear == true) {
-                ctx.clear(0.3, 0.125, 0.6);
+                ctx.clear(0.0, 0.0, 0.0);
                 requiresClear = false;
             }
         }

@@ -12,44 +12,16 @@ package gremlin.scene {
         public var modelEntity:ModelEntity;
         public var submesh:Submesh;
         public var material:Material;
-        public var scene:Scene;
 
-        public function SubmeshEntity() {
-        }
-
-
-        public function setSubmesh(_submesh:Submesh):void {
-            if (scene != null) {
-                scene.removeRenderable(this);
-            }
+        public function SubmeshEntity(_submesh:Submesh) {
             submesh = _submesh;
-            if (submesh != null) {
-                material = submesh.material;
-                if (scene != null) {
-                    scene.addRenderable(this);
-                }
-            } else {
-                material = null;
-            }
+            material = submesh.material;
         }
-
 
         public function setMaterial(_material:Material):void {
             material = _material;
-            if (scene != null) {
-                scene.notifyRenderableMaterialChange(this);
-            }
-        }
-
-        public function setScene(_scene:Scene):void {
-            if (scene != _scene) {
-                if (scene != null) {
-                    scene.removeRenderable(this);
-                }
-                scene = _scene;
-                if (scene != null) {
-                    scene.addRenderable(this);
-                }
+            for (var i:int = 0; i < modelEntity.scenes.length; ++i) {
+               modelEntity.scenes[i].notifyRenderableMaterialChange(this);
             }
         }
 

@@ -48,7 +48,7 @@ package game {
                 }
             }
             position.incrementBy(velocity);
-            if (gameCtx.level.layers[0].tiles[int(position.x / 2)][int(position.z / 2)].type.name == "block") {
+            if (gameCtx.level.layers[0].tiles[int(position.x / 2)][int(position.z / 2)].type.blocking) {
                 position.decrementBy(velocity);
             }
         }

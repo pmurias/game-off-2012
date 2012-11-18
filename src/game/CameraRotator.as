@@ -31,7 +31,7 @@ package game {
             var mapPosY:int = int(pos.z / 2);
             for (var i:int = 0; i < gameCtx.level.width; ++i) {
                 for (var j:int = 0; j < gameCtx.level.height; ++j) {
-                    if (Math.abs(i-mapPosX) <= 6 && Math.abs(j-mapPosY) <= 6) {
+                    if (Math.abs(i-mapPosX) <= 8 && Math.abs(j-mapPosY) <= 5) {
                         gameCtx.level.layers[0].tiles[i][j].node.setVisible(true);
                     } else {
                         gameCtx.level.layers[0].tiles[i][j].node.setVisible(false);

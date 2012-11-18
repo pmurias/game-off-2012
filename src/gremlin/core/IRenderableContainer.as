@@ -6,7 +6,8 @@ package gremlin.core {
      * @author mosowski
      */
     public interface IRenderableContainer {
-        function setScene(scene:Scene):void;
+        function addToScene(scene:Scene):void;
+        function removeFromScene(scene:Scene):void;
     }
 
 }

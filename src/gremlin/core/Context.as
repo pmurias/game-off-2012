@@ -7,6 +7,7 @@ package gremlin.core {
     import flash.display3D.VertexBuffer3D;
     import flash.events.Event;
     import flash.events.KeyboardEvent;
+    import flash.events.MouseEvent;
     import flash.geom.Matrix;
     import flash.geom.Matrix3D;
     import flash.utils.ByteArray;
@@ -89,6 +90,8 @@ package gremlin.core {
 
         public static const KEY_DOWN:String = "key_down";
         public static const KEY_UP:String = "key_up";
+        public static const MOUSE_DOWN:String = "mouse_down";
+        public static const MOUSE_UP:String = "mouse_up";
 
         public function Context(_stage:Stage) {
             stage = _stage;
@@ -123,6 +126,8 @@ package gremlin.core {
             stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
             stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
             stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
         }
 
         public function requestContext():void {
@@ -186,6 +191,14 @@ package gremlin.core {
 
         public function onKeyUp(ke:KeyboardEvent):void {
             dispatch(KEY_UP, ke);
+        }
+
+        public function onMouseDown(me:MouseEvent):void {
+            dispatch(MOUSE_DOWN, me);
+        }
+
+        public function onMouseUp(me:MouseEvent):void {
+            dispatch(MOUSE_UP, me);
         }
 
 

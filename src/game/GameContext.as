@@ -3,7 +3,9 @@ package game {
     import flash.display3D.Context3DBlendFactor;
     import flash.display3D.Context3DCompareMode;
     import flash.events.KeyboardEvent;
+    import flash.events.MouseEvent;
     import flash.geom.Vector3D;
+    import flash.text.TextField;
     import gremlin.core.Context;
     import gremlin.events.KeyCodes;
     import gremlin.gremlin2d.Quad2d;
@@ -21,6 +23,7 @@ package game {
     public class GameContext {
         public var ctx:Context;
         public var stage:Stage;
+        public var debugInfo:DebugInfo;
         public var level:Level;
         public var tileSet:TileSet;
         public var rotator:CameraRotator;
@@ -34,9 +37,13 @@ package game {
         public function GameContext(_ctx:Context) {
             ctx = _ctx;
             stage = ctx.stage;
+
         }
 
         public function setupState():void {
+            debugInfo = new DebugInfo(ctx);
+            stage.addChild(debugInfo);
+
             rotator = new CameraRotator(this);
             ctx.setCamera(rotator.camera);
 
@@ -46,71 +53,16 @@ package game {
             mainLight.setDirection(-2, -1.2, 3);
             mainLight.setScene(layer0Scene);
 
+            tileSet = new TileSet(ctx);
+            level = new Level(0, 0, 0, ctx.rootNode);
+            level.fromObject(ctx.loaderMgr.getLoaderJSON("static/map.bmap"), tileSet);
+            level.layers[0].setScene(layer0Scene);
+
             hero = new HeroPlayer(this);
-            hero.setPosition(25,1,25)
+            hero.position.copyFrom(level.startPosition);
             hero.setScene(layer0Scene);
 
             rotator.node = (hero as HeroPlayer).node;
-
-            tileSet = new TileSet(ctx);
-            level = new Level(50, 50, 1, ctx.rootNode);
-            for (var i:int = 0; i < 50; ++i) {
-                for (var j:int = 0 ; j < 50; ++j) {
-                    level.layers[0].tiles[i][j].setType(tileSet.types["floor"]);
-                }
-            }
-
-            /* just for test */
-            for ( i= 5; i < 28; i+=4) {
-                for ( j = 5; j <= 28; j += 4) {
-                    var random:Number = Math.random();
-                    if (random < 0.33) {
-                        level.layers[0].tiles[i][j].setType(tileSet.types["block"]);
-                        level.layers[0].tiles[i-1][j].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i-1][j].setRotation(3);
-                        level.layers[0].tiles[i+1][j].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i+1][j].setRotation(1);
-                        level.layers[0].tiles[i][j-1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i][j-1].setRotation(2);
-                        level.layers[0].tiles[i][j+1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i][j + 1].setRotation(0);
-                    } else if (random < 0.66) {
-                        level.layers[0].tiles[i][j].setType(tileSet.types["block"]);
-                        level.layers[0].tiles[i + 1][j].setType(tileSet.types["block"]);
-
-                        level.layers[0].tiles[i-1][j].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i-1][j].setRotation(3);
-                        level.layers[0].tiles[i+2][j].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i+2][j].setRotation(1);
-                        level.layers[0].tiles[i][j-1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i][j-1].setRotation(2);
-                        level.layers[0].tiles[i][j+1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i][j + 1].setRotation(0);
-                        level.layers[0].tiles[i+1][j-1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i+1][j-1].setRotation(2);
-                        level.layers[0].tiles[i+1][j+1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i+1][j + 1].setRotation(0);
-                    } else {
-                        level.layers[0].tiles[i][j].setType(tileSet.types["block"]);
-                        level.layers[0].tiles[i][j+1].setType(tileSet.types["block"]);
-
-                        level.layers[0].tiles[i-1][j].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i-1][j].setRotation(3);
-                        level.layers[0].tiles[i+1][j].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i + 1][j].setRotation(1);
-                        level.layers[0].tiles[i-1][j+1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i-1][j+1].setRotation(3);
-                        level.layers[0].tiles[i+1][j+1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i+1][j+1].setRotation(1);
-                        level.layers[0].tiles[i][j-1].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i][j-1].setRotation(2);
-                        level.layers[0].tiles[i][j+2].setType(tileSet.types["spikes"]);
-                        level.layers[0].tiles[i][j + 2].setRotation(0);
-
-                    }
-                }
-            }
-            level.layers[0].setScene(layer0Scene);
 
 
             //part = new BillboardParticlesEntity(ctx);
@@ -144,9 +96,12 @@ package game {
 
             ctx.addListener(Context.KEY_DOWN, onKeyDown);
             ctx.addListener(Context.KEY_UP, onKeyUp);
+            ctx.addListener(Context.MOUSE_DOWN, onMouseDown);
+            ctx.addListener(Context.MOUSE_UP, onMouseUp);
         }
 
         private function onEnterFrame(params:Object = null):void {
+            debugInfo.tick();
 
             hero.tick();
 
@@ -181,6 +136,29 @@ package game {
             } else if (ke.keyCode == KeyCodes.KC_RIGHT && hero.velocity.x > 0) {
                 hero.velocity.x = 0;
             }
+        }
+
+        public function onMouseDown(me:MouseEvent):void {
+            if (stage.mouseY < stage.stageHeight*1/4) {
+                hero.velocity.z = 0.04;
+            }
+            if (stage.mouseY > stage.stageHeight*3/4) {
+                hero.velocity.z = -0.04;
+            }
+            if (stage.mouseX < stage.stageWidth*1/4) {
+                hero.velocity.x = -0.04;
+            }
+            if (stage.mouseX > stage.stageWidth*3/4) {
+                hero.velocity.x = 0.04;
+            }
+            if (stage.mouseX > stage.stageWidth * 1 / 4 && stage.stage.mouseX < stage.stageWidth * 3 / 4
+            && stage.mouseY > stage.stageHeight * 1 / 4 && stage.stage.mouseY < stage.stageHeight * 3 / 4 ) {
+                hero.velocity.setTo(0, 0, 0);
+            }
+        }
+
+        public function onMouseUp(me:MouseEvent):void {
+            hero.velocity.setTo(0, 0, 0);
         }
 
 

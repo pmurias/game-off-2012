@@ -10,15 +10,23 @@ package game {
      * @author mosowski
      */
     public class Initializer {
+        private var required:LoaderBatch;
         public var ctx:Context;
         public var gameCtx:GameContext;
+        public var modelResources:Vector.<String>;
 
         public function Initializer(_ctx:Context) {
             ctx = _ctx;
+            modelResources = new Vector.<String>();
+        }
+
+        public function loadModelResource(filePath:String):void {
+            modelResources.push(filePath);
+            required.addDataUrl(filePath);
         }
 
         public function start():void {
-            var required:LoaderBatch = new LoaderBatch(ctx.loaderMgr);
+            required = new LoaderBatch(ctx.loaderMgr);
             required.addDataUrl("static/particle_vp.txt");
             required.addDataUrl("static/particle_fp.txt");
             required.addDataUrl("static/tex2d_vp.txt");
@@ -30,15 +38,25 @@ package game {
             required.addDataUrl("static/textured_light_vp.txt");
             required.addDataUrl("static/textured_light_fp.txt");
 
-            required.addDataUrl("static/Cox.orcm");
+            required.addDataUrl("static/map.bmap");
+
             required.addDataUrl("static/CoxSkeleton.orcs");
-            required.addDataUrl("static/Hero.orcm");
-            required.addDataUrl("static/TileFloorNice.orcm");
-            required.addDataUrl("static/TileFloorDep.orcm");
-            required.addDataUrl("static/TileFloorHappy.orcm");
-            required.addDataUrl("static/TileSpikes.orcm");
-            required.addDataUrl("static/TileBlock.orcm");
-            required.addDataUrl("static/TileWall.orcm");
+
+            loadModelResource("static/Cox.orcm");
+            loadModelResource("static/Hero.orcm");
+            loadModelResource("static/TileFloorNice.orcm");
+            loadModelResource("static/TileFloorDep.orcm");
+            loadModelResource("static/TileFloorHappy.orcm");
+            loadModelResource("static/TileSpikes.orcm");
+            loadModelResource("static/TileBlock.orcm");
+            loadModelResource("static/TileWall.orcm");
+            loadModelResource("static/TileFade.orcm");
+            loadModelResource("static/TileFadeCorner.orcm");
+            loadModelResource("static/TileFadeOuterCorner.orcm");
+            loadModelResource("static/TileSpikesCorner.orcm");
+            loadModelResource("static/TileSpikesOuterCorner.orcm");
+            loadModelResource("static/TileGrass.orcm");
+            loadModelResource("static/TileGrassSlot.orcm");
 
             required.load(onRequiredAssetsLoaded);
         }
@@ -110,10 +128,17 @@ package game {
             createTexturedMaterial("FloorDep", "static/tile_chess_dep.png");
             createTexturedMaterial("FloorHappy", "static/tile_chess_happy.png");
             createTexturedMaterial("FloorShade", "static/tile_chess_shade.png");
+            createTexturedMaterial("FloorShadeCorner", "static/tile_chess_corner.png");
             createTexturedMaterial("WallShade", "static/tile_wall.png");
             createTexturedMaterial("WallShadeSpikes", "static/tile_wall_shade.png");
             createTexturedMaterial("Spikes", "static/tile_spikes.png");
             createTexturedMaterial("Block", "static/tile_stones.png");
+            createTexturedMaterial("Fade", "static/tile_fade.png");
+            createTexturedMaterial("FadeCorner", "static/tile_fade_corner.png");
+            createTexturedMaterial("FadeOuterCorner", "static/tile_fade_outer_corner.png");
+            createTexturedMaterial("FloorShadeOuterCorner", "static/tile_chess_outer_corner.png");
+            createTexturedMaterial("Grass", "static/tile_grass.png");
+            createTexturedMaterial("GrassShade", "static/tile_grass_shade.png");
 
 
             m = ctx.materialMgr.createMaterial("Particle");
@@ -134,14 +159,9 @@ package game {
         public function initModels():void {
             ctx.skeletonMgr.loadSkeletonResource("static/CoxSkeleton.orcs");
 
-            ctx.modelMgr.loadModelResource("static/Cox.orcm");
-            ctx.modelMgr.loadModelResource("static/Hero.orcm");
-            ctx.modelMgr.loadModelResource("static/TileFloorNice.orcm");
-            ctx.modelMgr.loadModelResource("static/TileFloorDep.orcm");
-            ctx.modelMgr.loadModelResource("static/TileFloorHappy.orcm");
-            ctx.modelMgr.loadModelResource("static/TileSpikes.orcm");
-            ctx.modelMgr.loadModelResource("static/TileBlock.orcm");
-            ctx.modelMgr.loadModelResource("static/TileWall.orcm");
+            for (var i:int = 0; i < modelResources.length; ++i) {
+                ctx.modelMgr.loadModelResource(modelResources[i]);
+            }
         }
 
     }

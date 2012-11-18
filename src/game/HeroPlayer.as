@@ -1,6 +1,7 @@
 package game {
     import flash.geom.Vector3D;
     import gremlin.core.Context;
+    import gremlin.scene.AnimatedEntity;
     import gremlin.scene.ModelEntity;
     import gremlin.scene.Node;
     import gremlin.scene.Scene;
@@ -23,7 +24,7 @@ package game {
 
         override public function setScene(_scene:Scene):void {
             scene = _scene;
-            entity.setScene(scene);
+            entity.addToScene(scene);
         }
 
         override public function tick():void {

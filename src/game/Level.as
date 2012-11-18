@@ -1,4 +1,5 @@
 package game {
+    import flash.geom.Vector3D;
     import gremlin.scene.Node;
 	/**
      * ...
@@ -9,6 +10,7 @@ package game {
         public var height:int;
         public var layers:Vector.<LevelLayer>;
         public var rootNode:Node;
+        public var startPosition:Vector3D;
 
         public function Level(_width:int, _height:int, _layers:int, _rootNode:Node) {
             width = _width;
@@ -18,6 +20,34 @@ package game {
             for (var i:int = 0; i < _layers; ++i) {
                 layers[i]= new LevelLayer(width, height, rootNode);
             }
+            startPosition = new Vector3D();
+        }
+
+        public function fromObject(object:Object, tileSet:TileSet):void {
+            width = object.level.width;
+            height = object.level.height;
+            layers = new Vector.<LevelLayer>(object.level.layers, true);
+            var i:int, j:int, l:int;
+            for (i = 0; i < object.level.layers; ++i) {
+                layers[i]= new LevelLayer(width, height, rootNode);
+            }
+            var tileNameByCode:Array = [];
+            for (var tileName:String in object.tileSet) {
+                tileNameByCode[object.tileSet[tileName].code] = tileName;
+            }
+            for (l = 0; l < object.level.layers; ++l) {
+                var layer:Object = object.level["layer" + l];
+                for (i = 0; i < width; ++i) {
+                    for (j = 0; j < height; ++j) {
+                        if (layer[i][j] != 0) {
+                            layers[l].tiles[i][j].setType(tileSet.types[tileNameByCode[layer[i][j][0]]]);
+                            layers[l].tiles[i][j].setRotation(layer[i][j][1]);
+                        }
+                    }
+                }
+            }
+
+            startPosition.setTo(object.level['start'][0], object.level['start'][1], object.level['start'][2])
         }
 
         public function isPositionOnMap(x:int, y:int):Boolean {
