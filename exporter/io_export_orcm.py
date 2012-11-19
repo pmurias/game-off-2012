@@ -89,11 +89,14 @@ def vert_calc_tang(va, vb, vc):
 
     #wspolczynniki dla bitangenta    
     detb = (Bt[1]*At[0] - Bt[0]*At[1])
+    dett = (Bt[0]*At[1] - Bt[1]*At[0])
+    if detb == 0 or dett == 0:
+        return (1,0,0)
+        
     a = -Bt[0] / detb
     b = At[0] / detb
 
-    # wspolczynniki dla tangenta
-    dett = (Bt[0]*At[1] - Bt[1]*At[0])
+    # wspolczynniki dla tangenta    
     c = -Bt[1] / dett
     d = At[1] / dett
     

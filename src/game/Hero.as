@@ -8,6 +8,7 @@ package game {
      */
     public class Hero {
         public var gameCtx:GameContext;
+        public var id:uint;
         public var velocity:Vector3D;
         public var position:Vector3D;
         public var moveTarget:Vector3D;
@@ -17,6 +18,7 @@ package game {
 
         public function Hero(_gameCtx:GameContext) {
             gameCtx = _gameCtx;
+            id = gameCtx.getUniqueId();
             velocity = new Vector3D();
             position = new Vector3D();
             moveTarget = new Vector3D();

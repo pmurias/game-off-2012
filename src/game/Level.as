@@ -1,18 +1,22 @@
 package game {
     import flash.geom.Vector3D;
+    import game.spawners.Spawner;
     import gremlin.scene.Node;
 	/**
      * ...
      * @author mosowski
      */
     public class Level {
+        public var gameCtx:GameContext;
         public var width:int;
         public var height:int;
         public var layers:Vector.<LevelLayer>;
         public var rootNode:Node;
         public var startPosition:Vector3D;
+        public var spawners:Vector.<Spawner>;
 
-        public function Level(_width:int, _height:int, _layers:int, _rootNode:Node) {
+        public function Level(_gameCtx:GameContext, _width:int, _height:int, _layers:int, _rootNode:Node) {
+            gameCtx = _gameCtx;
             width = _width;
             height = _height;
             rootNode = _rootNode;
@@ -21,6 +25,7 @@ package game {
                 layers[i]= new LevelLayer(width, height, rootNode);
             }
             startPosition = new Vector3D();
+            spawners = new Vector.<Spawner>();
         }
 
         public function fromObject(object:Object, tileSet:TileSet):void {
@@ -47,11 +52,21 @@ package game {
                 }
             }
 
+            for (i = 0; i < object.level.spawners.length; ++i) {
+                var spawner:Spawner = new Spawner(gameCtx);
+                spawner.fromObject(object.level.spawners[i]);
+                spawners.push(spawner);
+            }
+
             startPosition.setTo(object.level['start'][0], object.level['start'][1], object.level['start'][2])
         }
 
         public function isPositionOnMap(x:int, y:int):Boolean {
             return x >= 0 && x < width && y >= 0 && y < height;
+        }
+
+        public function getTileAtPosition(position:Vector3D, l:int):Tile {
+            return layers[l].tiles[int(position.x / 2)][int(position.z / 2)];
         }
 
     }

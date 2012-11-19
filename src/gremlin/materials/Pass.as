@@ -21,6 +21,8 @@ package gremlin.materials {
 
         public var iterationMode:int;
 
+        public var transparent:Boolean;
+
         public var shader:Shader;
         public var samplers:Dictionary;
         public var index:int;
@@ -38,6 +40,8 @@ package gremlin.materials {
             depthCompareMode = Context3DCompareMode.LESS_EQUAL;
 
             iterationMode = ITERATION_ONE;
+
+            transparent = false;
         }
     }
 

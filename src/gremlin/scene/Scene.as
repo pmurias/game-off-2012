@@ -39,7 +39,7 @@ package gremlin.scene {
 
         public function removeRenderable(renderable:IRenderable):void {
             var material:Material = renderable.getMaterial();
-            var renderables:Vector.<IRenderable> = new Vector.<IRenderable>();
+            var renderables:Vector.<IRenderable> = renderablesByMaterial[material];
             if (renderables != null) {
                 renderables.splice(renderables.indexOf(renderable), 1);
             }
@@ -63,7 +63,7 @@ package gremlin.scene {
             var passQueue:Vector.<Pass> = ctx.materialMgr.getPassRenderingQueue();
             for (i = 0; i < passQueue.length; ++i) {
                 var pass:Pass = passQueue[i];
-                var renderables:Vector.<IRenderable> = renderablesByMaterial[passQueue[i].material];
+                var renderables:Vector.<IRenderable> = renderablesByMaterial[pass.material];
                 if (renderables != null && renderables.length > 0) {
                     ctx.setBlendFactors(pass.sourceBlendFactor, pass.destBlendFactor);
                     ctx.setDepthTest(pass.depthMask, pass.depthCompareMode);

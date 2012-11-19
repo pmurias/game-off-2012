@@ -6,6 +6,11 @@ package game {
     import flash.events.MouseEvent;
     import flash.geom.Vector3D;
     import flash.text.TextField;
+    import game.commands.Command;
+    import game.commands.Commander;
+    import game.commands.CommandSetHeroPosition;
+    import game.commands.CommandSetHeroVelocity;
+    import game.spawners.SharpItem;
     import gremlin.core.Context;
     import gremlin.events.KeyCodes;
     import gremlin.gremlin2d.Quad2d;
@@ -16,7 +21,8 @@ package game {
     import gremlin.scene.ModelEntity;
     import gremlin.scene.Node;
     import gremlin.scene.Scene;
-	/**
+
+    /**
      * ...
      * @author mosowski
      */
@@ -24,11 +30,15 @@ package game {
         public var ctx:Context;
         public var stage:Stage;
         public var debugInfo:DebugInfo;
+        public var uniqueId:uint;
+        public var commander:Commander;
         public var level:Level;
+        public var sharpItems:Vector.<SharpItem>;
         public var tileSet:TileSet;
         public var rotator:CameraRotator;
 
         public var hero:Hero;
+        public var heroes:Array;
 
         public var mainLight:DirectionaLight;
 
@@ -44,8 +54,12 @@ package game {
             debugInfo = new DebugInfo(ctx);
             stage.addChild(debugInfo);
 
+            commander = new Commander(this);
+
             rotator = new CameraRotator(this);
             ctx.setCamera(rotator.camera);
+
+            heroes = new Array();
 
             layer0Scene = new Scene(ctx);
 
@@ -53,17 +67,25 @@ package game {
             mainLight.setDirection(-2, -1.2, 3);
             mainLight.setScene(layer0Scene);
 
+            sharpItems = new Vector.<SharpItem>();
+
             tileSet = new TileSet(ctx);
-            level = new Level(0, 0, 0, ctx.rootNode);
+            level = new Level(this, 0, 0, 0, ctx.rootNode);
             level.fromObject(ctx.loaderMgr.getLoaderJSON("static/map.bmap"), tileSet);
             level.layers[0].setScene(layer0Scene);
 
-            hero = new HeroPlayer(this);
-            hero.position.copyFrom(level.startPosition);
+            hero = createHeroPlayer();
             hero.setScene(layer0Scene);
-
             rotator.node = (hero as HeroPlayer).node;
 
+            var cmdHeroSpawn:CommandSetHeroPosition = new CommandSetHeroPosition();
+            cmdHeroSpawn.heroId = hero.id;
+            cmdHeroSpawn.x = level.startPosition.x;
+            cmdHeroSpawn.y = level.startPosition.y;
+            cmdHeroSpawn.z = level.startPosition.z;
+            commander.queueCommand(cmdHeroSpawn);
+
+            commander.tick();
 
             //part = new BillboardParticlesEntity(ctx);
             //part.minLife = 15;
@@ -87,23 +109,38 @@ package game {
             //quad.setMaterial(ctx.materialMgr.getMaterial("QuadRTT"));
             //quad.setScene(scene1);
             //ctx.addListener(Context.RESIZE, function(params:Object):void {
-                //quad.transformation.identity();
-                //quad.transformation.scale(ctx.stage.stageWidth, ctx.stage.stageHeight);
-                //quad.transformation.translate(ctx.stage.stageWidth / 2, ctx.stage.stageHeight / 2);
+            //quad.transformation.identity();
+            //quad.transformation.scale(ctx.stage.stageWidth, ctx.stage.stageHeight);
+            //quad.transformation.translate(ctx.stage.stageWidth / 2, ctx.stage.stageHeight / 2);
             //});
 
             ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
 
             ctx.addListener(Context.KEY_DOWN, onKeyDown);
             ctx.addListener(Context.KEY_UP, onKeyUp);
-            ctx.addListener(Context.MOUSE_DOWN, onMouseDown);
-            ctx.addListener(Context.MOUSE_UP, onMouseUp);
         }
 
         private function onEnterFrame(params:Object = null):void {
             debugInfo.tick();
 
+            updatePlayerControl();
             hero.tick();
+
+            var i:int;
+            for (i = 0; i < level.spawners.length; ++i) {
+                level.spawners[i].tick();
+            }
+            for (i = 0; i < sharpItems.length; ++i) {
+                sharpItems[i].tick();
+            }
+            for (i = sharpItems.length - 1; i >= 0; --i) {
+                if (sharpItems[i].dead) {
+                    sharpItems[i].destroy();
+                    sharpItems.splice(i, 1);
+                }
+            }
+
+            commander.tick();
 
             ctx.rootNode.updateTransformation();
             rotator.tick();
@@ -115,52 +152,48 @@ package game {
         }
 
         public function onKeyDown(ke:KeyboardEvent):void {
-            if (ke.keyCode == KeyCodes.KC_UP) {
-                hero.velocity.z = 0.04;
-            } else if (ke.keyCode == KeyCodes.KC_DOWN) {
-                hero.velocity.z = -0.04;
-            } else if (ke.keyCode == KeyCodes.KC_LEFT) {
-                hero.velocity.x = -0.04;
-            } else if (ke.keyCode == KeyCodes.KC_RIGHT) {
-                hero.velocity.x = 0.04;
+            if (ke.keyCode == KeyCodes.KC_SPACE) {
+                commander.reset();
             }
         }
 
         public function onKeyUp(ke:KeyboardEvent):void {
-            if (ke.keyCode == KeyCodes.KC_UP && hero.velocity.z > 0) {
-                hero.velocity.z = 0;
-            } else if (ke.keyCode == KeyCodes.KC_DOWN && hero.velocity.z < 0) {
-                hero.velocity.z = 0;
-            } else if (ke.keyCode == KeyCodes.KC_LEFT && hero.velocity.x < 0) {
-                hero.velocity.x = 0;
-            } else if (ke.keyCode == KeyCodes.KC_RIGHT && hero.velocity.x > 0) {
-                hero.velocity.x = 0;
+        }
+
+        public function updatePlayerControl():void {
+            var velocityX:Number = 0;
+            var velocityZ:Number = 0;
+            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_DOWN)) {
+                velocityZ = -0.04;
+            }
+            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_UP)) {
+                velocityZ = 0.04;
+            }
+            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_LEFT)) {
+                velocityX = -0.04;
+            }
+            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_RIGHT)) {
+                velocityX = 0.04;
+            }
+
+            if (velocityX != hero.velocity.x || velocityZ != hero.velocity.z) {
+                var cmd:CommandSetHeroVelocity = new CommandSetHeroVelocity();
+                cmd.heroId = hero.id;
+                cmd.x = velocityX;
+                cmd.z = velocityZ;
+                commander.queueCommand(cmd);
             }
         }
 
-        public function onMouseDown(me:MouseEvent):void {
-            if (stage.mouseY < stage.stageHeight*1/4) {
-                hero.velocity.z = 0.04;
-            }
-            if (stage.mouseY > stage.stageHeight*3/4) {
-                hero.velocity.z = -0.04;
-            }
-            if (stage.mouseX < stage.stageWidth*1/4) {
-                hero.velocity.x = -0.04;
-            }
-            if (stage.mouseX > stage.stageWidth*3/4) {
-                hero.velocity.x = 0.04;
-            }
-            if (stage.mouseX > stage.stageWidth * 1 / 4 && stage.stage.mouseX < stage.stageWidth * 3 / 4
-            && stage.mouseY > stage.stageHeight * 1 / 4 && stage.stage.mouseY < stage.stageHeight * 3 / 4 ) {
-                hero.velocity.setTo(0, 0, 0);
-            }
+        public function getUniqueId():uint {
+            return uniqueId++;
         }
 
-        public function onMouseUp(me:MouseEvent):void {
-            hero.velocity.setTo(0, 0, 0);
+        public function createHeroPlayer():HeroPlayer {
+            var heroPlayer:HeroPlayer = new HeroPlayer(this);
+            heroes[heroPlayer.id] = heroPlayer;
+            return heroPlayer;
         }
-
 
     }
 

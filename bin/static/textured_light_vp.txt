@@ -8,23 +8,15 @@ attr vec3 norm
 attr vec2 uv0
 
 vertex = modelMatrix * pos
-//prevY = vertex.y
-//vertex.y = sin(vertex.z)
-//vertex.y = vertex.y * 2
-//vertex.y = vertex.y + prevY
 vertex = cameraMatrix * vertex
 out = vertex
 varying0 = uv0
-
-//tbn_t = normalMatrix * tan
-//tbn_n = normalMatrix * norm
-//tbn_b = cross(tbn_n, tbn_t)
 
 modelNormal = normalMatrix * norm
 modelNormal = -modelNormal
 lightFactor = dot3(modelNormal, lightDirection)
 lightFactor = max(lightFactor, 0)
-lightFactor = lightFactor + 0.3
+lightFactor = lightFactor + 0.5
 varying1 = lightFactor
 
 

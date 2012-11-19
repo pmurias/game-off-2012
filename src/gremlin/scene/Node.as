@@ -108,6 +108,11 @@ package gremlin.scene {
             node.transformationDirty = true;
         }
 
+        public function removeChild(node:Node):void {
+            node.parent = null;
+            children.splice(children.indexOf(node), 1);
+        }
+
         public function updateTransformation(dirty:Boolean = false):void {
             dirty ||= transformationDirty;
 

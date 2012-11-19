@@ -127,8 +127,8 @@ def save(operator,context, filepath=""):
                 spawner["speed"] = sel["speed"]
                 spawner["position"] = gremlinCoord(sel.location)
                 spawner["rotation"] = -sel.rotation_euler.z
-                if sel.name.find("/SAW") != -1:
-                    spawner["type"] = "saw"
+                if sel.name.find("/BLADE") != -1:
+                    spawner["type"] = "blade"
                 level["spawners"].append(spawner)
                
                 

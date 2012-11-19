@@ -17,6 +17,8 @@ package gremlin.materials {
         private var passDictByIndex:Array;
         private var renderingQueueDirty:Boolean;
 
+        private const MAX_PASSES:int = 8;
+
         public function MaterialManager(_ctx:Context) {
             ctx = _ctx;
             materials = new Dictionary();
@@ -43,12 +45,17 @@ package gremlin.materials {
                 for (i = 0; i < material.passes.length; ++i) {
                     material.passes[i].index = i;
 
-                    var passDict:Dictionary = passDictByIndex[i];
+                    var passSortingIndex:int = i;
+                    if (material.passes[i].transparent) {
+                        passSortingIndex += MAX_PASSES;
+                    }
+
+                    var passDict:Dictionary = passDictByIndex[passSortingIndex];
                     if (passDict == null) {
-                        passDict = passDictByIndex[i] = new Dictionary(true);
+                        passDict = passDictByIndex[passSortingIndex] = new Dictionary(true);
                     }
                     var passVec:Vector.<Pass> = passDict[material.passes[i].shader];
-                    if (!passVec) {
+                    if (passVec == null) {
                         passVec = passDict[material.passes[i].shader] = new Vector.<Pass>();
                     }
                     passVec.push(material.passes[i]);

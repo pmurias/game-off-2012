@@ -52,6 +52,7 @@ package gremlin.core {
         public var renderTargetMgr:RenderTargetManager;
         public var autoParams:AutoParams;
         public var ctx2d:Context2d;
+        public var keyboardState:KeyboardState;
 
         // render state variables
         public var activeShader:Shader;
@@ -74,6 +75,7 @@ package gremlin.core {
         // used for switching-off vertex streams that are active, but not needed in current call
         // activeVertexStreams remebers also vertex buffer bound to stream
         private var activeVertexStreams:Vector.<VertexBuffer3D>;
+        private var activeVertexStreamsOffsets:Vector.<int>;
         private var neededVertexStreams:Vector.<Boolean>;
 
         // same as above, except for textur samplers. activeSamplers remembers texture bound to sampler
@@ -109,6 +111,7 @@ package gremlin.core {
             renderTargetMgr = new RenderTargetManager(this);
             autoParams = new AutoParams(this);
             ctx2d = new Context2d(this);
+            keyboardState = new KeyboardState();
 
             screenMatrix = new Matrix();
 
@@ -118,6 +121,7 @@ package gremlin.core {
             mathConstants = new MathConstants();
 
             activeVertexStreams = new Vector.<VertexBuffer3D>(8, true);
+            activeVertexStreamsOffsets = new Vector.<int>(8, true);
             neededVertexStreams = new Vector.<Boolean>(8, true);
 
             activeSamplers = new Vector.<Texture>(8, true);
@@ -186,10 +190,12 @@ package gremlin.core {
         }
 
         public function onKeyDown(ke:KeyboardEvent):void {
+            keyboardState.setKeyDown(ke.keyCode);
             dispatch(KEY_DOWN, ke);
         }
 
         public function onKeyUp(ke:KeyboardEvent):void {
+            keyboardState.setKeyUp(ke.keyCode);
             dispatch(KEY_UP, ke);
         }
 
@@ -237,9 +243,10 @@ package gremlin.core {
         }
 
         public function setVertexBufferAt(streamId:int, vertexBuffer3d:VertexBuffer3D, offset:int, format:String):void {
-            if (activeVertexStreams[streamId] != vertexBuffer3d) {
+            if (activeVertexStreams[streamId] != vertexBuffer3d || activeVertexStreamsOffsets[streamId] != offset) {
                 ctx3d.setVertexBufferAt(streamId, vertexBuffer3d, offset, format);
                 activeVertexStreams[streamId] = vertexBuffer3d;
+                activeVertexStreamsOffsets[streamId] = offset;
             }
             neededVertexStreams[streamId] = true;
         }

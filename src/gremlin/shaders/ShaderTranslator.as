@@ -693,7 +693,7 @@ class InstructionMin extends Instruction {
 
 class InstructionTex extends Instruction {
     override public function getCode(mode:String):String {
-        return "tex " + dest.getCode(mode) + ", " + src1.getCode(mode) + ", " + src2.getCode(mode) + " <2d, repeat, linear>";
+        return "tex " + dest.getCode(mode) + ", " + src1.getCode(mode) + ", " + src2.getCode(mode) + " <2d, repeat>";
     }
 
 }

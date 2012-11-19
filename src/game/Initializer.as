@@ -1,4 +1,5 @@
 package game {
+    import flash.display3D.Context3DBlendFactor;
     import gremlin.core.Context;
     import gremlin.loading.LoaderBatch;
     import gremlin.materials.Material;
@@ -44,6 +45,7 @@ package game {
 
             loadModelResource("static/Cox.orcm");
             loadModelResource("static/Hero.orcm");
+            loadModelResource("static/Blade.orcm");
             loadModelResource("static/TileFloorNice.orcm");
             loadModelResource("static/TileFloorDep.orcm");
             loadModelResource("static/TileFloorHappy.orcm");
@@ -92,7 +94,6 @@ package game {
             ctx.shaderMgr.createShaderFromJSON("Textured",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_fp.txt"), ShaderTranslator.FRAGMENT));
-            ctx.shaderMgr.getShader("Textured").fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 1, 1, 1));
 
             ctx.shaderMgr.createShaderFromJSON("TexturedLight",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_vp.txt"), ShaderTranslator.VERTEX),
@@ -111,6 +112,20 @@ package game {
             return m;
         }
 
+        private function createTexturedMultiplyMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.sourceBlendFactor = Context3DBlendFactor.DESTINATION_COLOR;
+            p.destBlendFactor = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+            p.transparent = true;
+            p.shader = ctx.shaderMgr.getShader("Textured");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
         public function initMaterials():void {
             var m:Material;
             var p:Pass;
@@ -123,6 +138,7 @@ package game {
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/chess.png");
             m.addPass(p);
 
+            createTexturedMaterial("Blade", "static/blade.png");
             createTexturedMaterial("Hero", "static/hero.png");
             createTexturedMaterial("FloorNice", "static/tile_chess_nice.png");
             createTexturedMaterial("FloorDep", "static/tile_chess_dep.png");
@@ -139,6 +155,8 @@ package game {
             createTexturedMaterial("FloorShadeOuterCorner", "static/tile_chess_outer_corner.png");
             createTexturedMaterial("Grass", "static/tile_grass.png");
             createTexturedMaterial("GrassShade", "static/tile_grass_shade.png");
+
+            createTexturedMultiplyMaterial("RoundShadow", "static/round_shadow.png");
 
 
             m = ctx.materialMgr.createMaterial("Particle");
