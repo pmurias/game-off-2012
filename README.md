@@ -14,3 +14,18 @@ rendering quad with shaders, AGAL shading language wrapper that makes writing st
 and scene graph with material-based renderable system. Some of the features still require a lot of work, but now I need more focus on 
 gameplay.
 
+--
+
+Open Source projects I'm using in this game:
+
+Blender:
+3d modelling, map editing, animation. 
+
+
+GIMP:
+Texture creating and editing.
+
+
+telemetry-utils: https://github.com/adamcath/telemetry-utils
+A script which enables Adobe Scout profiling flag.
+
