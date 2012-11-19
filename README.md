@@ -26,6 +26,10 @@ GIMP:
 Texture creating and editing.
 
 
+FlashDevelop:
+Great IDE for flash development.
+
+
 telemetry-utils: https://github.com/adamcath/telemetry-utils
 A script which enables Adobe Scout profiling flag.
 
