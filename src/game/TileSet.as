@@ -27,6 +27,7 @@ package game {
             addTile("TileGrass");
             addTile("TileGrassSlot");
 
+            types["TileBlock"].blocking = true;
             types["TileFade"].blocking = true;
             types["TileFadeCorner"].blocking = true;
             types["TileFadeOuterCorner"].blocking = true;

@@ -100,6 +100,7 @@ def save(operator,context, filepath=""):
     level["layers"] = 0
     level["start"] = [0, 0, 0]
     level["spawners"] = []
+    level["pickables"] = []
     
     tiles = [ ]
    
@@ -121,6 +122,7 @@ def save(operator,context, filepath=""):
                     break
             if sel.name == "START":
                 level["start"] = gremlinCoord(sel.location)
+                
             if sel.name.find("SPAWN") != -1:
                 spawner = { }
                 spawner["delay"] = sel["delay"]
@@ -130,6 +132,13 @@ def save(operator,context, filepath=""):
                 if sel.name.find("/BLADE") != -1:
                     spawner["type"] = "blade"
                 level["spawners"].append(spawner)
+                
+            if sel.name.find("PICK") != -1:
+                pickable = { }
+                pickable["position"] = gremlinCoord(sel.location)
+                if sel.name.find("/H") != -1:
+                    pickable["type"] = "h"
+                level["pickables"].append(pickable)
                
                 
         

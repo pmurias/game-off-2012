@@ -1,7 +1,9 @@
 package gremlin.scene {
     import gremlin.core.Context;
     import gremlin.core.IRenderableContainer;
+    import gremlin.materials.Material;
     import gremlin.meshes.ModelResource;
+    import gremlin.meshes.Submesh;
 
     /**
      * ...
@@ -13,26 +15,26 @@ package gremlin.scene {
         public var submeshEntities:Vector.<SubmeshEntity>;
         public var scenes:Vector.<Scene>;
 
-        public function ModelEntity(_mesh:ModelResource = null, _node:Node = null) {
+        public function ModelEntity(mesh:ModelResource = null, node:Node = null) {
             submeshEntities = new Vector.<SubmeshEntity>();
             scenes = new Vector.<Scene>();
-            if (_mesh != null) {
-                setModelResource(_mesh);
+            if (mesh != null) {
+                setModelResource(mesh);
             }
-            if (_node != null) {
-                attachToNode(_node);
+            if (node != null) {
+                attachToNode(node);
             }
         }
 
-        public function attachToNode(_node:Node):void {
-            node = _node;
+        public function attachToNode(node:Node):void {
+            this.node = node;
         }
 
         public function detachFromNode():void {
             node = null;
         }
 
-        public function setModelResource(_modelResource:ModelResource):void {
+        public function setModelResource(modelResource:ModelResource):void {
             var i:int, j:int;
             for (i = 0; i < submeshEntities.length; ++i) {
                 for (j = 0; j < scenes.length; ++j) {
@@ -40,7 +42,7 @@ package gremlin.scene {
                 }
             }
 
-            modelResource = _modelResource;
+            this.modelResource = modelResource;
             submeshEntities.length = 0;
 
             for (i = 0; i < modelResource.submeshes.length; ++i) {
@@ -51,6 +53,15 @@ package gremlin.scene {
                 }
                 submeshEntities.push(submeshEntity);
             }
+        }
+
+        public function getSubmeshEntityByMaterial(material:Material):SubmeshEntity {
+            for (var i:int = 0; i < submeshEntities.length; ++i) {
+                if (submeshEntities[i].material == material) {
+                    return submeshEntities[i];
+                }
+            }
+            return null;
         }
 
         public function addToScene(scene:Scene):void {

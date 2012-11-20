@@ -16,9 +16,10 @@ package game.spawners {
         public function Blade(_gameCtx:GameContext) {
             super(_gameCtx);
             entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Blade"), node);
-            entity.addToScene(gameCtx.layer0Scene);
+            entity.addToScene(gameCtx.layer0);
             rotation = 0;
             spinningSpeed = 0.3;
+            enableShadow();
         }
 
         override protected function customTick():void {
@@ -30,7 +31,7 @@ package game.spawners {
 
         override public function destroy():void {
             super.destroy();
-            entity.removeFromScene(gameCtx.layer0Scene);
+            entity.removeFromScene(gameCtx.layer0);
         }
 
     }

@@ -1,5 +1,6 @@
 package game {
     import flash.geom.Vector3D;
+    import game.pickable.Pickable;
     import gremlin.core.Context;
     import gremlin.scene.AnimatedEntity;
     import gremlin.scene.ModelEntity;
@@ -11,20 +12,16 @@ package game {
      */
     public class HeroPlayer extends Hero {
         public var entity:ModelEntity;
-        public var node:Node;
         public var rotation:Number;
 
-        public function HeroPlayer(_gameCtx:GameContext) {
-            super(_gameCtx);
-            node = new Node();
-            gameCtx.ctx.rootNode.addChild(node);
-            entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Hero"), node);
-            rotation = 0;
-        }
+        public function HeroPlayer(gameCtx:GameContext) {
+            super(gameCtx);
 
-        override public function setScene(_scene:Scene):void {
-            scene = _scene;
-            entity.addToScene(scene);
+            entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Hero"), node);
+            entity.addToScene(gameCtx.layer0);
+            rotation = 0;
+            shadow.node.setScale(1.5, 1, 1.5);
+            radius = 0.5;
         }
 
         override public function tick():void {
@@ -44,8 +41,16 @@ package game {
 
             node.getRotation().setFromAxisAngle(Vector3D.Y_AXIS, rotation);
 
+            for (var i:int = 0; i < gameCtx.pickables.length; ++i) {
+                var pickable:Pickable = gameCtx.pickables[i];
+                if (gameCtx.ctx.mathConstants.squaredDistanceXZ(pickable.node.position, node.position) < (pickable.radius+radius)*(pickable.radius+radius)) {
+                    pickable.onPick(this);
+                }
+            }
+        }
 
-            node.copyPositionFrom(position);
+        override public function destroy():void {
+            super.destroy();
         }
     }
 

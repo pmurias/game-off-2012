@@ -43,11 +43,6 @@ package game {
 
         public function setRotation(rot:int):void {
             node.getRotation().setFromAxisAngle(Vector3D.Y_AXIS, rot * Math.PI / 2);
-            if (rot & 1) {
-                node.setScale(1, 1, 1);
-            } else {
-                node.setScale(1, 1, 1);
-            }
         }
 
     }

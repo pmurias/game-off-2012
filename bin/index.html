@@ -27,16 +27,37 @@
 			flashvars, params, attributes);
 	</script>
 	<style>
-		html, body { height:100%; width:100% }		
+html{height:100%}
+html,body {margin:0;padding:0;}
+body{
+	background:#000
+	text-align:center;
+	min-width:650px;
+	
+}
+#wrapperVertical{
+	position:absolute;
+	top:50%;
+	margin-top:-300px;
+	left:0;
+	width:100%;
+}
+#wrapperHorizontal {
+	width:800px;
+	margin-left:auto;
+	margin-right:auto;
+	height:600px;
+	background:#000;
+}
 	</style>
 </head>
 <body bgcolor=#000000>
-	<center>	
+	<center>
+        <div id="wrapperVertical"><div id="wrapperHorizontal">
         <div id="altContent">
             <p><a href="http://www.adobe.com/go/getflashplayer">Get Adobe Flash player</a></p>
         </div>
-        <br><br>
-        <embed src="http://www.youtube.com/v/i5KORjVtczU&autoplay=1" type="application/x-shockwave-flash" wmode="transparent" width="1" height="1"></embed>
+        </div></div>
 	</center>
 </body>
 </html>

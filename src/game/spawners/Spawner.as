@@ -24,7 +24,7 @@ package game.spawners {
             direction = new Vector3D();
             speed = 0;
             delay = 0;
-            lastSpawnTime = gameCtx.ctx.time;
+            lastSpawnTime = gameCtx.time;
 
             if (spawnedTypeByName == null) {
                 spawnedTypeByName = new Dictionary();
@@ -36,20 +36,19 @@ package game.spawners {
             speed = object.speed;
             delay = object.delay;
             direction.setTo(Math.sin(object.rotation), 0, Math.cos(object.rotation));
-            position.setTo(object.position[0]+1, object.position[1]+0.5, object.position[2]+1);
+            position.setTo(object.position[0]+1, object.position[1]+0.5, object.position[2]);
 
             spawnedType = spawnedTypeByName[object.type];
         }
 
         public function tick():void {
-            if (gameCtx.ctx.time > lastSpawnTime + delay) {
+            if (gameCtx.time > lastSpawnTime + delay) {
                 var sharpItem:SharpItem = new spawnedType(gameCtx);
                 sharpItem.homeTile = gameCtx.level.getTileAtPosition(position, 0);
                 sharpItem.direction.copyFrom(direction);
-                sharpItem.position.copyFrom(position);
+                sharpItem.node.position.copyFrom(position);
                 sharpItem.speed = speed;
-                gameCtx.sharpItems.push(sharpItem);
-                lastSpawnTime = gameCtx.ctx.time;
+                lastSpawnTime = gameCtx.time;
             }
         }
 

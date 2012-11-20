@@ -1,5 +1,6 @@
 package game {
     import flash.display3D.Context3DBlendFactor;
+    import flash.display3D.Context3DCompareMode;
     import gremlin.core.Context;
     import gremlin.loading.LoaderBatch;
     import gremlin.materials.Material;
@@ -43,9 +44,11 @@ package game {
 
             required.addDataUrl("static/CoxSkeleton.orcs");
 
+            loadModelResource("static/RoundShadow.orcm");
             loadModelResource("static/Cox.orcm");
             loadModelResource("static/Hero.orcm");
             loadModelResource("static/Blade.orcm");
+            loadModelResource("static/Pickable.orcm");
             loadModelResource("static/TileFloorNice.orcm");
             loadModelResource("static/TileFloorDep.orcm");
             loadModelResource("static/TileFloorHappy.orcm");
@@ -119,6 +122,7 @@ package game {
             p = new Pass();
             p.sourceBlendFactor = Context3DBlendFactor.DESTINATION_COLOR;
             p.destBlendFactor = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+            p.depthMask = false;
             p.transparent = true;
             p.shader = ctx.shaderMgr.getShader("Textured");
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
@@ -138,8 +142,10 @@ package game {
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/chess.png");
             m.addPass(p);
 
-            createTexturedMaterial("Blade", "static/blade.png");
             createTexturedMaterial("Hero", "static/hero.png");
+            createTexturedMaterial("Blade", "static/blade.png");
+            createTexturedMaterial("Pickable", "static/pickable.png");
+            createTexturedMaterial("PickableH", "static/pickable_h.png");
             createTexturedMaterial("FloorNice", "static/tile_chess_nice.png");
             createTexturedMaterial("FloorDep", "static/tile_chess_dep.png");
             createTexturedMaterial("FloorHappy", "static/tile_chess_happy.png");

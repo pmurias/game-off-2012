@@ -45,9 +45,17 @@ package gremlin.scene {
             }
         }
 
-        public function notifyRenderableMaterialChange(renderable:IRenderable):void {
-            removeRenderable(renderable);
-            addRenderable(renderable);
+        public function notifyRenderableMaterialChange(renderable:IRenderable, from:Material, to:Material):void {
+            var renderables:Vector.<IRenderable> = renderablesByMaterial[from];
+            if (renderables != null) {
+                renderables.splice(renderables.indexOf(renderable), 1);
+            }
+
+            renderables = renderablesByMaterial[to];
+            if (renderables == null) {
+                renderablesByMaterial[to] = renderables = new Vector.<IRenderable>();
+            }
+            renderables.push(renderable);
         }
 
         public function addDirectionalLight(directionalLight:DirectionaLight):void {

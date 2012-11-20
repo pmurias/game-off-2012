@@ -6,27 +6,26 @@ package game {
      * ...
      * @author mosowski
      */
-    public class Hero {
-        public var gameCtx:GameContext;
-        public var id:uint;
+    public class Hero extends GameObject {
         public var velocity:Vector3D;
-        public var position:Vector3D;
         public var moveTarget:Vector3D;
         public var moveTargetSet:Boolean;
         public var speed:Number;
         public var scene:Scene;
 
-        public function Hero(_gameCtx:GameContext) {
-            gameCtx = _gameCtx;
-            id = gameCtx.getUniqueId();
+        public function Hero(gameCtx:GameContext) {
+            super(gameCtx);
+            gameCtx.heroes.push(this);
+            gameCtx.heroesById[id] = this;
+
             velocity = new Vector3D();
-            position = new Vector3D();
             moveTarget = new Vector3D();
             speed = 1.0;
+            enableShadow();
         }
 
         public function setPosition(x:Number, y:Number, z:Number):void {
-            position.setTo(x, y, z);
+            node.setPosition(x, y, z);
         }
 
         public function moveTo(x:Number, y:Number, z:Number):void {
@@ -38,9 +37,10 @@ package game {
             velocity.setTo(x, y, z);
         }
 
-        public function tick():void {
+        override public function tick():void {
+            super.tick();
             if (moveTargetSet) {
-                velocity.setTo(moveTarget.x - position.x, moveTarget.y - position.y, moveTarget.z - position.z);
+                velocity.setTo(moveTarget.x - node.position.x, moveTarget.y - node.position.y, moveTarget.z - node.position.z);
                 if (velocity.lengthSquared < 0.1) {
                     velocity.setTo(0, 0, 0);
                     moveTargetSet = false;
@@ -49,14 +49,19 @@ package game {
                     velocity.scaleBy(speed);
                 }
             }
-            position.incrementBy(velocity);
-            if (gameCtx.level.layers[0].tiles[int(position.x / 2)][int(position.z / 2)].type.blocking) {
-                position.decrementBy(velocity);
+            node.position.incrementBy(velocity);
+            if (gameCtx.level.getTileAtPosition(node.position, 0).type.blocking) {
+                node.position.decrementBy(velocity);
+            }
+            if (velocity.lengthSquared > 0) {
+                node.markAsDirty();
             }
         }
 
-        public function setScene(scene:Scene):void {
-
+        override public function destroy():void {
+            super.destroy();
+            gameCtx.heroes.splice(gameCtx.heroes.indexOf(this), 1);
+            delete gameCtx.heroesById[id];
         }
 
     }

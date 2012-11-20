@@ -13,16 +13,16 @@ package gremlin.scene {
         public var submesh:Submesh;
         public var material:Material;
 
-        public function SubmeshEntity(_submesh:Submesh) {
-            submesh = _submesh;
+        public function SubmeshEntity(submesh:Submesh) {
+            this.submesh = submesh;
             material = submesh.material;
         }
 
-        public function setMaterial(_material:Material):void {
-            material = _material;
+        public function setMaterial(material:Material):void {
             for (var i:int = 0; i < modelEntity.scenes.length; ++i) {
-               modelEntity.scenes[i].notifyRenderableMaterialChange(this);
+               modelEntity.scenes[i].notifyRenderableMaterialChange(this, this.material, material);
             }
+            this.material = material;
         }
 
         public function getMaterial():Material {

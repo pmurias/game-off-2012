@@ -16,9 +16,9 @@ package gremlin.scene {
         public var parent:Node;
         public var children:Vector.<Node>;
 
-        private var position:Vector3D;
-        private var rotation:Quaternion;
-        private var scale:Vector3D;
+        public var position:Vector3D;
+        public var rotation:Quaternion;
+        public var scale:Vector3D;
         private var visible:Boolean;
 
         private var transformationDirty:Boolean;
