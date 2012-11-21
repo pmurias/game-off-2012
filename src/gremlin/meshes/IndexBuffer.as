@@ -2,13 +2,14 @@ package gremlin.meshes {
     import flash.display3D.IndexBuffer3D;
     import flash.utils.ByteArray;
     import gremlin.core.Context;
+    import gremlin.core.IDisposable;
     import gremlin.core.IRestorable;
 
     /**
      * ...
      * @author mosowski
      */
-    public class IndexBuffer implements IRestorable {
+    public class IndexBuffer implements IRestorable, IDisposable {
         public var ctx:Context;
         public var indexBuffer3d:IndexBuffer3D;
         public var data:ByteArray;
@@ -45,6 +46,12 @@ package gremlin.meshes {
             if (data != null) {
                 upload();
             }
+        }
+
+        public function dispose():void {
+            ctx.restorableResources.splice(ctx.restorableResources.indexOf(this), 1);
+            ctx.stats.indexMemory -= numIndices * 2;
+            indexBuffer3d.dispose();
         }
 
     }

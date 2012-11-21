@@ -30,20 +30,14 @@ package game {
             if (velocity.x != 0 || velocity.z != 0) {
                 var newRot:Number = Math.atan2( -velocity.x, -velocity.z);
 
-                if (newRot - rotation > Math.PI) {
-                    rotation += Math.PI * 2;
-                } else if (rotation - newRot > Math.PI) {
-                    newRot += Math.PI * 2;
-                }
-                rotation += (newRot - rotation) * 0.1;
-                rotation = (rotation + Math.PI) % (Math.PI * 2) - Math.PI;
+                rotation = gameCtx.ctx.mathUtils.getSmoothlyBlendedAngle(rotation, newRot, 0.1);
             }
 
             node.getRotation().setFromAxisAngle(Vector3D.Y_AXIS, rotation);
 
             for (var i:int = 0; i < gameCtx.pickables.length; ++i) {
                 var pickable:Pickable = gameCtx.pickables[i];
-                if (gameCtx.ctx.mathConstants.squaredDistanceXZ(pickable.node.position, node.position) < (pickable.radius+radius)*(pickable.radius+radius)) {
+                if (gameCtx.ctx.mathUtils.squaredDistanceXZ(pickable.node.position, node.position) < (pickable.radius+radius)*(pickable.radius+radius)) {
                     pickable.onPick(this);
                 }
             }

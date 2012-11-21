@@ -138,6 +138,14 @@ def save(operator,context, filepath=""):
                 pickable["position"] = gremlinCoord(sel.location)
                 if sel.name.find("/H") != -1:
                     pickable["type"] = "h"
+                if sel.name.find("/F") != -1:
+                    pickable["type"] = "f"
+                if sel.name.find("/C") != -1:
+                    pickable["type"] = "c"
+                if sel.name.find("/POINT") != -1:
+                    pickable["type"] = "point"
+                if sel.name.find("/EYE") != -1:
+                    pickable["type"] = "eye"
                 level["pickables"].append(pickable)
                
                 

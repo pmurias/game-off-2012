@@ -21,9 +21,9 @@ package gremlin.scene {
         public var scale:Vector3D;
         private var visible:Boolean;
 
-        private var transformationDirty:Boolean;
-        public var transformationMatrix:Matrix3D;
-        public var normalMatrix:Matrix3D;
+        internal var transformationDirty:Boolean;
+        internal var transformationMatrix:Matrix3D;
+        internal var normalMatrix:Matrix3D;
 
         private static const _tempAuxVector3D:Vector3D = new Vector3D();
 

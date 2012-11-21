@@ -1,5 +1,11 @@
 package game {
     import flash.geom.Vector3D;
+    import flash.utils.Dictionary;
+    import game.pickable.Pickable;
+    import game.pickable.PickableCloningMode;
+    import game.pickable.PickableEye;
+    import game.pickable.PickableFairMode;
+    import game.pickable.PickablePoint;
     import game.spawners.Spawner;
     import gremlin.scene.Node;
 	/**
@@ -15,6 +21,8 @@ package game {
         public var startPosition:Vector3D;
         public var spawners:Vector.<Spawner>;
 
+        public static var pickableTypeByName:Dictionary;
+
         public function Level(_gameCtx:GameContext, _width:int, _height:int, _layers:int, _rootNode:Node) {
             gameCtx = _gameCtx;
             width = _width;
@@ -26,6 +34,14 @@ package game {
             }
             startPosition = new Vector3D();
             spawners = new Vector.<Spawner>();
+
+            if (pickableTypeByName == null) {
+                pickableTypeByName = new Dictionary();
+                pickableTypeByName["point"] = PickablePoint;
+                pickableTypeByName["eye"] = PickableEye;
+                pickableTypeByName["f"] = PickableFairMode;
+                pickableTypeByName["c"] = PickableCloningMode;
+            }
         }
 
         public function fromObject(object:Object, tileSet:TileSet):void {
@@ -56,6 +72,12 @@ package game {
                 var spawner:Spawner = new Spawner(gameCtx);
                 spawner.fromObject(object.level.spawners[i]);
                 spawners.push(spawner);
+            }
+
+            for (i = 0; i < object.level.pickables.length; ++i) {
+                var pickableSetup:Object = object.level.pickables[i];
+                var pickable:Pickable = new pickableTypeByName[pickableSetup.type](gameCtx);
+                pickable.node.setPosition(pickableSetup.position[0], pickableSetup.position[1], pickableSetup.position[2]);
             }
 
             startPosition.setTo(object.level['start'][0], object.level['start'][1], object.level['start'][2])

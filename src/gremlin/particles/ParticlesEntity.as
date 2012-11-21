@@ -3,6 +3,7 @@ package gremlin.particles {
     import flash.utils.ByteArray;
     import flash.utils.Endian;
     import gremlin.core.Context;
+    import gremlin.core.IDisposable;
     import gremlin.core.IRenderable;
     import gremlin.error.EAbstractClass;
     import gremlin.materials.Material;
@@ -14,7 +15,7 @@ package gremlin.particles {
      * ...
      * @author mosowski
      */
-    public class ParticlesEntity {
+    public class ParticlesEntity implements IDisposable {
         protected var ctx:Context;
         public var node:Node;
         protected var vertexBuffer:VertexBuffer;
@@ -33,7 +34,10 @@ package gremlin.particles {
         public var spawnRate:Number;
         public var direction:Vector3D;
 
-        public function ParticlesEntity(self:ParticlesEntity, _ctx:Context) {
+        public var enabled:Boolean;
+        public var visible:Boolean;
+
+        public function ParticlesEntity(self:ParticlesEntity, _ctx:Context)  {
             if (self != this) {
                 throw new EAbstractClass(ParticlesEntity);
             } else {
@@ -48,6 +52,9 @@ package gremlin.particles {
                 particlesToSpawn = 0;
                 spawnRate = 0;
                 direction = new Vector3D();
+
+                enabled = true;
+                visible = true;
             }
         }
 
@@ -86,9 +93,11 @@ package gremlin.particles {
             var deltaTime:Number = time - lastUpdateTime;
             lastUpdateTime = time;
 
-            particlesToSpawn += spawnRate * deltaTime;
-            direction.setTo(0, 0, 1);
-            node.derivedRotation.transformVector(direction);
+            if (enabled == true) {
+                particlesToSpawn += spawnRate * deltaTime;
+                direction.setTo(0, 0, -1);
+                node.derivedRotation.transformVector(direction);
+            }
 
             while (particlesToSpawn >= 1) {
                 for (var i:int = 0; i < quota; ++i) {
@@ -119,6 +128,15 @@ package gremlin.particles {
                 vertexBuffer.upload(dirtyDataStartOffset * 4, (dirtyDataEndOffset - dirtyDataStartOffset + 1) * 4);
                 dirtyDataStartOffset = dirtyDataEndOffset = -1;
             }
+        }
+
+        public function isVisible():Boolean {
+            return visible;
+        }
+
+        public function dispose():void {
+            vertexBuffer.dispose();
+            indexBuffer.dispose();
         }
 
         protected function addVertexBufferStreams():void {

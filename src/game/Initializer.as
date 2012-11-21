@@ -39,6 +39,7 @@ package game {
             required.addDataUrl("static/textured_fp.txt");
             required.addDataUrl("static/textured_light_vp.txt");
             required.addDataUrl("static/textured_light_fp.txt");
+            required.addDataUrl("static/cloning_mode_fp.txt");
 
             required.addDataUrl("static/map.bmap");
 
@@ -49,6 +50,8 @@ package game {
             loadModelResource("static/Hero.orcm");
             loadModelResource("static/Blade.orcm");
             loadModelResource("static/Pickable.orcm");
+            loadModelResource("static/PickableEye.orcm");
+            loadModelResource("static/PickablePoint.orcm");
             loadModelResource("static/TileFloorNice.orcm");
             loadModelResource("static/TileFloorDep.orcm");
             loadModelResource("static/TileFloorHappy.orcm");
@@ -88,6 +91,10 @@ package game {
             ctx.shaderMgr.createShaderFromJSON("Tex2d",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_fp.txt"), ShaderTranslator.FRAGMENT));
+
+            ctx.shaderMgr.createShaderFromJSON("CloningMode",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/cloning_mode_fp.txt"), ShaderTranslator.FRAGMENT));
 
             ctx.shaderMgr.createShaderFromJSON("Animated",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/animated_vp.txt"), ShaderTranslator.VERTEX),
@@ -130,11 +137,28 @@ package game {
             return m;
         }
 
+        public function createParticleMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.sourceBlendFactor = Context3DBlendFactor.ONE;
+            p.destBlendFactor = Context3DBlendFactor.ONE;
+            p.depthMask = false;
+            p.transparent = true;
+            p.shader = ctx.shaderMgr.getShader("Particle");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
         public function initMaterials():void {
             var m:Material;
             var p:Pass;
 
-            ctx.textureMgr.createRenderTargetTextureResource("rtt", 32, 32);
+            ctx.textureMgr.createRenderTargetTextureResource("bigRTT1", 1024, 1024);
+            ctx.textureMgr.createRenderTargetTextureResource("bigRTT2", 512, 512);
+
 
             m = ctx.materialMgr.createMaterial("Cox");
             p = new Pass();
@@ -146,6 +170,10 @@ package game {
             createTexturedMaterial("Blade", "static/blade.png");
             createTexturedMaterial("Pickable", "static/pickable.png");
             createTexturedMaterial("PickableH", "static/pickable_h.png");
+            createTexturedMaterial("PickableC", "static/pickable_c.png");
+            createTexturedMaterial("PickableF", "static/pickable_f.png");
+            createTexturedMaterial("PickableEye", "static/pickable_eye.png");
+            createTexturedMaterial("PickablePoint", "static/pickable_point.png");
             createTexturedMaterial("FloorNice", "static/tile_chess_nice.png");
             createTexturedMaterial("FloorDep", "static/tile_chess_dep.png");
             createTexturedMaterial("FloorHappy", "static/tile_chess_happy.png");
@@ -164,20 +192,17 @@ package game {
 
             createTexturedMultiplyMaterial("RoundShadow", "static/round_shadow.png");
 
+            createParticleMaterial("Particle1", "static/particle_1.png");
 
-            m = ctx.materialMgr.createMaterial("Particle");
+            m = ctx.materialMgr.createMaterial("CloningMode");
             p = new Pass();
-            p.shader = ctx.shaderMgr.getShader("Particle");
-            p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/chess.png");
+            p.shader = ctx.shaderMgr.getShader("CloningMode");
+            p.samplers["main"] = ctx.textureMgr.getTextureResource("bigRTT1");
+            p.samplers["clone"] = ctx.textureMgr.getTextureResource("bigRTT2");
             m.addPass(p);
 
-            m = ctx.materialMgr.createMaterial("QuadRTT");
-            p = new Pass();
-            p.shader = ctx.shaderMgr.getShader("Tex2d");
-            p.samplers["tex"] = ctx.textureMgr.getTextureResource("rtt");
-            m.addPass(p);
-
-            ctx.renderTargetMgr.createRenderTargetFromTexture("target", ctx.textureMgr.getTextureResource("rtt"));
+            ctx.renderTargetMgr.createRenderTargetFromTexture("bigRT1", ctx.textureMgr.getTextureResource("bigRTT1"));
+            ctx.renderTargetMgr.createRenderTargetFromTexture("bigRT2", ctx.textureMgr.getTextureResource("bigRTT2"));
         }
 
         public function initModels():void {

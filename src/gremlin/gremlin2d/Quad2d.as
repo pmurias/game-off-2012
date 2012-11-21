@@ -16,16 +16,18 @@ package gremlin.gremlin2d {
         public var transformation:Matrix;
         public var material:Material;
         public var scene:Scene;
+        public var visible:Boolean;
 
         public function Quad2d() {
             transformation = new Matrix();
+            visible = true;
         }
 
-        public function setMaterial(_material:Material):void {
-            material = _material;
+        public function setMaterial(material:Material):void {
             if (scene != null) {
-                scene.notifyRenderableMaterialChange(this);
+                scene.notifyRenderableMaterialChange(this, this.material, material);
             }
+            this.material = material;
         }
 
         public function setScene(_scene:Scene):void {
@@ -42,6 +44,10 @@ package gremlin.gremlin2d {
 
         public function getMaterial():Material {
             return material;
+        }
+
+        public function isVisible():Boolean {
+            return visible;
         }
 
         public function render(ctx:Context):void {

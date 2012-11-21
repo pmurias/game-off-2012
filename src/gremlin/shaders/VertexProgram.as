@@ -9,7 +9,7 @@ package gremlin.shaders {
      * ...
      * @author mosowski
      */
-    public class VertexProgram extends ShaderProgram {
+    public class VertexProgram extends ShaderProgram  {
         public var attrs:Dictionary;
 
         public function VertexProgram(_ctx:Context) {

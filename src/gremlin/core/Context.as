@@ -19,7 +19,7 @@ package gremlin.core {
     import gremlin.gremlin2d.Context2d;
     import gremlin.loading.LoaderManager;
     import gremlin.materials.MaterialManager;
-    import gremlin.math.MathConstants;
+    import gremlin.math.MathUtils;
     import gremlin.math.ProjectionUtils;
     import gremlin.meshes.IndexBuffer;
     import gremlin.meshes.ModelManager;
@@ -31,6 +31,8 @@ package gremlin.core {
     import gremlin.shaders.ShaderManager;
     import gremlin.textures.TextureManager;
     import gremlin.textures.TextureResource;
+    import gremlin.tweener.Tween;
+    import gremlin.tweener.Tweener;
 
     /**
      * ...
@@ -53,6 +55,7 @@ package gremlin.core {
         public var autoParams:AutoParams;
         public var ctx2d:Context2d;
         public var keyboardState:KeyboardState;
+        public var tweener:Tweener;
 
         // render state variables
         public var activeShader:Shader;
@@ -70,7 +73,7 @@ package gremlin.core {
 
         // utilities
         public var projectionUtils:ProjectionUtils;
-        public var mathConstants:MathConstants;
+        public var mathUtils:MathUtils;
 
         // used for switching-off vertex streams that are active, but not needed in current call
         // activeVertexStreams remebers also vertex buffer bound to stream
@@ -112,13 +115,14 @@ package gremlin.core {
             autoParams = new AutoParams(this);
             ctx2d = new Context2d(this);
             keyboardState = new KeyboardState();
+            tweener = new Tweener(this);
 
             screenMatrix = new Matrix();
 
             rootNode = new Node();
 
             projectionUtils = new ProjectionUtils();
-            mathConstants = new MathConstants();
+            mathUtils = new MathUtils();
 
             activeVertexStreams = new Vector.<VertexBuffer3D>(8, true);
             activeVertexStreamsOffsets = new Vector.<int>(8, true);
@@ -186,6 +190,7 @@ package gremlin.core {
 
         public function onEnterFrame(e:Event):void {
             time = getTimer() / 1000;
+            tweener.tick();
             dispatch(ENTER_FRAME);
         }
 

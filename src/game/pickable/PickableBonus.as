@@ -20,7 +20,7 @@ package game.pickable {
         }
 
         override protected function pickCallback(hero:Hero):Boolean {
-            return true;
+            return false;
         }
 
     }

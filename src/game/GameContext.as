@@ -13,8 +13,15 @@ package game {
     import game.commands.Commander;
     import game.commands.CommandSetHeroPosition;
     import game.commands.CommandSetHeroVelocity;
+    import game.modes.CloningMode;
+    import game.modes.FairMode;
+    import game.modes.Mode;
     import game.pickable.Pickable;
     import game.pickable.PickableBonus;
+    import game.pickable.PickableCloningMode;
+    import game.pickable.PickableEye;
+    import game.pickable.PickableFairMode;
+    import game.pickable.PickablePoint;
     import game.spawners.SharpItem;
     import gremlin.core.Context;
     import gremlin.events.KeyCodes;
@@ -35,13 +42,13 @@ package game {
         public var ctx:Context;
         public var stage:Stage;
         public var time:Number;
+        public var timeStep:Number;
         public var debugInfo:DebugInfo;
         public var uniqueId:uint;
         public var commander:Commander;
         public var level:Level;
         public var gameObjects:Vector.<GameObject>;
         public var tileSet:TileSet;
-        public var rotator:CameraRotator;
 
         public var hero:Hero;
 
@@ -54,6 +61,10 @@ package game {
         public var mainLight:DirectionaLight;
 
         public var layer0:Scene;
+        public var layerPostprocess:Scene;
+
+        public var mode:Mode;
+        public var nextMode:Mode;
 
         public function GameContext(_ctx:Context) {
             ctx = _ctx;
@@ -67,11 +78,9 @@ package game {
             debugInfo = new DebugInfo(ctx);
             stage.addChild(debugInfo);
             time = 0;
+            timeStep = 1/32;
 
             commander = new Commander(this);
-
-            rotator = new CameraRotator(this);
-            ctx.setCamera(rotator.camera);
 
             heroesById = new Array();
             heroes = new Vector.<Hero>();
@@ -80,6 +89,7 @@ package game {
             pickables = new Vector.<Pickable>();
 
             layer0 = new Scene(ctx);
+            layerPostprocess = new Scene(ctx);
 
             mainLight = new DirectionaLight();
             mainLight.setDirection(-2, -1.2, 3);
@@ -93,11 +103,9 @@ package game {
             level.layers[0].setScene(layer0);
 
             hero = new HeroPlayer(this);
-            rotator.node = (hero as HeroPlayer).node;
 
-            var p:PickableBonus  = new PickableBonus(this);
-            p.node.setPosition(2 * 2 + 1, 0, 5 * 2 + 1);
-            p.setMaterial(ctx.materialMgr.getMaterial("PickableH"));
+            mode = new FairMode(this);
+            mode.enter();
 
             var cmdHeroSpawn:CommandSetHeroPosition = new CommandSetHeroPosition();
             cmdHeroSpawn.heroId = hero.id;
@@ -108,46 +116,32 @@ package game {
 
             commander.tick();
 
-            //part = new BillboardParticlesEntity(ctx);
-            //part.minLife = 15;
-            //part.maxLife = 16;
-            //part.minStartSize = 1;
-            //part.maxStartSize = 2;
-            //part.minEndSize = 0.1;
-            //part.maxEndSize = 0.1;
-            //part.minVelocity = 0;
-            //part.maxVelocity = 0.1;
-            //part.spawnRate = 6;
-            //part.node = node0;
-            //part.setQuota(100);
-            //part.setMaterial(ctx.materialMgr.getMaterial("Particle"));
-            //part.setScene(scene0);
-//
-            //var quad:Quad2d = new Quad2d();
-            //quad.transformation.identity();
-            //quad.transformation.scale(ctx.stage.stageWidth, ctx.stage.stageHeight);
-            //quad.transformation.translate(ctx.stage.stageWidth / 2, ctx.stage.stageHeight / 2);
-            //quad.setMaterial(ctx.materialMgr.getMaterial("QuadRTT"));
-            //quad.setScene(scene1);
-            //ctx.addListener(Context.RESIZE, function(params:Object):void {
-            //quad.transformation.identity();
-            //quad.transformation.scale(ctx.stage.stageWidth, ctx.stage.stageHeight);
-            //quad.transformation.translate(ctx.stage.stageWidth / 2, ctx.stage.stageHeight / 2);
-            //});
 
             ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
 
             ctx.addListener(Context.KEY_DOWN, onKeyDown);
             ctx.addListener(Context.KEY_UP, onKeyUp);
 
-            var timer:Timer = new Timer(32);
+            var timer:Timer = new Timer(1/timeStep);
             timer.addEventListener(TimerEvent.TIMER, tick);
             timer.start();
         }
 
+        public function enterMode(mode:Mode):void {
+            nextMode = mode;
+            this.mode.addSingleTimeListener(Mode.MODE_EXITED, onCurrentModeExited);
+            this.mode.exit();
+        }
+
+        public function onCurrentModeExited(params:Object = null):void {
+            mode = nextMode;
+            nextMode = null;
+            mode.enter();
+        }
+
         private function tick(e:Event):void {
-            time += 1 / 32;
-            hero.tick();
+            time += timeStep;
+            mode.tick();
 
             var i:int;
             for (i = 0; i < level.spawners.length; ++i) {
@@ -169,15 +163,8 @@ package game {
         private function onEnterFrame(params:Object = null):void {
             debugInfo.tick();
 
-            updatePlayerControl();
-
-            ctx.rootNode.updateTransformation();
-            rotator.tick();
-            ctx.setCamera(rotator.camera);
-
-            ctx.renderTargetMgr.defaultRenderTarget.activate();
-            layer0.render();
-            ctx.renderTargetMgr.defaultRenderTarget.finish();
+            mode.processInput();
+            mode.render();
         }
 
         public function onKeyDown(ke:KeyboardEvent):void {
@@ -187,31 +174,6 @@ package game {
         }
 
         public function onKeyUp(ke:KeyboardEvent):void {
-        }
-
-        public function updatePlayerControl():void {
-            var velocityX:Number = 0;
-            var velocityZ:Number = 0;
-            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_DOWN)) {
-                velocityZ = -0.04;
-            }
-            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_UP)) {
-                velocityZ = 0.04;
-            }
-            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_LEFT)) {
-                velocityX = -0.04;
-            }
-            if (ctx.keyboardState.isKeyDown(KeyCodes.KC_RIGHT)) {
-                velocityX = 0.04;
-            }
-
-            if (velocityX != hero.velocity.x || velocityZ != hero.velocity.z) {
-                var cmd:CommandSetHeroVelocity = new CommandSetHeroVelocity();
-                cmd.heroId = hero.id;
-                cmd.x = velocityX;
-                cmd.z = velocityZ;
-                commander.queueCommand(cmd);
-            }
         }
 
         public function getUniqueId():uint {

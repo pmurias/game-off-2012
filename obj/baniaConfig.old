@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'2012-11-20'</value>
+      <value>'2012-11-21'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -42,7 +42,7 @@
     <path-element>D:\git\bania\src\Main.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
-  <default-frame-rate>60</default-frame-rate>
+  <default-frame-rate>30</default-frame-rate>
   <default-size>
     <width>800</width>
     <height>600</height>

@@ -1,16 +1,17 @@
 
 TODO:
--light system
 -loader as textureresource source
 -disposing on context (stats)
 -oriented particle system
 -2d particle system
--compositors
 -shadows (not important now)
 -text rendering (not sure if really needed)
 -advanced 2d renderables
+-frustum culling: sphere-cone
+-improve shader language wrapper (auto-reuse registers)
 
 DONE:
+-light system (directional)
 -pass properties
 -scenes
 -render targets

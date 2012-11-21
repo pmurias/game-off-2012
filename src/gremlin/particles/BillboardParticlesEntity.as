@@ -46,11 +46,12 @@ package gremlin.particles {
             scenes = new Vector.<Scene>()
         }
 
-        public function setMaterial(_material:Material):void {
-            material = _material;
+        public function setMaterial(material:Material):void {
             for (var i:int = 0; i < scenes.length; ++i) {
-                scenes[i].notifyRenderableMaterialChange(this);
+                scenes[i].notifyRenderableMaterialChange(this, this.material, material);
             }
+            this.material = material;
+
         }
 
         public function addToScene(scene:Scene):void {
@@ -118,7 +119,7 @@ package gremlin.particles {
 
         public function render(ctx:Context):void {
             update();
-            ctx.autoParams.modelMatrix.value = ctx.mathConstants.identityMatrix;
+            ctx.autoParams.modelMatrix.value = ctx.mathUtils.identityMatrix;
             ctx.activeShader.uploadLocalAutoParams();
 
             ctx.activeShader.vertexProgram.setVertexBuffer(vertexBuffer);

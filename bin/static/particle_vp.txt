@@ -13,6 +13,7 @@ f.x = time.x - uvBornLife.z
 f.x = f.x / uvBornLife.w
 centerPos = deltaPos * f.xxxx
 centerPos = centerPos + startPos
+centerPos.w = 1
 centerPos = modelMatrix * centerPos
 centerPos = viewMatrix * centerPos
 
@@ -25,7 +26,6 @@ vertex.xy = uvBornLife.xy - (0.5,0.5)
 vertex.xy = vertex.xy * scale.xx
 
 centerPos.xy = centerPos.xy + vertex.xy
-centerPos.w = 1
 
 vertex = projectionMatrix * centerPos
 varying0 = uvBornLife
