@@ -2,4 +2,6 @@ sampler tex
 
 texColor = tex2D(varying0.xy, tex)
 texColor = texColor * varying1
-out = texColor
+gray = dot3(texColor, (0.222, 0.707, 0.071))
+gray = gray * 2
+out = gray * texColor
