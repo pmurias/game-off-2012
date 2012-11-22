@@ -19,9 +19,7 @@ package game.modes {
             rotator.node = gameCtx.hero.node;
         }
 
-
-
-        override public function processInput():void {
+            override public function processInput():void {
             super.processInput();
 
             var velocityX:Number = 0;
@@ -78,6 +76,7 @@ package game.modes {
         override public function enter():void {
             super.enter();
             rotator.resetAlpha();
+            rotator.tick();
         }
 
         override public function exit():void {

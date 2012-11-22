@@ -26,6 +26,8 @@ package game.modes {
             mainRotator.node = gameCtx.hero.node;
             cloneRotator.node = gameCtx.hero.node;
             cloneAlpha = 0.27;
+            mainRotator.tick();
+            cloneRotator.tick();
 
             quad = new Quad2d();
             quad.transformation.identity();

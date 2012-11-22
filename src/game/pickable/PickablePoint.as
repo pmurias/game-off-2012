@@ -29,6 +29,10 @@ package game.pickable {
             p.maxEndSize = 1.5;
             p.minVelocity = 0.1;
             p.maxVelocity = 1;
+            p.minStartColor = 0xFF0000FF;
+            p.maxEndColor = 0xFF0000FF;
+            p.minEndColor = 0xFF00FFFF;
+            p.maxEndColor = 0xFFFFFFFF;
             p.spawnRate = 20;
             p.setQuota(100);
             p.setMaterial(gameCtx.ctx.materialMgr.getMaterial("Particle1"));

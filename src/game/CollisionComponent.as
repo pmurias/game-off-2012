@@ -15,20 +15,22 @@ package game {
 
         public var collisionPoly:Vector.<Point>;
         public var bounds:Rectangle;
-        public var translationOnly:Boolean;
+        public var useFullTransformation:Boolean;
+        public var origin:Point;
 
         public function CollisionComponent(node:Node) {
             this.node = node;
-            translationOnly = false;
+            useFullTransformation = false;
         }
 
         public function setBounds(points:Vector.<Point>):void {
             collisionPoly = points;
             bounds = new Rectangle();
+            origin = new Point();
             updateBounds();
         }
 
-        public function updateBounds():void {
+        private function calculateBoundsRect():void {
             bounds.setTo(0, 0, 0, 0);
             var px:Number, py:Number;
             var transform:Vector.<Number> = node.getTransformationMatrix().rawData;
@@ -37,7 +39,7 @@ package game {
             // 2 6 A E
             // 3 7 B F
             for (var i:int = 0; i < collisionPoly.length; ++i) {
-                if (translationOnly == true) {
+                if (useFullTransformation == false) {
                     px = collisionPoly[i].x + transform[12];
                     py = collisionPoly[i].y + transform[14];
                 } else {
@@ -63,6 +65,27 @@ package game {
                     }
                 }
             }
+        }
+
+        public function updateBounds():void {
+            if (useFullTransformation == false) {
+                if (bounds.width == 0 && bounds.height == 0) {
+                    calculateBoundsRect();
+                    origin.setTo(bounds.x, bounds.y);
+                } else {
+                    bounds.x = node.derivedPosition.x + origin.x;
+                    bounds.y = node.derivedPosition.z + origin.y;
+                }
+            } else {
+                calculateBoundsRect();
+            }
+        }
+
+        //NOTE: works assuming node doesn't have any parent transformation and
+        // only translation affects bounds
+        public function updatePosition():void {
+            bounds.x = node.position.x + origin.x;
+            bounds.y = node.position.z + origin.y;
         }
 
         private static var debugVector:Vector3D = new Vector3D();

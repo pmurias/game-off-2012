@@ -101,6 +101,7 @@ def save(operator,context, filepath=""):
     level["start"] = [0, 0, 0]
     level["spawners"] = []
     level["pickables"] = []
+    level["crates"] = []
     
     tiles = [ ]
    
@@ -147,6 +148,14 @@ def save(operator,context, filepath=""):
                 if sel.name.find("/EYE") != -1:
                     pickable["type"] = "eye"
                 level["pickables"].append(pickable)
+                
+            if sel.name[:5] == "CRATE":
+                crate = { }
+                crate["position"] = gremlinCoord(sel.location)
+                level["crates"].append(crate)
+                
+                
+                
                
                 
         

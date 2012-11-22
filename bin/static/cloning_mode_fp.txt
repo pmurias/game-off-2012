@@ -6,7 +6,6 @@ red = tex2D(varying0.xy, main)
 blue = tex2D(varying0.xy, clone)
 
 blend = red + blue
-blend = min(blend, red)
-blend = min(blend, blue)
-out = blend
+out = blend * 0.5
+
 

@@ -1,5 +1,6 @@
 package game.spawners {
     import flash.geom.Vector3D;
+    import game.CollisionComponent;
     import game.GameContext;
     import gremlin.math.Quaternion;
     import gremlin.scene.ModelEntity;
@@ -17,6 +18,8 @@ package game.spawners {
             super(_gameCtx);
             entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Blade"), node);
             entity.addToScene(gameCtx.layer0);
+            collisionComponent = new CollisionComponent(node);
+            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d[0]);
             rotation = 0;
             spinningSpeed = 0.3;
             enableShadow();

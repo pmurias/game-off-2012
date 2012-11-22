@@ -61,6 +61,8 @@ package game {
         public var pickablesById:Array;
         public var pickables:Vector.<Pickable>;
 
+        public var crates:Vector.<Crate>;
+
         public var mainLight:DirectionaLight;
 
         public var layer0:Scene;
@@ -92,6 +94,8 @@ package game {
 
             pickablesById = new Array();
             pickables = new Vector.<Pickable>();
+
+            crates = new Vector.<Crate>();
 
             layer0 = new Scene(ctx);
             layerPostprocess = new Scene(ctx);

@@ -1,5 +1,6 @@
 package game.spawners {
     import flash.geom.Vector3D;
+    import game.Crate;
     import game.GameContext;
     import game.GameObject;
     import game.Tile;
@@ -36,6 +37,14 @@ package game.spawners {
                 var currentTile:Tile = gameCtx.level.getTileAtPosition(node.position, 0);
                 if (currentTile.type.blocking && currentTile != homeTile) {
                     dead = true;
+                } else {
+                    for (var i:int = 0; i < gameCtx.crates.length; ++i) {
+                        var crate:Crate = gameCtx.crates[i];
+                        if (crate.collisionComponent.bounds.intersects(collisionComponent.bounds)) {
+                            dead = true;
+                            break;
+                        }
+                    }
                 }
             }
         }

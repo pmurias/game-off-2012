@@ -50,9 +50,49 @@ package game {
                 }
             }
             node.position.incrementBy(velocity);
-            if (gameCtx.level.getTileAtPosition(node.position, 0).type.blocking) {
+            collisionComponent.updatePosition();
+            var collidingTile:Tile = gameCtx.level.checkNearTileCollision(this);
+            if (collidingTile != null) {
                 node.position.decrementBy(velocity);
+            } else {
+                var halfVelocity:Vector3D = velocity.clone();
+                halfVelocity.scaleBy(0.5);
+                for (var i:int = 0; i < gameCtx.crates.length; ++i) {
+                    var crate:Crate = gameCtx.crates[i];
+                    if (collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
+                        crate.node.position.incrementBy(halfVelocity);
+                        crate.collisionComponent.updatePosition();
+
+                        var crateCanMove:Boolean = true;
+                        for (var j:int = 0; j < gameCtx.gameObjects.length; ++j) {
+                            var gameObject:GameObject = gameCtx.gameObjects[j];
+                            if (gameObject.collisionComponent != null && gameObject != this && gameObject != crate) {
+                                if (gameObject.collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
+                                    crateCanMove = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (gameCtx.level.checkNearTileCollision(crate)) {
+                            crateCanMove = false;
+                        }
+
+                        if (crateCanMove == true) {
+                            crate.node.markAsDirty();
+                            node.position.decrementBy(halfVelocity);
+                            collisionComponent.updatePosition();
+                        } else {
+                            crate.node.position.decrementBy(halfVelocity);
+                            crate.collisionComponent.updatePosition();
+
+                            node.position.decrementBy(velocity);
+                            break;
+                        }
+                    }
+                }
             }
+            collisionComponent.updatePosition();
+
             if (velocity.lengthSquared > 0) {
                 node.markAsDirty();
             }

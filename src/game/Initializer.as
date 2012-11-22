@@ -51,6 +51,7 @@ package game {
             loadModelResource("static/Cox.orcm");
             loadModelResource("static/Beholder.orcm");
             loadModelResource("static/Hero.orcm");
+            loadModelResource("static/Crate.orcm");
             loadModelResource("static/Blade.orcm");
             loadModelResource("static/Pickable.orcm");
             loadModelResource("static/PickableEye.orcm");
@@ -182,6 +183,7 @@ package game {
 
             createTexturedMaterial("Hero", "static/hero.png");
             createTexturedMaterial("Blade", "static/blade.png");
+            createTexturedMaterial("Crate", "static/crate.png");
             createTexturedMaterial("Pickable", "static/pickable.png");
             createTexturedMaterial("PickableH", "static/pickable_h.png");
             createTexturedMaterial("PickableC", "static/pickable_c.png");

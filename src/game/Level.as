@@ -1,5 +1,6 @@
 package game {
     import flash.geom.Point;
+    import flash.geom.Rectangle;
     import flash.geom.Vector3D;
     import flash.utils.Dictionary;
     import game.pickable.Pickable;
@@ -82,6 +83,12 @@ package game {
                 pickable.node.setPosition(pickableSetup.position[0], pickableSetup.position[1], pickableSetup.position[2]);
             }
 
+            for (i = 0; i < object.level.crates.length; ++i) {
+                var crateSetup:Object = object.level.crates[i];
+                var crate:Crate = new Crate(gameCtx);
+                crate.node.setPosition(crateSetup.position[0], crateSetup.position[1], crateSetup.position[2]);
+            }
+
             startPosition.setTo(object.level['start'][0], object.level['start'][1], object.level['start'][2])
         }
 
@@ -97,6 +104,24 @@ package game {
             for (var i:int = 0; i < layers.length; ++i) {
                 layers[i].updateTileBounds();
             }
+        }
+
+        public function checkNearTileCollision(gameObject:GameObject):Tile {
+            var sourceTile:Tile = getTileAtPosition(gameObject.node.position, 0);
+            var bounds:Rectangle = gameObject.collisionComponent.bounds;
+            for (var i:int =  sourceTile.mapx - 1; i <= sourceTile.mapx + 1; ++i) {
+                for (var j:int  = sourceTile.mapy -1; j <= sourceTile.mapy +1; ++j) {
+                    if (isPositionOnMap(i, j)) {
+                        var tile:Tile = layers[0].tiles[i][j];
+                        if (tile.getCollisionComponent() != null) {
+                            if (tile.getCollisionComponent().bounds.intersects(bounds)) {
+                                return tile;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         public function drawTileBounds(camera:Camera):void {

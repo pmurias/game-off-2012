@@ -29,6 +29,13 @@ package gremlin.particles {
         public var minVelocity:Number;
         public var maxVelocity:Number;
 
+        // ABGR
+        public var minStartColor:uint;
+        public var maxStartColor:uint;
+
+        public var minEndColor:uint;
+        public var maxEndColor:uint;
+
         private static var uvs:Vector.<Point>;
         private static var data32PerVertex:int;
         {
@@ -38,7 +45,7 @@ package gremlin.particles {
             uvs[2] = new Point(1, 1);
             uvs[3] = new Point(1, 0);
 
-            data32PerVertex = 12;
+            data32PerVertex = 14;
         }
 
         public function BillboardParticlesEntity(_ctx:Context) {
@@ -73,6 +80,8 @@ package gremlin.particles {
             vertexBuffer.addStream("startPos", Context3DVertexBufferFormat.FLOAT_3);
             vertexBuffer.addStream("deltaPos", Context3DVertexBufferFormat.FLOAT_3);
             vertexBuffer.addStream("size", Context3DVertexBufferFormat.FLOAT_2);
+            vertexBuffer.addStream("startColor", Context3DVertexBufferFormat.BYTES_4);
+            vertexBuffer.addStream("endColor", Context3DVertexBufferFormat.BYTES_4);
         }
 
         override protected function writeParticleData(index:int, time:Number):void {
@@ -89,6 +98,19 @@ package gremlin.particles {
 
             var startSize:Number = minStartSize + (maxStartSize - minStartSize) * Math.random();
             var deltaSize:Number = minEndSize + (maxEndSize - minEndSize) * Math.random() - startSize;
+
+            var f:Number = Math.random();
+            var startColor:uint =
+            (minStartColor & 0xFF000000 + int((maxStartColor & 0xFF000000 - minStartColor & 0xFF000000) * f) & 0xFF000000)
+            | (minStartColor & 0x00FF0000 + int((maxStartColor & 0x00FF0000 - minStartColor & 0x00FF0000) * f) & 0x00FF0000)
+            | (minStartColor & 0x0000FF00 + int((maxStartColor & 0x0000FF00 - minStartColor & 0x0000FF00) * f) & 0x0000FF00)
+            | (minStartColor & 0x000000FF + int((maxStartColor & 0x000000FF - minStartColor & 0x000000FF) * f) & 0x000000FF);
+
+            var endColor:uint =
+            (minEndColor & 0xFF000000 + int((maxEndColor & 0xFF000000 - minEndColor & 0xFF000000) * f) & 0xFF000000)
+            | (minEndColor & 0x00FF0000 + int((maxEndColor & 0x00FF0000 - minEndColor & 0x00FF0000) * f) & 0x00FF0000)
+            | (minEndColor & 0x0000FF00 + int((maxEndColor & 0x0000FF00 - minEndColor & 0x0000FF00) * f) & 0x0000FF00)
+            | (minEndColor & 0x000000FF + int((maxEndColor & 0x000000FF - minEndColor & 0x000000FF) * f) & 0x000000FF);
 
             particleExpiracy[index] = time + life;
 
@@ -110,6 +132,9 @@ package gremlin.particles {
 
                 vertexData.writeFloat(startSize);
                 vertexData.writeFloat(deltaSize);
+
+                vertexData.writeUnsignedInt(startColor);
+                vertexData.writeUnsignedInt(endColor);
             }
         }
 
