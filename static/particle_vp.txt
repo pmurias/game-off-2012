@@ -8,9 +8,12 @@ attr vec4 uvBornLife
 attr vec3 startPos
 attr vec3 deltaPos
 attr vec2 size
+attr vec4 startColor
+attr vec4 endColor
 
 f.x = time.x - uvBornLife.z
 f.x = f.x / uvBornLife.w
+
 centerPos = deltaPos * f.xxxx
 centerPos = centerPos + startPos
 centerPos.w = 1
@@ -28,5 +31,12 @@ vertex.xy = vertex.xy * scale.xx
 centerPos.xy = centerPos.xy + vertex.xy
 
 vertex = projectionMatrix * centerPos
-varying0 = uvBornLife
 out = vertex
+
+varying0 = uvBornLife
+
+outColor = endColor - startColor
+outColor = outColor * f.xxxx
+outColor = outColor + startColor
+
+varying1 = outColor
