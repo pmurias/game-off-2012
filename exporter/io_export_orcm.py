@@ -154,11 +154,12 @@ def getBones(armature, bonesList, boneNames, boneMatrices):
 
 def save(operator,context, data_layout, mirrory, filepath=""):    
     bones = []
-    anims = []
+    anims = []    
     skeletonName = "";
     compsizes = { 'pos':3,'norm':3,'tan':3,'uv0':2,'uv1':2,'uv2':2,'uv3':2,'bones':4,'weights':4}
     comps = data_layout.split(',')
     vFormat = [(comp, compsizes[comp]) for comp in comps ]
+    collision2dByName = { }
 
     def uvMirrorY(uv):
         if mirrory:
@@ -229,121 +230,140 @@ def save(operator,context, data_layout, mirrory, filepath=""):
 
 
 
-    # zbieranie siatki i eksport
     for sel in bpy.context.selected_objects:
         if sel.type == 'MESH':
-            mesh = bpy.data.meshes[sel.name]
-            meshob = bpy.data.objects[sel.name]
-            objectName = sel.name
-            uvlayers = []
-            vertsArr = []
-            textures = []
-
-            if len(bones)>0:
-                bonegroups = [g for g in meshob.vertex_groups if g.name in bonenames.keys()]  
-                bonegroupsids = [g.index for g in bonegroups] 
-
-            for v in mesh.vertices:
-                vert = {}
-                vert['pos'] = (v.co[0], v.co[1], v.co[2]) 
-                vert['norm'] = (v.normal[0], v.normal[1], v.normal[2])
-                if len(bones)>0:
-                    affbones = [g for g in v.groups if g.group in bonegroupsids]  
-                    if len(affbones)>0:
-                        sortbones = sorted(affbones, key=lambda g: g.weight)
-                        vertBones = []
-                        weightSum = 0
-                        for i in range(1,min(len(sortbones)+1, 5)): 
-                            if meshob.vertex_groups[sortbones[-i].group].name in bonenames:
-                                vertBones.append( (bonenames[meshob.vertex_groups[sortbones[-i].group].name],sortbones[-i].weight) )
-                                weightSum += sortbones[-i].weight
-                        # normalizujemy wagi                        
-                        vert['bones'] = [ ba[0] for ba in vertBones]
-                        vert['weights'] = [ ba[1]/weightSum for ba in vertBones ]                        
-                    else:
-                        vert['bones'] = [ 0 , 0 , 0 , 0 ]
-                        vert['weights'] = [ 0 , 0 , 0 ,0 ]
-                        print('vertex without bon assignment')
-                vertsArr.append(vert)
-
-            for uvlayer in mesh.uv_layers:
-                uvs = []
-                faceId = 0                
-                numFaces = len(uvlayer.data)//3
-                for uvId in range(0,numFaces):
-                    uvs.append(( (uvlayer.data[uvId*3].uv[0], uvMirrorY(uvlayer.data[uvId*3].uv[1])),(uvlayer.data[uvId*3+1].uv[0],uvMirrorY(uvlayer.data[uvId*3+1].uv[1])),(uvlayer.data[uvId*3+2].uv[0],uvMirrorY(uvlayer.data[uvId*3+2].uv[1]))))
-                uvlayers.append(uvs)
-
-            verts = []        
-            for k in range(0, len(mesh.polygons)):
-                for i in range(0,3):
-                    vert = {}            
-                    for (name,v) in vertsArr[mesh.polygons[k].vertices[i]].items():
-                        vert[name]=v
-                    uvi = 0
-                    for uv in uvlayers:
-                        vert['uv'+str(uvi)]=uv[k][i]
-                        uvi += 1
-
-                    vert['mat']=meshob.data.materials[mesh.polygons[k].material_index].name
-                    verts.append(vert)
-
-                if 'uv0' in verts[-3] and 'tan' in comps:
-                    tan = vert_calc_tang(verts[-3], verts[-2], verts[-1])
-                    verts[-3]['tan']=tan
-                    verts[-2]['tan']=tan
-                    verts[-1]['tan']=tan
-            
-            def get_vert_hash(v):
-                return "%s%s%s" % (v['pos'],v['norm'],v['uv0'] if 'uv0' in v else '')
-
-            # budujemy tablice indeksowanych wierzcholkow
-            vertmap = { }
-            index = 0
-            for v in verts:
-                if get_vert_hash(v) not in vertmap:
-                    vertmap[get_vert_hash(v)] = (index,v)
-                    index += 1
-
-
-            # --- ZAPIS WIERZCHOLKOW ---
-            # sortujemy wierzcholki wg. indeksu
-            sortVerts = sorted(vertmap.values(), key=lambda v: v[0])
-        
-            # wypelniamy tablice wyjsciowa wierzcholkow danymi
-            vertData = []
-            boneAssign = []
-            for (_,v) in sortVerts:            
-                if 'bones' in v:
-                    boneAssign.append( list(zip(v['bones'], v['weights'])) )
-                for (name, size) in vFormat:
-                    # przerabiamy wektory do bazy uzywanej w silniku
-                    if size==3:
-                        vertData.extend([v[name][0], v[name][2], v[name][1]])
-                    else: 
-                        for i in range(0,len(v[name])): vertData.append(v[name][i])
-                        for i in range(len(v[name]), size): vertData.append(0)
-             
-        # ZAPIS INDEKSOW
-            matGroups = {}
-            for i in range(0, len(verts)):
-                index = vertmap[get_vert_hash(verts[i])][0]
-                matGroups.setdefault(verts[i]['mat'], []).append(index)
+            if sel.name[:6] == 'COL2D/':
+                collision2d = { }                
+                collision2dByName[sel.name[6:]] = collision2d
+                collision2d["polygons"] = [ ]
                 
-            print('Saving mesh ', sel.name)            
-            print('Vertex count = ', len(vertmap.values()))
-            print('Triangles count = ', len(mesh.polygons))
-            print('Materials = ', matGroups.keys())
+                mesh = bpy.data.meshes[sel.name]
+                for k in range(0, len(mesh.polygons)):
+                    polygon2d = [ ]
+                    for i in range(0, len(mesh.polygons[k].vertices)):
+                        pos = mesh.vertices[mesh.polygons[k].vertices[i]].co
+                        polygon2d.append([pos[0], pos[1]])
+                    collision2d["polygons"].append(polygon2d)           
+            
+    for sel in bpy.context.selected_objects:
+        if sel.type == 'MESH':
+            if sel.name[:6] != 'COL2D/':
+                mesh = bpy.data.meshes[sel.name]
+                meshob = bpy.data.objects[sel.name]
+                objectName = sel.name
+                uvlayers = []
+                vertsArr = []
+                textures = []
 
-            if len(bones)>0:
-                pathdir = os.path.dirname(filepath)
-                outfile = open(pathdir+'/'+skeletonName+'.orcs', "wt")
-                outfile.write(json.dumps([skeletonName,bones,anims]))
+                if len(bones)>0:
+                    bonegroups = [g for g in meshob.vertex_groups if g.name in bonenames.keys()]  
+                    bonegroupsids = [g.index for g in bonegroups] 
+
+                for v in mesh.vertices:
+                    vert = {}
+                    vert['pos'] = (v.co[0], v.co[1], v.co[2]) 
+                    vert['norm'] = (v.normal[0], v.normal[1], v.normal[2])
+                    if len(bones)>0:
+                        affbones = [g for g in v.groups if g.group in bonegroupsids]  
+                        if len(affbones)>0:
+                            sortbones = sorted(affbones, key=lambda g: g.weight)
+                            vertBones = []
+                            weightSum = 0
+                            for i in range(1,min(len(sortbones)+1, 5)): 
+                                if meshob.vertex_groups[sortbones[-i].group].name in bonenames:
+                                    vertBones.append( (bonenames[meshob.vertex_groups[sortbones[-i].group].name],sortbones[-i].weight) )
+                                    weightSum += sortbones[-i].weight
+                            # normalizujemy wagi                        
+                            vert['bones'] = [ ba[0] for ba in vertBones]
+                            vert['weights'] = [ ba[1]/weightSum for ba in vertBones ]                        
+                        else:
+                            vert['bones'] = [ 0 , 0 , 0 , 0 ]
+                            vert['weights'] = [ 0 , 0 , 0 ,0 ]
+                            print('vertex without bon assignment')
+                    vertsArr.append(vert)
+
+                for uvlayer in mesh.uv_layers:
+                    uvs = []
+                    faceId = 0                
+                    numFaces = len(uvlayer.data)//3
+                    for uvId in range(0,numFaces):
+                        uvs.append(( (uvlayer.data[uvId*3].uv[0], uvMirrorY(uvlayer.data[uvId*3].uv[1])),(uvlayer.data[uvId*3+1].uv[0],uvMirrorY(uvlayer.data[uvId*3+1].uv[1])),(uvlayer.data[uvId*3+2].uv[0],uvMirrorY(uvlayer.data[uvId*3+2].uv[1]))))
+                    uvlayers.append(uvs)
+
+                verts = []        
+                for k in range(0, len(mesh.polygons)):
+                    for i in range(0,3):
+                        vert = {}            
+                        for (name,v) in vertsArr[mesh.polygons[k].vertices[i]].items():
+                            vert[name]=v
+                        uvi = 0
+                        for uv in uvlayers:
+                            vert['uv'+str(uvi)]=uv[k][i]
+                            uvi += 1
+
+                        vert['mat']=meshob.data.materials[mesh.polygons[k].material_index].name
+                        verts.append(vert)
+
+                    if 'uv0' in verts[-3] and 'tan' in comps:
+                        tan = vert_calc_tang(verts[-3], verts[-2], verts[-1])
+                        verts[-3]['tan']=tan
+                        verts[-2]['tan']=tan
+                        verts[-1]['tan']=tan
+                
+                def get_vert_hash(v):
+                    return "%s%s%s" % (v['pos'],v['norm'],v['uv0'] if 'uv0' in v else '')
+
+                # budujemy tablice indeksowanych wierzcholkow
+                vertmap = { }
+                index = 0
+                for v in verts:
+                    if get_vert_hash(v) not in vertmap:
+                        vertmap[get_vert_hash(v)] = (index,v)
+                        index += 1
+
+
+                # --- ZAPIS WIERZCHOLKOW ---
+                # sortujemy wierzcholki wg. indeksu
+                sortVerts = sorted(vertmap.values(), key=lambda v: v[0])
+            
+                # wypelniamy tablice wyjsciowa wierzcholkow danymi
+                vertData = []
+                boneAssign = []
+                for (_,v) in sortVerts:            
+                    if 'bones' in v:
+                        boneAssign.append( list(zip(v['bones'], v['weights'])) )
+                    for (name, size) in vFormat:
+                        # przerabiamy wektory do bazy uzywanej w silniku
+                        if size==3:
+                            vertData.extend([v[name][0], v[name][2], v[name][1]])
+                        else: 
+                            for i in range(0,len(v[name])): vertData.append(v[name][i])
+                            for i in range(len(v[name]), size): vertData.append(0)
+                 
+            # ZAPIS INDEKSOW
+                matGroups = {}
+                for i in range(0, len(verts)):
+                    index = vertmap[get_vert_hash(verts[i])][0]
+                    matGroups.setdefault(verts[i]['mat'], []).append(index)
+                    
+                print('Saving mesh ', sel.name)            
+                print('Vertex count = ', len(vertmap.values()))
+                print('Triangles count = ', len(mesh.polygons))
+                print('Materials = ', matGroups.keys())
+
+                if len(bones)>0:
+                    pathdir = os.path.dirname(filepath)
+                    outfile = open(pathdir+'/'+skeletonName+'.orcs', "wt")
+                    outfile.write(json.dumps([skeletonName,bones,anims]))
+                    outfile.close()
+                    
+                collisionData = { }
+                if sel.name in collision2dByName:
+                    collisionData["collision2d"] = collision2dByName[sel.name]
+            
+                outfile = open(filepath, "wt")
+                outfile.write(json.dumps([objectName,vFormat,vertData,matGroups,skeletonName, collisionData]))
                 outfile.close()
-        
-            outfile = open(filepath, "wt")
-            outfile.write(json.dumps([objectName,vFormat,vertData,matGroups,skeletonName]))
-            outfile.close()
 
 
     return {'FINISHED'}

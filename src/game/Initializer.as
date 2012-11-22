@@ -39,14 +39,17 @@ package game {
             required.addDataUrl("static/textured_fp.txt");
             required.addDataUrl("static/textured_light_vp.txt");
             required.addDataUrl("static/textured_light_fp.txt");
+            required.addDataUrl("static/animated_light_vp.txt");
             required.addDataUrl("static/cloning_mode_fp.txt");
 
             required.addDataUrl("static/map.bmap");
 
             required.addDataUrl("static/CoxSkeleton.orcs");
+            required.addDataUrl("static/BeholderSkeleton.orcs");
 
             loadModelResource("static/RoundShadow.orcm");
             loadModelResource("static/Cox.orcm");
+            loadModelResource("static/Beholder.orcm");
             loadModelResource("static/Hero.orcm");
             loadModelResource("static/Blade.orcm");
             loadModelResource("static/Pickable.orcm");
@@ -99,7 +102,6 @@ package game {
             ctx.shaderMgr.createShaderFromJSON("Animated",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/animated_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/animated_fp.txt"), ShaderTranslator.FRAGMENT));
-            ctx.shaderMgr.getShader("Animated").fragmentProgram.addConst("color", 0, new ShaderConstVec4(1, 0.5, 0, 1));
 
             ctx.shaderMgr.createShaderFromJSON("Textured",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_vp.txt"), ShaderTranslator.VERTEX),
@@ -108,7 +110,13 @@ package game {
             ctx.shaderMgr.createShaderFromJSON("TexturedLight",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_fp.txt"), ShaderTranslator.FRAGMENT));
+
+            ctx.shaderMgr.createShaderFromJSON("AnimatedLight",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/animated_light_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_fp.txt"), ShaderTranslator.FRAGMENT));
         }
+
+
 
         private function createTexturedMaterial(name:String, texturePath:String):Material {
             var m:Material;
@@ -166,6 +174,12 @@ package game {
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/chess.png");
             m.addPass(p);
 
+            m = ctx.materialMgr.createMaterial("Beholder");
+            p = new Pass();
+            p.shader = ctx.shaderMgr.getShader("AnimatedLight");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/beholder.png");
+            m.addPass(p);
+
             createTexturedMaterial("Hero", "static/hero.png");
             createTexturedMaterial("Blade", "static/blade.png");
             createTexturedMaterial("Pickable", "static/pickable.png");
@@ -207,6 +221,7 @@ package game {
 
         public function initModels():void {
             ctx.skeletonMgr.loadSkeletonResource("static/CoxSkeleton.orcs");
+            ctx.skeletonMgr.loadSkeletonResource("static/BeholderSkeleton.orcs");
 
             for (var i:int = 0; i < modelResources.length; ++i) {
                 ctx.modelMgr.loadModelResource(modelResources[i]);

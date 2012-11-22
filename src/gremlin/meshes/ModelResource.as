@@ -17,11 +17,13 @@ package gremlin.meshes {
         public var vertexBuffer:VertexBuffer;
         public var indexBuffer:IndexBuffer;
         public var skeletonResource:SkeletonResource;
+        public var collisionData:CollisionData;
         public var isLoaded:Boolean;
 
         public function ModelResource(_ctx:Context) {
             ctx = _ctx;
             submeshes = new Vector.<Submesh>();
+            collisionData = new CollisionData();
         }
 
         public function fromJSON(json:Object):void {
@@ -82,6 +84,10 @@ package gremlin.meshes {
 
             if (json[4].length > 0) {
                 skeletonResource = ctx.skeletonMgr.skeletonResourcesByName[json[4]];
+            }
+
+            if (json[5] != null) {
+                collisionData.fromObject(json[5]);
             }
 
             isLoaded = true;

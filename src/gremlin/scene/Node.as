@@ -25,6 +25,8 @@ package gremlin.scene {
         internal var transformationMatrix:Matrix3D;
         internal var normalMatrix:Matrix3D;
 
+        public var transformationUpdated:Boolean;
+
         private static const _tempAuxVector3D:Vector3D = new Vector3D();
 
         public function Node() {
@@ -115,6 +117,7 @@ package gremlin.scene {
 
         public function updateTransformation(dirty:Boolean = false):void {
             dirty ||= transformationDirty;
+            transformationUpdated = false;
 
             if (dirty) {
                 if (parent) {
@@ -143,6 +146,8 @@ package gremlin.scene {
                 normalMatrix.copyFrom(transformationMatrix);
                 normalMatrix.invert();
                 normalMatrix.transpose();
+
+                transformationUpdated = true;
             }
 
             for (var i:int = 0; i < children.length; ++i) {

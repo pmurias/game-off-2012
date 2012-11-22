@@ -1,4 +1,6 @@
 package game {
+    import flash.geom.Point;
+    import flash.geom.Rectangle;
     import flash.geom.Vector3D;
     import gremlin.math.Quaternion;
     import gremlin.meshes.ModelResource;
@@ -9,13 +11,15 @@ package game {
      * ...
      * @author mosowski
      */
-    public class Tile {
+    public class Tile implements ICollisionComponent {
         public var mapx:int;
         public var mapy:int;
         public var layer:int;
         public var node:Node;
         public var entity:ModelEntity;
         public var type:TileInfo;
+
+        public var collisionComponent:CollisionComponent;
 
         public function Tile(_mapx:int, _mapy:int, layerNode:Node) {
             mapx = _mapx;
@@ -32,6 +36,10 @@ package game {
             } else {
                 entity.setModelResource(modelResource);
             }
+            if (modelResource.collisionData.collision2d != null) {
+                collisionComponent = new CollisionComponent(node);
+                collisionComponent.setBounds(modelResource.collisionData.collision2d[0]);
+            }
             type = tileInfo;
         }
 
@@ -41,8 +49,18 @@ package game {
             }
         }
 
+        public function updateBounds():void {
+            if (collisionComponent != null) {
+                collisionComponent.updateBounds();
+            }
+        }
+
         public function setRotation(rot:int):void {
             node.getRotation().setFromAxisAngle(Vector3D.Y_AXIS, rot * Math.PI / 2);
+        }
+
+        public function getCollisionComponent():CollisionComponent {
+            return collisionComponent;
         }
 
     }

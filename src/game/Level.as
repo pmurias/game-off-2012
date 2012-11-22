@@ -1,4 +1,5 @@
 package game {
+    import flash.geom.Point;
     import flash.geom.Vector3D;
     import flash.utils.Dictionary;
     import game.pickable.Pickable;
@@ -7,6 +8,7 @@ package game {
     import game.pickable.PickableFairMode;
     import game.pickable.PickablePoint;
     import game.spawners.Spawner;
+    import gremlin.scene.Camera;
     import gremlin.scene.Node;
 	/**
      * ...
@@ -89,6 +91,24 @@ package game {
 
         public function getTileAtPosition(position:Vector3D, l:int):Tile {
             return layers[l].tiles[int(position.x / 2)][int(position.z / 2)];
+        }
+
+        public function updateTileBounds():void {
+            for (var i:int = 0; i < layers.length; ++i) {
+                layers[i].updateTileBounds();
+            }
+        }
+
+        public function drawTileBounds(camera:Camera):void {
+            gameCtx.graphics.lineStyle(1, 0xFF0000);
+            for (var i:int = 0; i < width; ++i) {
+                for (var j:int  = 0 ; j < height; ++j) {
+                    var tile:Tile = layers[0].tiles[i][j];
+                    if (tile.collisionComponent != null) {
+                        tile.collisionComponent.debugDraw(gameCtx.graphics, camera);
+                    }
+                }
+            }
         }
 
     }

@@ -78,6 +78,9 @@ package game.modes {
 
         override public function tick():void {
             super.tick();
+            mainRotator.tick();
+            cloneRotator.tick();
+
             if (exiting == true) {
                 cloneRotator.alpha = 0;
 
@@ -98,8 +101,6 @@ package game.modes {
             super.render();
 
             ctx.rootNode.updateTransformation();
-            mainRotator.tick();
-            cloneRotator.tick();
 
             ctx.setCamera(mainRotator.camera);
             ctx.renderTargetMgr.renderTargets["bigRT1"].activate();

@@ -16,6 +16,7 @@ package game.pickable {
             entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("PickablePoint"), node);
             entity.addToScene(gameCtx.layer0);
             shadow.node.setScale(1.2, 1, 0.6);
+            enableCollision();
         }
 
         override protected function pickCallback(hero:Hero):Boolean {

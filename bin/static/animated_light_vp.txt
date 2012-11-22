@@ -1,0 +1,39 @@
+param m44[25] bonesMatrices
+param m44 cameraMatrix
+param m44 modelMatrix
+param m44 normalMatrix
+param vec4 lightDirection
+
+attr vec3 pos
+attr vec3 norm
+attr vec2 uv0
+attr vec4 bones
+attr vec4 weights
+
+registerIndices = bones * 4
+boneVertex = bonesMatrices[registerIndices.x] * pos
+boneVertex = boneVertex * weights.x
+vertex = boneVertex
+
+boneVertex = bonesMatrices[registerIndices.y] * pos
+boneVertex = boneVertex * weights.y
+vertex = vertex + boneVertex
+
+boneVertex = bonesMatrices[registerIndices.z] * pos
+boneVertex = boneVertex * weights.z
+vertex = vertex + boneVertex
+
+boneVertex = bonesMatrices[registerIndices.w] * pos
+boneVertex = boneVertex * weights.w
+vertex = vertex + boneVertex
+
+vertex = modelMatrix * vertex
+out = cameraMatrix * vertex
+varying0 = uv0
+
+modelNormal = normalMatrix * norm
+modelNormal = -modelNormal
+lightFactor = dot3(modelNormal, lightDirection)
+lightFactor = max(lightFactor, 0)
+lightFactor = lightFactor + 0.5
+varying1 = lightFactor

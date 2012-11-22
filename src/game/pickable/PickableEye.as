@@ -12,6 +12,7 @@ package game.pickable {
             super(gameCtx);
             entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("PickableEye"), node);
             entity.addToScene(gameCtx.layer0);
+            enableCollision();
         }
 
         override protected function pickCallback(hero:Hero):Boolean {

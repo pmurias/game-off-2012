@@ -1,4 +1,6 @@
 package game {
+    import flash.display.GradientType;
+    import flash.display.Graphics;
     import flash.display.Stage;
     import flash.display3D.Context3DBlendFactor;
     import flash.display3D.Context3DCompareMode;
@@ -41,6 +43,7 @@ package game {
     public class GameContext {
         public var ctx:Context;
         public var stage:Stage;
+        public var graphics:Graphics;
         public var time:Number;
         public var timeStep:Number;
         public var debugInfo:DebugInfo;
@@ -77,6 +80,8 @@ package game {
         public function setupState():void {
             debugInfo = new DebugInfo(ctx);
             stage.addChild(debugInfo);
+            graphics = debugInfo.graphics;
+            debugInfo.visible = false;
             time = 0;
             timeStep = 1/32;
 
@@ -162,6 +167,7 @@ package game {
 
         private function onEnterFrame(params:Object = null):void {
             debugInfo.tick();
+            graphics.clear();
 
             mode.processInput();
             mode.render();
@@ -170,6 +176,8 @@ package game {
         public function onKeyDown(ke:KeyboardEvent):void {
             if (ke.keyCode == KeyCodes.KC_SPACE) {
                 commander.reset();
+            } if (ke.keyCode == KeyCodes.KC_D) {
+                debugInfo.visible = !debugInfo.visible;
             }
         }
 

@@ -1,7 +1,10 @@
 package game.modes {
+    import flash.geom.Point;
+    import flash.geom.Vector3D;
     import game.CameraRotator;
     import game.commands.CommandSetHeroVelocity;
     import game.GameContext;
+    import game.Tile;
     import gremlin.events.KeyCodes;
 	/**
      * ...
@@ -16,10 +19,7 @@ package game.modes {
             rotator.node = gameCtx.hero.node;
         }
 
-        override public function enter():void {
-            super.enter();
-            rotator.resetAlpha();
-        }
+
 
         override public function processInput():void {
             super.processInput();
@@ -48,15 +48,36 @@ package game.modes {
             }
         }
 
+        override public function tick():void {
+            super.tick();
+            rotator.tick();
+        }
+
         override public function render():void {
             super.render();
             ctx.rootNode.updateTransformation();
-            rotator.tick();
+            gameCtx.level.updateTileBounds();
             ctx.setCamera(rotator.camera);
+
+            if (gameCtx.debugInfo.visible) {
+                gameCtx.level.drawTileBounds(rotator.camera);
+                gameCtx.graphics.lineStyle(1, 0xFFFF00);
+                for (var i:int = 0; i < gameCtx.gameObjects.length; ++i) {
+                    if (gameCtx.gameObjects[i].collisionComponent != null) {
+                        gameCtx.gameObjects[i].collisionComponent.debugDraw(gameCtx.graphics, rotator.camera);
+                    }
+                }
+            }
+
 
             ctx.renderTargetMgr.defaultRenderTarget.activate();
             gameCtx.layer0.render();
             ctx.renderTargetMgr.defaultRenderTarget.finish();
+        }
+
+        override public function enter():void {
+            super.enter();
+            rotator.resetAlpha();
         }
 
         override public function exit():void {

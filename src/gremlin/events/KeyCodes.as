@@ -10,6 +10,8 @@ package gremlin.events {
         public static const KC_DOWN:int = 40;
 
         public static const KC_SPACE:int = 32;
+
+        public static const KC_D:int = 68;
     }
 
 }

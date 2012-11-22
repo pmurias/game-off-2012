@@ -11,6 +11,7 @@ package game.pickable {
         public function PickableCloningMode(gameCtx:GameContext) {
             super(gameCtx);
             setMaterial(gameCtx.ctx.materialMgr.getMaterial("PickableC"));
+            enableCollision();
         }
 
         override protected function pickCallback(hero:Hero):Boolean {

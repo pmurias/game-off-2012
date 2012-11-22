@@ -35,6 +35,16 @@ package game {
             }
         }
 
+        public function updateTileBounds():void {
+            for (var i:int = 0; i < width; ++i) {
+                for (var j:int = 0; j < height; ++j) {
+                    if (tiles[i][j].node.transformationUpdated == true) {
+                        tiles[i][j].updateBounds();
+                    }
+                }
+            }
+        }
+
 
     }
 

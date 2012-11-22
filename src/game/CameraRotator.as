@@ -21,7 +21,7 @@ package game {
 
         public function CameraRotator(gameCtx:GameContext, fixedWidth:int=-1, fixedHeight:int=-1) {
             this.gameCtx = gameCtx;
-            camera = new Camera();
+            camera = new Camera(gameCtx.ctx);
             if (fixedWidth == -1 || fixedHeight == -1) {
                 gameCtx.ctx.addListener(Context.RESIZE, onResize);
                 gameCtx.ctx.projectionUtils.makePerspectiveMatrix(camera.projectionMatrix, 0.1, 100.0, 55, gameCtx.stage.stageWidth / gameCtx.stage.stageHeight);

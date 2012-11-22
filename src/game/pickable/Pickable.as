@@ -1,5 +1,6 @@
 package game.pickable {
     import flash.geom.Vector3D;
+    import game.CollisionComponent;
     import game.GameContext;
     import game.GameObject;
     import game.Hero;
@@ -20,6 +21,11 @@ package game.pickable {
             gameCtx.pickablesById[id] = this;
             enableShadow();
             radius = 0.3;
+        }
+
+        public function enableCollision():void {
+            collisionComponent = new CollisionComponent(node);
+            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d[0]);
         }
 
         protected function pickCallback(hero:Hero):Boolean {

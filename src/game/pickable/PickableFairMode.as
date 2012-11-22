@@ -11,6 +11,7 @@ package game.pickable {
         public function PickableFairMode(gameCtx:GameContext) {
             super(gameCtx);
             setMaterial(gameCtx.ctx.materialMgr.getMaterial("PickableF"));
+            enableCollision();
         }
 
         override protected function pickCallback(hero:Hero):Boolean {
