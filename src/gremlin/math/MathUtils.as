@@ -23,18 +23,17 @@ package gremlin.math {
             return (from + Math.PI) % (Math.PI * 2) - Math.PI;
         }
 
+        // return angle @from shifted to @to (0..2PI) in a shorter way by @shift
         public function getShiftedAngle(from:Number, to:Number, shift:Number):Number {
             if (to - from > Math.PI) {
-                from += Math.PI * 2;
-            } else if (from - to > Math.PI) {
-                to += Math.PI * 2;
-            }
-            if (to - from > 0) {
-                from += shift;
+                return (from - shift) % (Math.PI * 2);
+            } else if (to - from < -Math.PI) {
+                return (from + shift) % (Math.PI * 2);
+            } else if (to > from) {
+                return (from + shift) % (Math.PI * 2);
             } else {
-                from -= shift;
+                return (from - shift) % (Math.PI * 2);
             }
-            return (from + Math.PI) % (Math.PI * 2) - Math.PI;
         }
 
         public function getAngleDistance(from:Number, to:Number):Number {

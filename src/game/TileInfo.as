@@ -9,6 +9,7 @@ package game {
         public var modelResources:Vector.<ModelResource>;
         public var name:String;
         public var blocking:Boolean;
+        public var isLethal:Boolean;
 
         public function TileInfo(_name:String, ...resources) {
             name = _name;

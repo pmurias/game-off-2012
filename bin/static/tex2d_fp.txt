@@ -1,4 +1,6 @@
 
 sampler tex
+param vec4 color
 
-out = tex2D(varying0.xy, tex)
+texColor = tex2D(varying0.xy, tex)
+out = texColor * color

@@ -26,11 +26,16 @@ package game {
             addTile("TileSpikesOuterCorner");
             addTile("TileGrass");
             addTile("TileGrassSlot");
+            addTile("TileVortal");
 
             types["TileBlock"].blocking = true;
             types["TileFade"].blocking = true;
             types["TileFadeCorner"].blocking = true;
             types["TileFadeOuterCorner"].blocking = true;
+
+            types["TileSpikes"].isLethal = true;
+            types["TileSpikesCorner"].isLethal = true;
+            types["TileSpikesOuterCorner"].isLethal = true;
         }
 
         public function addTile(name:String, modelResourceName:String = ""):void {

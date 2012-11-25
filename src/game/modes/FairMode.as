@@ -48,6 +48,7 @@ package game.modes {
 
         override public function tick():void {
             super.tick();
+            rotator.deadMode = gameCtx.hero.isDead;
             rotator.tick();
         }
 
@@ -67,9 +68,9 @@ package game.modes {
                 }
             }
 
-
             ctx.renderTargetMgr.defaultRenderTarget.activate();
             gameCtx.layer0.render();
+            gameCtx.layerGUI.render();
             ctx.renderTargetMgr.defaultRenderTarget.finish();
         }
 
@@ -77,6 +78,7 @@ package game.modes {
             super.enter();
             rotator.resetAlpha();
             rotator.tick();
+
         }
 
         override public function exit():void {

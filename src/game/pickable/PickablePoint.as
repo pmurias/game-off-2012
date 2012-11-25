@@ -22,24 +22,25 @@ package game.pickable {
         override protected function pickCallback(hero:Hero):Boolean {
             var p:BillboardParticlesEntity = new BillboardParticlesEntity(gameCtx.ctx);
             p.minLife = 1;
-            p.maxLife = 2;
-            p.minStartSize = 0.5;
-            p.maxStartSize = 0.8;
+            p.maxLife = 3;
+            p.minStartSize = 3.8;
+            p.maxStartSize = 5.2;
             p.minEndSize = 1;
             p.maxEndSize = 1.5;
-            p.minVelocity = 0.1;
-            p.maxVelocity = 1;
-            p.minStartColor = 0xFF0000FF;
-            p.maxEndColor = 0xFF0000FF;
-            p.minEndColor = 0xFF00FFFF;
-            p.maxEndColor = 0xFFFFFFFF;
-            p.spawnRate = 20;
+            p.minVelocity = 2;
+            p.maxVelocity = 4;
+            p.minStartColor = 0xFF225555;
+            p.maxStartColor = 0xFF225555;
+            p.minEndColor = 0x00FFFFFF;
+            p.maxEndColor = 0x00FFFFFF;
+            p.spawnRate = 10;
             p.setQuota(100);
             p.setMaterial(gameCtx.ctx.materialMgr.getMaterial("Particle1"));
             var explosion:ParticleExplosion = new ParticleExplosion(gameCtx);
             explosion.node.position.copyFrom(node.position);
             explosion.node.rotation.multiplyByAngleAxis(Vector3D.X_AXIS, Math.PI * 0.5);
             explosion.explode(p, 0.5);
+            gameCtx.addPoints(1);
             return true;
         }
 

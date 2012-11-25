@@ -38,7 +38,8 @@ package game {
 
         public function onPlayerReady(event:Event):void {
             player = loader.content;
-            player.loadVideoById(videoId);
+            player.loadPlaylist([ videoId ] );
+            player.setLoop(true);
             player.setSize(1, 1);
         }
     }

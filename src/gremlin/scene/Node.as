@@ -115,6 +115,12 @@ package gremlin.scene {
             children.splice(children.indexOf(node), 1);
         }
 
+        public function removeFromParent():void {
+            if (parent != null) {
+                parent.removeChild(this);
+            }
+        }
+
         public function updateTransformation(dirty:Boolean = false):void {
             dirty ||= transformationDirty;
             transformationUpdated = false;

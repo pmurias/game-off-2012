@@ -32,10 +32,16 @@ package game.pickable {
             return false;
         }
 
+        private var dying:Boolean;
         public final function onPick(hero:Hero):void {
-            if (dead == false) {
+            if (dead == false && dying==false) {
                 if (pickCallback(hero) == true) {
-                    dead = true;
+                    dying = true;
+                    //gameCtx.ctx.tweener.tween(node.position, "x", node.position.x, node.position.x, 1, null);
+                    //gameCtx.ctx.tweener.tween(node.position, "y", node.position.y, 0, 1, null);
+                    gameCtx.ctx.tweener.tween(node.position, "y", node.position.y, 20, 1, function():void {
+                        dead = true;
+                    });
                 }
             }
         }

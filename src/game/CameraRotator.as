@@ -19,6 +19,8 @@ package game {
 
         public var alphaValue:Number;
 
+        public var deadMode:Boolean;
+
         public function CameraRotator(gameCtx:GameContext, fixedWidth:int=-1, fixedHeight:int=-1) {
             this.gameCtx = gameCtx;
             camera = new Camera(gameCtx.ctx);
@@ -43,10 +45,15 @@ package game {
         }
 
         public function tick():void {
-            camera.viewMatrix.identity();
-            var pos:Vector3D = node.getPosition();
-            alphaValue = (alphaValue + alpha * gameCtx.timeStep) % (Math.PI * 2);
+            if (deadMode == false) {
+                alphaValue = (alphaValue + alpha * gameCtx.timeStep) % (Math.PI * 2);
+            } else {
+                beta += 2.0 * gameCtx.timeStep;
+            }
 
+
+            var pos:Vector3D = node.getPosition();
+            camera.viewMatrix.identity();
             camera.viewMatrix.appendTranslation(-pos.x, -pos.y, -pos.z);
             camera.viewMatrix.appendRotation(-90 + Math.sin(alphaValue) * gamma, Vector3D.X_AXIS);
             camera.viewMatrix.appendRotation(Math.cos(alphaValue) * gamma, Vector3D.Z_AXIS);

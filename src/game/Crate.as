@@ -21,6 +21,7 @@ package game {
 
         override public function destroy():void {
             super.destroy();
+            entity.removeFromAllScenes();
             gameCtx.crates.splice(gameCtx.crates.indexOf(this), 1);
         }
 

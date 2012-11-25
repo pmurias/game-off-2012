@@ -29,6 +29,7 @@ package game.spawners {
             if (spawnedTypeByName == null) {
                 spawnedTypeByName = new Dictionary();
                 spawnedTypeByName["blade"] = Blade;
+                spawnedTypeByName["fork"] = Fork;
             }
         }
 

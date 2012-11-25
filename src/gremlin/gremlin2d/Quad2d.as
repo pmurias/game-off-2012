@@ -1,5 +1,6 @@
 package gremlin.gremlin2d {
     import flash.geom.Matrix;
+    import flash.geom.Vector3D;
     import flash.utils.Endian;
     import gremlin.core.Context;
     import gremlin.core.IRenderable;
@@ -17,9 +18,11 @@ package gremlin.gremlin2d {
         public var material:Material;
         public var scene:Scene;
         public var visible:Boolean;
+        public var color:Vector3D;
 
         public function Quad2d() {
             transformation = new Matrix();
+            color = new Vector3D(1,1,1,1);
             visible = true;
         }
 
@@ -56,6 +59,10 @@ package gremlin.gremlin2d {
             ctx.autoParams.uvRect.y = 0;
             ctx.autoParams.uvRect.z = 1;
             ctx.autoParams.uvRect.w = 1;
+            ctx.autoParams.color.x = color.x;
+            ctx.autoParams.color.y = color.y;
+            ctx.autoParams.color.z = color.z;
+            ctx.autoParams.color.w = color.w;
             ctx.activeShader.uploadLocalAutoParams();
             ctx.activeShader.vertexProgram.setVertexBuffer(ctx.ctx2d.unitQuadVertexBuffer);
             ctx.drawTriangles(ctx.ctx2d.unitQuadIndexBuffer);

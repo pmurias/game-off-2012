@@ -37,8 +37,6 @@ package gremlin.animation {
             var transformedTail:Vector3D = parentTail.add(frameLoc);
             var transformedTotalRot:Quaternion = totalRot.clone();
 
-            //var translation:Vector3D = transformedTail.subtract(head);
-
             transformedTotalRot.multiplyBy(frameRot);
             var rotatedTail:Vector3D = tail.clone();
             transformedTotalRot.transformVector(rotatedTail);
@@ -49,7 +47,7 @@ package gremlin.animation {
             transformedTotalRot.toAngleAxis(rotVec);
             animation.tracks[id].matrix[frame].appendTranslation(-head.x, -head.y, -head.z);
             animation.tracks[id].matrix[frame].appendRotation(rotVec.w * (180.0 / Math.PI), rotVec);
-            animation.tracks[id].matrix[frame].appendTranslation(parentTail.x, parentTail.y, parentTail.z);
+            animation.tracks[id].matrix[frame].appendTranslation(parentTail.x + frameLoc.x, parentTail.y + frameLoc.y, parentTail.z + frameLoc.z);
 
             animation.tracks[id].rawMatrix[frame] = animation.tracks[id].matrix[frame].rawData;
 

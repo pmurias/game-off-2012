@@ -48,11 +48,14 @@ package game {
             required.addDataUrl("static/BeholderSkeleton.orcs");
 
             loadModelResource("static/RoundShadow.orcm");
+            loadModelResource("static/BloodSpatter.orcm");
             loadModelResource("static/Cox.orcm");
             loadModelResource("static/Beholder.orcm");
+            loadModelResource("static/BeholderDead.orcm");
             loadModelResource("static/Hero.orcm");
             loadModelResource("static/Crate.orcm");
             loadModelResource("static/Blade.orcm");
+            loadModelResource("static/Fork.orcm");
             loadModelResource("static/Pickable.orcm");
             loadModelResource("static/PickableEye.orcm");
             loadModelResource("static/PickablePoint.orcm");
@@ -69,6 +72,7 @@ package game {
             loadModelResource("static/TileSpikesOuterCorner.orcm");
             loadModelResource("static/TileGrass.orcm");
             loadModelResource("static/TileGrassSlot.orcm");
+            loadModelResource("static/TileVortal.orcm");
 
             required.load(onRequiredAssetsLoaded);
         }
@@ -146,6 +150,36 @@ package game {
             return m;
         }
 
+        private function createTexturedAlphaMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.sourceBlendFactor = Context3DBlendFactor.SOURCE_ALPHA;
+            p.destBlendFactor = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+            p.depthMask = false;
+            p.transparent = true;
+            p.shader = ctx.shaderMgr.getShader("Textured");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
+        private function createTexturedLightAlphaMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.sourceBlendFactor = Context3DBlendFactor.SOURCE_ALPHA;
+            p.destBlendFactor = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+            p.depthMask = false;
+            p.transparent = true;
+            p.shader = ctx.shaderMgr.getShader("TexturedLight");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
         public function createParticleMaterial(name:String, texturePath:String):Material {
             var m:Material;
             var p:Pass;
@@ -156,6 +190,21 @@ package game {
             p.depthMask = false;
             p.transparent = true;
             p.shader = ctx.shaderMgr.getShader("Particle");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
+        private function createTex2dMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.sourceBlendFactor = Context3DBlendFactor.SOURCE_ALPHA;
+            p.destBlendFactor = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+            p.depthMask = false;
+            p.transparent = true;
+            p.shader = ctx.shaderMgr.getShader("Tex2d");
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
             m.addPass(p);
             return m;
@@ -183,6 +232,7 @@ package game {
 
             createTexturedMaterial("Hero", "static/hero.png");
             createTexturedMaterial("Blade", "static/blade.png");
+            createTexturedMaterial("Fork", "static/fork.png");
             createTexturedMaterial("Crate", "static/crate.png");
             createTexturedMaterial("Pickable", "static/pickable.png");
             createTexturedMaterial("PickableH", "static/pickable_h.png");
@@ -205,10 +255,16 @@ package game {
             createTexturedMaterial("FloorShadeOuterCorner", "static/tile_chess_outer_corner.png");
             createTexturedMaterial("Grass", "static/tile_grass.png");
             createTexturedMaterial("GrassShade", "static/tile_grass_shade.png");
+            createTexturedAlphaMaterial("Vortal", "static/vortal.png");
 
             createTexturedMultiplyMaterial("RoundShadow", "static/round_shadow.png");
+            createTexturedMultiplyMaterial("BloodSpatter", "static/blood_spatter.png");
+
+            createTexturedMultiplyMaterial("BeholderDead", "static/beholder_dead.png");
 
             createParticleMaterial("Particle1", "static/particle_1.png");
+
+            createTex2dMaterial("Black2d", "static/black.png");
 
             m = ctx.materialMgr.createMaterial("CloningMode");
             p = new Pass();

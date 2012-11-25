@@ -16,6 +16,7 @@ package game.pickable {
 
         override protected function pickCallback(hero:Hero):Boolean {
             gameCtx.enterMode(new FairMode(gameCtx));
+            gameCtx.splasher.splashBitmap(new gameCtx.staticEmbeded.merge_mode());
             return true;
         }
 

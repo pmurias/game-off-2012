@@ -44,6 +44,7 @@ package game.modes {
         override public function enter():void {
             super.enter();
             quad.setScene(gameCtx.layerPostprocess);
+            gameCtx.splasher.splashBitmap(new gameCtx.staticEmbeded.cloning_mode());
         }
 
         override public function exit():void {
@@ -116,6 +117,7 @@ package game.modes {
 
             ctx.renderTargetMgr.defaultRenderTarget.activate();
             gameCtx.layerPostprocess.render();
+            gameCtx.layerGUI.render();
             ctx.renderTargetMgr.defaultRenderTarget.finish();
         }
 

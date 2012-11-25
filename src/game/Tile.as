@@ -44,6 +44,13 @@ package game {
             type = tileInfo;
         }
 
+        public function destroy():void {
+            if (entity != null) {
+                entity.removeFromAllScenes();
+                node.removeFromParent();
+            }
+        }
+
         public function setScene(scene:Scene):void {
             if (entity != null) {
                 entity.addToScene(scene);

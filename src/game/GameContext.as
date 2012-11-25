@@ -1,6 +1,9 @@
 package game {
+    import flash.display.Bitmap;
+    import flash.display.BlendMode;
     import flash.display.GradientType;
     import flash.display.Graphics;
+    import flash.display.Sprite;
     import flash.display.Stage;
     import flash.display3D.Context3DBlendFactor;
     import flash.display3D.Context3DCompareMode;
@@ -25,6 +28,7 @@ package game {
     import game.pickable.PickableFairMode;
     import game.pickable.PickablePoint;
     import game.spawners.SharpItem;
+    import game.spawners.Spawner;
     import gremlin.core.Context;
     import gremlin.events.KeyCodes;
     import gremlin.gremlin2d.Quad2d;
@@ -55,6 +59,12 @@ package game {
 
         public var hero:Hero;
 
+        public var bloodSpatters:Vector.<BloodSpatter>;
+        public var deadBodies:Vector.<BeholderDead>;
+
+        public var spawners:Vector.<Spawner>;
+        public var sharpItems:Vector.<SharpItem>;
+
         public var heroesById:Array;
         public var heroes:Vector.<Hero>;
 
@@ -67,9 +77,18 @@ package game {
 
         public var layer0:Scene;
         public var layerPostprocess:Scene;
+        public var layerGUI:Scene;
 
         public var mode:Mode;
         public var nextMode:Mode;
+
+        public var deathBlackout:DeathBlackout;
+        public var staticEmbeded:StaticEmbeded;
+        public var splasher:Splasher;
+        public var hud:HUD;
+
+        public var points:int;
+        public var deaths:int;
 
         public function GameContext(_ctx:Context) {
             ctx = _ctx;
@@ -85,9 +104,15 @@ package game {
             graphics = debugInfo.graphics;
             debugInfo.visible = false;
             time = 0;
-            timeStep = 1/32;
+            timeStep = 1 / 32;
 
             commander = new Commander(this);
+
+            bloodSpatters = new Vector.<BloodSpatter>();
+            deadBodies = new Vector.<BeholderDead>();
+
+            spawners = new Vector.<Spawner>();
+            sharpItems = new Vector.<SharpItem>();
 
             heroesById = new Array();
             heroes = new Vector.<Hero>();
@@ -99,6 +124,7 @@ package game {
 
             layer0 = new Scene(ctx);
             layerPostprocess = new Scene(ctx);
+            layerGUI = new Scene(ctx);
 
             mainLight = new DirectionaLight();
             mainLight.setDirection(-2, -1.2, 3);
@@ -107,6 +133,26 @@ package game {
             gameObjects = new Vector.<GameObject>();
 
             tileSet = new TileSet(ctx);
+
+            deathBlackout = new DeathBlackout(this);
+            staticEmbeded = new StaticEmbeded();
+            splasher = new Splasher(this);
+            hud = new HUD(this);
+
+            initLevel();
+
+            ctx.addListener(Context.RESIZE, onResize);
+            ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
+
+            ctx.addListener(Context.KEY_DOWN, onKeyDown);
+            ctx.addListener(Context.KEY_UP, onKeyUp);
+
+            var timer:Timer = new Timer(1/timeStep);
+            timer.addEventListener(TimerEvent.TIMER, tick);
+            timer.start();
+        }
+
+        public function initLevel():void {
             level = new Level(this, 0, 0, 0, ctx.rootNode);
             level.fromObject(ctx.loaderMgr.getLoaderJSON("static/map.bmap"), tileSet);
             level.layers[0].setScene(layer0);
@@ -124,16 +170,23 @@ package game {
             commander.queueCommand(cmdHeroSpawn);
 
             commander.tick();
+        }
 
+        public function resetLevel():void {
+            spawners.length = 0;
+            for (var i:int = 0; i < gameObjects.length; ++i) {
+                gameObjects[i].destroy();
+            }
+            level.destroyTiles();
 
-            ctx.addListener(Context.ENTER_FRAME, onEnterFrame);
+            gameObjects.length = 0;
+            sharpItems.length = 0;
+            crates.length = 0;
+            heroes.length = 0;
+            pickables.length = 0;
+            heroesById = [];
+            pickablesById = [];
 
-            ctx.addListener(Context.KEY_DOWN, onKeyDown);
-            ctx.addListener(Context.KEY_UP, onKeyUp);
-
-            var timer:Timer = new Timer(1/timeStep);
-            timer.addEventListener(TimerEvent.TIMER, tick);
-            timer.start();
         }
 
         public function enterMode(mode:Mode):void {
@@ -148,13 +201,40 @@ package game {
             mode.enter();
         }
 
+        public function die():void {
+            deathBlackout.addSingleTimeListener(DeathBlackout.BLACKOUT_COMPLETED, onDeathCompleted);
+            deathBlackout.begin();
+            addDeath();
+        }
+
+        public function onDeathCompleted(params:Object = null):void {
+            deathBlackout.end();
+            new BeholderDead(this, hero.node);
+            resetLevel();
+            initLevel();
+        }
+
+        public function onResize(params:Object = null):void {
+        }
+
+        public function addPoints(value:int):void {
+            points += value;
+            hud.pointsTextField.text = "Points: " + points;
+        }
+
+        public function addDeath():void {
+            deaths++;
+            hud.deathsTextField.text = "Deaths: " + deaths;
+        }
+
         private function tick(e:Event):void {
             time += timeStep;
             mode.tick();
+            deathBlackout.tick();
 
             var i:int;
-            for (i = 0; i < level.spawners.length; ++i) {
-                level.spawners[i].tick();
+            for (i = 0; i < spawners.length; ++i) {
+                spawners[i].tick();
             }
             for (i = 0; i < gameObjects.length; ++i) {
                 gameObjects[i].tick();
@@ -179,7 +259,6 @@ package game {
 
         public function onKeyDown(ke:KeyboardEvent):void {
             if (ke.keyCode == KeyCodes.KC_SPACE) {
-                commander.reset();
             } if (ke.keyCode == KeyCodes.KC_D) {
                 debugInfo.visible = !debugInfo.visible;
             }

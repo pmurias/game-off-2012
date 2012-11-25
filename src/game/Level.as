@@ -22,7 +22,7 @@ package game {
         public var layers:Vector.<LevelLayer>;
         public var rootNode:Node;
         public var startPosition:Vector3D;
-        public var spawners:Vector.<Spawner>;
+        public var sourceObject:Object;
 
         public static var pickableTypeByName:Dictionary;
 
@@ -36,7 +36,6 @@ package game {
                 layers[i]= new LevelLayer(width, height, rootNode);
             }
             startPosition = new Vector3D();
-            spawners = new Vector.<Spawner>();
 
             if (pickableTypeByName == null) {
                 pickableTypeByName = new Dictionary();
@@ -48,6 +47,7 @@ package game {
         }
 
         public function fromObject(object:Object, tileSet:TileSet):void {
+            sourceObject = object;
             width = object.level.width;
             height = object.level.height;
             layers = new Vector.<LevelLayer>(object.level.layers, true);
@@ -74,7 +74,7 @@ package game {
             for (i = 0; i < object.level.spawners.length; ++i) {
                 var spawner:Spawner = new Spawner(gameCtx);
                 spawner.fromObject(object.level.spawners[i]);
-                spawners.push(spawner);
+                gameCtx.spawners.push(spawner);
             }
 
             for (i = 0; i < object.level.pickables.length; ++i) {
@@ -90,6 +90,21 @@ package game {
             }
 
             startPosition.setTo(object.level['start'][0], object.level['start'][1], object.level['start'][2])
+        }
+
+        public function destroyTiles():void {
+            var i:int, j:int, l:int;
+            for (l = 0; l < layers.length; ++l) {
+                for (i = 0; i < width; ++i) {
+                    for (j = 0; j < height; ++j) {
+                        var tile:Tile = layers[l].tiles[i][j];
+                        if (tile != null) {
+                            tile.destroy();
+                        }
+                    }
+                }
+                rootNode.removeChild(layers[l].layerNode);
+            }
         }
 
         public function isPositionOnMap(x:int, y:int):Boolean {

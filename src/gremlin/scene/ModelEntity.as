@@ -78,6 +78,15 @@ package gremlin.scene {
             scenes.splice(scenes.indexOf(scene), 1);
         }
 
+        public function removeFromAllScenes():void {
+            for (var i:int = 0; i < scenes.length; ++i) {
+                for (var j:int = 0; j < submeshEntities.length; ++j) {
+                    scenes[i].removeRenderable(submeshEntities[j]);
+                }
+            }
+            scenes.length = 0;
+        }
+
         public function setLocalAutoParams(ctx:Context):void {
             ctx.autoParams.modelMatrix.value = node.transformationMatrix;
             ctx.autoParams.normalMatrix.value = node.normalMatrix;

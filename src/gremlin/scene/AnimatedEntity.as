@@ -20,11 +20,20 @@ package gremlin.scene {
             animationStates = new Dictionary();
         }
 
-        public function setAnimationState(animationName:String):void {
+        public function getAnimationState(animationName:String):AnimationState {
+            var animationState:AnimationState = animationStates[animationName];
+            if (animationState == null) {
+                animationState = animationStates[animationName] = new AnimationState(modelResource.skeletonResource.animations[animationName]);
+            }
+            return animationState;
+        }
+
+        public function setAnimationState(animationName:String):AnimationState {
             currentAnimationState = animationStates[animationName];
             if (currentAnimationState == null) {
                 currentAnimationState = animationStates[animationName] = new AnimationState(modelResource.skeletonResource.animations[animationName]);
             }
+            return currentAnimationState;
         }
 
         override public function setLocalAutoParams(ctx:Context):void {

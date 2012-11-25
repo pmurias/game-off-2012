@@ -86,6 +86,7 @@ def save(operator,context, filepath=""):
     tileSet["TileFadeOuterCorner"] = { "code": 11 }
     tileSet["TileGrass"] = { "code": 12 }
     tileSet["TileGrassSlot"] = { "code": 13 }
+    tileSet["TileVortal"] = { "code": 14 }
     
     
     tileNameList = []

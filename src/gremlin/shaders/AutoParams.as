@@ -30,6 +30,7 @@ package gremlin.shaders {
 
         public var modelMatrix:ShaderConstM44;
         public var imageMatrix:ShaderConstM42;
+        public var color:ShaderConstVec4;
         public var normalMatrix:ShaderConstM44;
         public var uvRect:ShaderConstVec4;
         public var bonesMatrices:ShaderConstM44Array;
@@ -44,6 +45,7 @@ package gremlin.shaders {
 
         public static const MODEL_MATRIX:String = "modelMatrix";
         public static const IMAGE_MATRIX:String = "imageMatrix";
+        public static const COLOR:String = "color";
         public static const NORMAL_MATRIX:String = "normalMatrix";
         public static const UV_RECT:String = "uvRect";
         public static const BONES_MATRICES:String = "bonesMatrices";
@@ -64,6 +66,7 @@ package gremlin.shaders {
             localAutoParams[MODEL_MATRIX] = modelMatrix = new ShaderConstM44();
             localAutoParams[BONES_MATRICES] = bonesMatrices = new ShaderConstM44Array(32);
             localAutoParams[IMAGE_MATRIX] = imageMatrix = new ShaderConstM42();
+            localAutoParams[COLOR] = color = new ShaderConstVec4();
             localAutoParams[NORMAL_MATRIX] = normalMatrix = new ShaderConstM44();
             localAutoParams[UV_RECT] = uvRect = new ShaderConstVec4();
         }

@@ -16,6 +16,7 @@ package game.spawners {
 
         public function SharpItem(gameCtx:GameContext) {
             super(gameCtx);
+            gameCtx.sharpItems.push(this);
             direction = new Vector3D();
             speed = 0;
         }
@@ -47,6 +48,11 @@ package game.spawners {
                     }
                 }
             }
+        }
+
+        override public function destroy():void {
+            super.destroy();
+            gameCtx.sharpItems.splice(gameCtx.sharpItems.indexOf(this), 1);
         }
 
     }
