@@ -77,6 +77,13 @@ package gremlin.particles {
             scenes.splice(scenes.indexOf(scene), 1);
         }
 
+        public function removeFromAllScenes():void {
+            for (var i:int = 0; i < scenes.length; ++i) {
+                scenes[i].removeRenderable(this);
+            }
+            scenes.length = 0;
+        }
+
         public function getMaterial():Material {
             return material;
         }

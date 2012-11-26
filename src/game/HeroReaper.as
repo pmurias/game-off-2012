@@ -116,6 +116,7 @@ package game {
         override public function destroy():void {
             super.destroy();
             particlesDeath.dispose();
+            particlesDeath.removeFromAllScenes();
             entity.removeFromAllScenes();
         }
     }
