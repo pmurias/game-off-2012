@@ -7,7 +7,7 @@ param float time
 attr vec4 uvBornLife
 attr vec3 startPos
 attr vec3 deltaPos
-attr vec2 size
+attr vec4 sizeRotation
 attr vec4 startColor
 attr vec4 endColor
 
@@ -20,13 +20,29 @@ centerPos.w = 1
 centerPos = modelMatrix * centerPos
 centerPos = viewMatrix * centerPos
 
-scale.x = size.y * f.x
-scale.x = scale.x + size.x
+scale.x = sizeRotation.y * f.x
+scale.x = scale.x + sizeRotation.x
 fscale.x = f.x < 1
 scale.x = scale.x * fscale.x
 
 vertex.xy = uvBornLife.xy - (0.5,0.5)
 vertex.xy = vertex.xy * scale.xx
+
+// ==== rotation is freaky, because language needs upgrade
+rotation.z = sizeRotation.w * f.x
+rotation.z = rotation.z + sizeRotation.z
+rotation.x = sin(rotation.z)
+rotation.y = cos(rotation.z)
+
+rotation.z = vertex.x //tmp
+
+vertex.x = rotation.y * vertex.x
+rotation.w = rotation.x * vertex.y // tmp
+vertex.x = vertex.x + rotation.w
+
+vertex.y = rotation.y * vertex.y
+rotation.w = rotation.x * rotation.z
+vertex.y = vertex.y - rotation.w
 
 centerPos.xy = centerPos.xy + vertex.xy
 
