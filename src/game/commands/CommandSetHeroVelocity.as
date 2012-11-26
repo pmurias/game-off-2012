@@ -19,7 +19,9 @@ package game.commands {
         override public function execute(gameCtx:GameContext):void {
             super.execute(gameCtx);
             var hero:Hero = gameCtx.heroesById[heroId];
-            hero.setVelocity(x, y, z);
+            if (hero != null) {
+                hero.setVelocity(x, y, z);
+            }
         }
 
     }
