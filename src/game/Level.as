@@ -6,7 +6,7 @@ package game {
     import game.pickable.Pickable;
     import game.pickable.PickableCloningMode;
     import game.pickable.PickableEye;
-    import game.pickable.PickableFairMode;
+    import game.pickable.PickableMerge;
     import game.pickable.PickablePoint;
     import game.spawners.Spawner;
     import gremlin.scene.Camera;
@@ -41,7 +41,7 @@ package game {
                 pickableTypeByName = new Dictionary();
                 pickableTypeByName["point"] = PickablePoint;
                 pickableTypeByName["eye"] = PickableEye;
-                pickableTypeByName["f"] = PickableFairMode;
+                pickableTypeByName["m"] = PickableMerge;
                 pickableTypeByName["c"] = PickableCloningMode;
             }
         }

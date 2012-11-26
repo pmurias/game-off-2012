@@ -29,6 +29,10 @@ package game.pickable {
             p.maxEndSize = 1.5;
             p.minVelocity = 2;
             p.maxVelocity = 4;
+            p.minRotation = 0;
+            p.maxRotation = Math.PI * 2;
+            p.minOmega = 0;
+            p.maxOmega = 0;
             p.minStartColor = 0xFF225555;
             p.maxStartColor = 0xFF225555;
             p.minEndColor = 0x00FFFFFF;

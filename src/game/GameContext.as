@@ -25,7 +25,6 @@ package game {
     import game.pickable.PickableBonus;
     import game.pickable.PickableCloningMode;
     import game.pickable.PickableEye;
-    import game.pickable.PickableFairMode;
     import game.pickable.PickablePoint;
     import game.spawners.SharpItem;
     import game.spawners.Spawner;
@@ -158,6 +157,9 @@ package game {
             level.layers[0].setScene(layer0);
 
             hero = new HeroPlayer(this);
+
+            var gr:HeroReaper = new HeroReaper(this);
+            gr.setPosition(10, 0, 5);
 
             mode = new FairMode(this);
             mode.enter();

@@ -1,0 +1,7 @@
+
+sampler tex
+
+texColor = tex2D(varying0.xy, tex)
+texColor.w = texColor.w * varying1.w
+texColor.xyzw = texColor.xyzw * varying1.xyzw
+out = texColor

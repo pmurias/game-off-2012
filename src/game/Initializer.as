@@ -31,6 +31,7 @@ package game {
             required = new LoaderBatch(ctx.loaderMgr);
             required.addDataUrl("static/particle_vp.txt");
             required.addDataUrl("static/particle_fp.txt");
+            required.addDataUrl("static/particle_alpha_fp.txt");
             required.addDataUrl("static/tex2d_vp.txt");
             required.addDataUrl("static/tex2d_fp.txt");
             required.addDataUrl("static/animated_vp.txt");
@@ -46,11 +47,13 @@ package game {
 
             required.addDataUrl("static/CoxSkeleton.orcs");
             required.addDataUrl("static/BeholderSkeleton.orcs");
+            required.addDataUrl("static/ReaperSkeleton.orcs");
 
             loadModelResource("static/RoundShadow.orcm");
             loadModelResource("static/BloodSpatter.orcm");
             loadModelResource("static/Cox.orcm");
             loadModelResource("static/Beholder.orcm");
+            loadModelResource("static/Reaper.orcm");
             loadModelResource("static/BeholderDead.orcm");
             loadModelResource("static/Hero.orcm");
             loadModelResource("static/Crate.orcm");
@@ -95,6 +98,10 @@ package game {
             ctx.shaderMgr.createShaderFromJSON("Particle",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/particle_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/particle_fp.txt"), ShaderTranslator.FRAGMENT));
+
+            ctx.shaderMgr.createShaderFromJSON("ParticleAlpha",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/particle_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/particle_alpha_fp.txt"), ShaderTranslator.FRAGMENT));
 
             ctx.shaderMgr.createShaderFromJSON("Tex2d",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_vp.txt"), ShaderTranslator.VERTEX),
@@ -180,7 +187,7 @@ package game {
             return m;
         }
 
-        public function createParticleMaterial(name:String, texturePath:String):Material {
+        public function createParticleAdditiveMaterial(name:String, texturePath:String):Material {
             var m:Material;
             var p:Pass;
             m = ctx.materialMgr.createMaterial(name);
@@ -190,6 +197,21 @@ package game {
             p.depthMask = false;
             p.transparent = true;
             p.shader = ctx.shaderMgr.getShader("Particle");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
+        public function createParticleMultiplyMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.sourceBlendFactor = Context3DBlendFactor.SOURCE_ALPHA;
+            p.destBlendFactor = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+            p.depthMask = false;
+            p.transparent = true;
+            p.shader = ctx.shaderMgr.getShader("ParticleAlpha");
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
             m.addPass(p);
             return m;
@@ -210,6 +232,17 @@ package game {
             return m;
         }
 
+        private function createAnimatedLightMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.shader = ctx.shaderMgr.getShader("AnimatedLight");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
         public function initMaterials():void {
             var m:Material;
             var p:Pass;
@@ -224,11 +257,8 @@ package game {
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/chess.png");
             m.addPass(p);
 
-            m = ctx.materialMgr.createMaterial("Beholder");
-            p = new Pass();
-            p.shader = ctx.shaderMgr.getShader("AnimatedLight");
-            p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/beholder.png");
-            m.addPass(p);
+            createAnimatedLightMaterial("Beholder", "static/beholder.png");
+            createAnimatedLightMaterial("Reaper", "static/reaper.png");
 
             createTexturedMaterial("Hero", "static/hero.png");
             createTexturedMaterial("Blade", "static/blade.png");
@@ -238,6 +268,7 @@ package game {
             createTexturedMaterial("PickableH", "static/pickable_h.png");
             createTexturedMaterial("PickableC", "static/pickable_c.png");
             createTexturedMaterial("PickableF", "static/pickable_f.png");
+            createTexturedMaterial("PickableM", "static/pickable_m.png");
             createTexturedMaterial("PickableEye", "static/pickable_eye.png");
             createTexturedMaterial("PickablePoint", "static/pickable_point.png");
             createTexturedMaterial("FloorNice", "static/tile_chess_nice.png");
@@ -260,9 +291,10 @@ package game {
             createTexturedMultiplyMaterial("RoundShadow", "static/round_shadow.png");
             createTexturedMultiplyMaterial("BloodSpatter", "static/blood_spatter.png");
 
-            createTexturedMultiplyMaterial("BeholderDead", "static/beholder_dead.png");
+            createTexturedAlphaMaterial("BeholderDead", "static/beholder_dead.png");
 
-            createParticleMaterial("Particle1", "static/particle_1.png");
+            createParticleAdditiveMaterial("Particle1", "static/particle_1.png");
+            createParticleMultiplyMaterial("ParticleDeath", "static/particle_death.png");
 
             createTex2dMaterial("Black2d", "static/black.png");
 
@@ -280,6 +312,7 @@ package game {
         public function initModels():void {
             ctx.skeletonMgr.loadSkeletonResource("static/CoxSkeleton.orcs");
             ctx.skeletonMgr.loadSkeletonResource("static/BeholderSkeleton.orcs");
+            ctx.skeletonMgr.loadSkeletonResource("static/ReaperSkeleton.orcs");
 
             for (var i:int = 0; i < modelResources.length; ++i) {
                 ctx.modelMgr.loadModelResource(modelResources[i]);

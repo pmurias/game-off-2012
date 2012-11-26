@@ -2,12 +2,15 @@ package game {
     import flash.geom.Vector3D;
     import game.spawners.SharpItem;
     import gremlin.core.Context;
+    import gremlin.scene.ModelEntity;
     import gremlin.scene.Scene;
 	/**
      * ...
      * @author mosowski
      */
     public class Hero extends GameObject {
+        public var entity:ModelEntity;
+        public var rotation:Number;
         public var velocity:Vector3D;
         public var moveTarget:Vector3D;
         public var moveTargetSet:Boolean;
@@ -15,6 +18,8 @@ package game {
         public var scene:Scene;
         public var isMortal:Boolean;
         public var isDead:Boolean;
+        public var collisionEnabled:Boolean;
+
 
         public function Hero(gameCtx:GameContext) {
             super(gameCtx);
@@ -23,7 +28,7 @@ package game {
 
             velocity = new Vector3D();
             moveTarget = new Vector3D();
-            speed = 1.0;
+            rotation = 0;
             isMortal = false;
             isDead = false;
             enableShadow();
@@ -46,7 +51,7 @@ package game {
             super.tick();
             if (isDead == false) {
                 if (moveTargetSet) {
-                    velocity.setTo(moveTarget.x - node.position.x, moveTarget.y - node.position.y, moveTarget.z - node.position.z);
+                    velocity.setTo(moveTarget.x - node.position.x, 0, moveTarget.z - node.position.z);
                     if (velocity.lengthSquared < 0.1) {
                         velocity.setTo(0, 0, 0);
                         moveTargetSet = false;
@@ -69,47 +74,48 @@ package game {
                     if (isMortal == true) {
                         die();
                     }
-                } else {
-                    var collidingTile:Tile = gameCtx.level.checkNearTileCollision(this);
-                    if (collidingTile != null) {
-                        node.position.decrementBy(velocity);
-                        if (isMortal == true && collidingTile.type.isLethal == true) {
-                            die();
-                        }
-                    } else {
-                        var halfVelocity:Vector3D = velocity.clone();
-                        halfVelocity.scaleBy(0.5);
-                        for (i = 0; i < gameCtx.crates.length; ++i) {
-                            var crate:Crate = gameCtx.crates[i];
-                            if (collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
-                                crate.node.position.incrementBy(halfVelocity);
-                                crate.collisionComponent.updatePosition();
+                }
+                var collidingTile:Tile = gameCtx.level.checkNearTileCollision(this);
+                if (isDead == false && collidingTile != null) {
+                    node.position.decrementBy(velocity);
+                    if (isMortal == true && collidingTile.type.isLethal == true) {
+                        die();
+                    }
+                }
 
-                                var crateCanMove:Boolean = true;
-                                for (var j:int = 0; j < gameCtx.gameObjects.length; ++j) {
-                                    var gameObject:GameObject = gameCtx.gameObjects[j];
-                                    if (gameObject.collisionComponent != null && gameObject != this && gameObject != crate) {
-                                        if (gameObject.collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
-                                            crateCanMove = false;
-                                            break;
-                                        }
+                if (isDead == false) {
+                    var halfVelocity:Vector3D = velocity.clone();
+                    halfVelocity.scaleBy(0.5);
+                    for (i = 0; i < gameCtx.crates.length; ++i) {
+                        var crate:Crate = gameCtx.crates[i];
+                        if (collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
+                            crate.node.position.incrementBy(halfVelocity);
+                            crate.collisionComponent.updatePosition();
+
+                            var crateCanMove:Boolean = true;
+                            for (var j:int = 0; j < gameCtx.gameObjects.length; ++j) {
+                                var gameObject:GameObject = gameCtx.gameObjects[j];
+                                if (gameObject.collisionComponent != null && gameObject != this && gameObject != crate) {
+                                    if (gameObject.collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
+                                        crateCanMove = false;
+                                        break;
                                     }
                                 }
-                                if (gameCtx.level.checkNearTileCollision(crate)) {
-                                    crateCanMove = false;
-                                }
+                            }
+                            if (gameCtx.level.checkNearTileCollision(crate)) {
+                                crateCanMove = false;
+                            }
 
-                                if (crateCanMove == true) {
-                                    crate.node.markAsDirty();
-                                    node.position.decrementBy(halfVelocity);
-                                    collisionComponent.updatePosition();
-                                } else {
-                                    crate.node.position.decrementBy(halfVelocity);
-                                    crate.collisionComponent.updatePosition();
+                            if (crateCanMove == true) {
+                                crate.node.markAsDirty();
+                                node.position.decrementBy(halfVelocity);
+                                collisionComponent.updatePosition();
+                            } else {
+                                crate.node.position.decrementBy(halfVelocity);
+                                crate.collisionComponent.updatePosition();
 
-                                    node.position.decrementBy(velocity);
-                                    break;
-                                }
+                                node.position.decrementBy(velocity);
+                                break;
                             }
                         }
                     }
@@ -120,6 +126,16 @@ package game {
                 if (velocity.lengthSquared > 0) {
                     node.markAsDirty();
                 }
+
+                if (velocity.x != 0 || velocity.z != 0) {
+                    var newRot:Number = Math.atan2( -velocity.x, -velocity.z);
+
+                    rotation = gameCtx.ctx.mathUtils.getSmoothlyBlendedAngle(rotation, newRot, 0.1);
+                }
+
+                node.rotation.setFromAxisAngle(Vector3D.Y_AXIS, rotation);
+
+                node.markAsDirty();
             } else {
                 velocity.setTo(0, 0, 0);
             }

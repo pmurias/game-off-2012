@@ -28,6 +28,7 @@ package gremlin.animation {
             isPlayingOnce = true;
             isActive = true;
             time = 0;
+            currentFrame = 0;
         }
 
         public function gotoAndPlay(_time:Number = 0):void {
@@ -35,7 +36,7 @@ package gremlin.animation {
             isActive = true;
             time = (_time * fps) % animation.length;
             for (var i:int = animation.frames.length - 1; i >=0; --i) {
-                if (time > animation.frames[i]) {
+                if (time >= animation.frames[i]) {
                     currentFrame = i;
                     break;
                 }
@@ -47,7 +48,7 @@ package gremlin.animation {
             isActive = false;
             time = (_time * fps) % animation.length;
             for (var i:int = animation.frames.length - 1; i >=0; --i) {
-                if (time > animation.frames[i]) {
+                if (time >= animation.frames[i]) {
                     currentFrame = i;
                     break;
                 }
@@ -66,7 +67,7 @@ package gremlin.animation {
             if (isActive == true) {
                 time = time + deltaTime * fps;
                 if (isPlayingOnce == true && time >= animation.length) {
-                    time = animation.length-0.1;
+                    time = animation.length-0.001;
                     isActive = false;
                     dispatch(ANIMATION_COMPELTED);
                 }

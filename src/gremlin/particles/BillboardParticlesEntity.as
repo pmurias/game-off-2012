@@ -29,6 +29,12 @@ package gremlin.particles {
         public var minVelocity:Number;
         public var maxVelocity:Number;
 
+        public var minRotation:Number;
+        public var maxRotation:Number;
+
+        public var minOmega:Number;
+        public var maxOmega:Number;
+
         // ABGR
         public var minStartColor:uint;
         public var maxStartColor:uint;
@@ -45,7 +51,7 @@ package gremlin.particles {
             uvs[2] = new Point(1, 1);
             uvs[3] = new Point(1, 0);
 
-            data32PerVertex = 14;
+            data32PerVertex = 16;
         }
 
         public function BillboardParticlesEntity(_ctx:Context) {
@@ -79,7 +85,7 @@ package gremlin.particles {
             vertexBuffer.addStream("uvBornLife", Context3DVertexBufferFormat.FLOAT_4);
             vertexBuffer.addStream("startPos", Context3DVertexBufferFormat.FLOAT_3);
             vertexBuffer.addStream("deltaPos", Context3DVertexBufferFormat.FLOAT_3);
-            vertexBuffer.addStream("size", Context3DVertexBufferFormat.FLOAT_2);
+            vertexBuffer.addStream("sizeRotation", Context3DVertexBufferFormat.FLOAT_4);
             vertexBuffer.addStream("startColor", Context3DVertexBufferFormat.BYTES_4);
             vertexBuffer.addStream("endColor", Context3DVertexBufferFormat.BYTES_4);
         }
@@ -98,6 +104,9 @@ package gremlin.particles {
 
             var startSize:Number = minStartSize + (maxStartSize - minStartSize) * Math.random();
             var deltaSize:Number = minEndSize + (maxEndSize - minEndSize) * Math.random() - startSize;
+
+            var startRotation:Number = minRotation + (maxRotation - minRotation) * Math.random();
+            var deltaRotation:Number = minOmega + (maxOmega - minOmega) * Math.random() * life;
 
             var f:Number = Math.random();
             var startColor:uint =
@@ -132,6 +141,8 @@ package gremlin.particles {
 
                 vertexData.writeFloat(startSize);
                 vertexData.writeFloat(deltaSize);
+                vertexData.writeFloat(startRotation);
+                vertexData.writeFloat(deltaRotation);
 
                 vertexData.writeUnsignedInt(startColor);
                 vertexData.writeUnsignedInt(endColor);

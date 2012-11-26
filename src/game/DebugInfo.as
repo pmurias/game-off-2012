@@ -11,6 +11,7 @@ package game {
         public var fpsTimor:Number;
         public var fpsCounter:int;
         public var fpsText:TextField;
+        public var driverText:TextField;
 
 
         public function DebugInfo(_ctx:Context) {
@@ -19,9 +20,17 @@ package game {
             fpsText.x = 0;
             fpsText.y = 0;
             fpsText.textColor = 0xFFFF00;
+            fpsText.selectable = false;
             addChild(fpsText);
             fpsTimor = ctx.time;
             fpsCounter = 0;
+
+            driverText = new TextField();
+            driverText.x = 0;
+            driverText.y = 10;
+            driverText.selectable = false;
+            driverText.textColor = 0xFFFF00;
+            addChild(driverText);
         }
 
         public function tick():void {
@@ -29,6 +38,7 @@ package game {
                 fpsText.text = fpsCounter.toString();
                 fpsCounter = 0;
                 fpsTimor = ctx.time;
+                driverText.text = ctx.ctx3d.driverInfo;
             }
             fpsCounter++;
         }

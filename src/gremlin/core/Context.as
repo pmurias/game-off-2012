@@ -1,6 +1,7 @@
 package gremlin.core {
     import flash.display.Stage;
     import flash.display3D.Context3D;
+    import flash.display3D.Context3DRenderMode;
     import flash.display3D.IndexBuffer3D;
     import flash.display3D.Program3D;
     import flash.display3D.textures.Texture;
@@ -41,6 +42,7 @@ package gremlin.core {
     public class Context extends EventDispatcher {
         public var stage:Stage;
         public var ctx3d:Context3D;
+        public var constrainedMode:Boolean;
         public var stats:MemoryStats;
         public var time:Number;
         public var restorableResources:Vector.<IRestorable>;
@@ -144,6 +146,14 @@ package gremlin.core {
         }
 
         private function onContextReady(e:Event = null):void {
+            if (stage.stage3Ds[0].context3D.driverInfo.indexOf("oftware") != -1) {
+                if (stage.stage3Ds[0].requestContext3D.length == 2 && constrainedMode == false) {
+                    stage.stage3Ds[0].requestContext3D(Context3DRenderMode.AUTO, "baselineConstrained");
+                    constrainedMode = true;
+                    return;
+                }
+            }
+
             stage.stage3Ds[0].removeEventListener(Event.CONTEXT3D_CREATE, onContextReady);
             stage.stage3Ds[0].addEventListener(Event.CONTEXT3D_CREATE, onContextRecreated);
             stage.addEventListener(Event.RESIZE, onStageResize);

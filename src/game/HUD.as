@@ -23,8 +23,10 @@ package game {
             pointsTextField.y = 20;
             pointsTextField.textColor = 0xFFFFFF;
             pointsTextField.alpha = 0.5;
-            pointsTextField.defaultTextFormat = new TextFormat("Decade", 20);
+            pointsTextField.embedFonts = true;
+            pointsTextField.defaultTextFormat = new TextFormat("FontDecade", 20);
             pointsTextField.text = "Points: 0";
+            pointsTextField.selectable = false;
 
             deathsTextField = new TextField();
             sprite.addChild(deathsTextField);
@@ -32,8 +34,10 @@ package game {
             deathsTextField.y = 45;
             deathsTextField.textColor = 0xFFFFFF;
             deathsTextField.alpha = 0.5;
-            deathsTextField.defaultTextFormat = new TextFormat("Decade", 15);
+            deathsTextField.embedFonts = true;
+            deathsTextField.defaultTextFormat = new TextFormat("FontDecade", 15);
             deathsTextField.text = "Deaths: 0";
+            deathsTextField.selectable = false;
         }
 
     }
