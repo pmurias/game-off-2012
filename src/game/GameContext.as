@@ -265,6 +265,7 @@ package game {
         }
 
         public function goal():void {
+            currentPoints = 0;
             destroyLevel();
             clearBodies();
             levelConfigType = levelConfig.nextLevelConfig;
