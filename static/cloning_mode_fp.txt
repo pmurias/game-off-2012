@@ -1,11 +1,12 @@
 
-sampler main
+//sampler main
 sampler clone
 
-red = tex2D(varying0.xy, main)
+//red = tex2D(varying0.xy, main)
 blue = tex2D(varying0.xy, clone)
 
-blend = red + blue
-out = blend * 0.5
+//blend = red + blue
+//out = blend * 0.5
+out = blue
 
 
