@@ -12,6 +12,8 @@ Most of instructions are given at tutorial levels. You command a cloned clockwor
 Screenshots:
 ============
 
+![Screenshot1](https://raw.github.com/mosowski/game-off-2012/master/screenshots/level6.png)
+
 Creation notes:
 ================
 
