@@ -19,8 +19,7 @@ package game {
         public var context:LoaderContext = new LoaderContext();
         public var videoId:String;
 
-        public function YoutubePlayer(videoId:String) {
-            this.videoId = videoId;
+        public function YoutubePlayer() {
             context.checkPolicyFile = true;
             context.securityDomain = SecurityDomain.currentDomain;
             context.applicationDomain = ApplicationDomain.currentDomain;
@@ -28,6 +27,19 @@ package game {
             loader.contentLoaderInfo.addEventListener(Event.INIT, onLoaderInit);
             Security.allowDomain("www.youtube.com")
             loader.load(new URLRequest("http://www.youtube.com/apiplayer?version=3"));
+        }
+
+        public function play(id:String):void {
+            if (id != videoId) {
+                videoId = id;
+                if (player != null) {
+                    player.stopVideo();
+                    player.loadPlaylist([ videoId ] );
+                    player.setLoop(true);
+                    player.setSize(1, 1);
+                    player.playVideo();
+                }
+            }
         }
 
         public function onLoaderInit(event:Event):void {
@@ -38,9 +50,11 @@ package game {
 
         public function onPlayerReady(event:Event):void {
             player = loader.content;
-            player.loadPlaylist([ videoId ] );
-            player.setLoop(true);
-            player.setSize(1, 1);
+            if (videoId) {
+                player.loadPlaylist([ videoId ] );
+                player.setLoop(true);
+                player.setSize(1, 1);
+            }
         }
     }
 

@@ -1,22 +1,32 @@
-Game is slowly showing up:
+Mania! Push your perception to the limit!
+=========================================
+
+Most recent version of the game:
 http://mosowski.github.com/game-off-2012
 
-Rendering engine: Gremlin-2nd iteration is mostly done, now I'm going to create more assets and finally a gameplay.
-I have very limited time after work, so few features I've planned won't be present in a game at the end of November.
+Instructions:
+=============
 
+Most of instructions are given at tutorial levels. You command a cloned clockwork demon beholder pushed into another realm. Rule is simple, to escape terrifying dimmension, you have to reach the goal point on each level, collecting as many points as you can. There are plenty obstacles in the game, static and moving as well, sometimes you will have to push some crates and solve a riddle, but main difficulty in this game is orientation. Screen will rotate and stretch more and more over time. Can you handle this?
 
-Game is going to be a challenging maze filled up with illusions and modes. Use of third dimmension is necessary!
+Screenshots:
+============
 
+Creation notes:
+================
 
-Gremlin engine was made for the purpose of this game. It is my second attempt at writing browser-based 3d rendering engine. It is wirtten totally in ActionScript and uses stage3d for rendering.
-It uses upgraded version of my blender model and skeleton exporter. Engine supports texture render targets, postprocess via 
-rendering quad with shaders, AGAL shading language wrapper that makes writing stage3d shaders bearable, of course skeletal animation
-and scene graph with material-based renderable system. Some of the features still require a lot of work, but now I need more focus on 
-gameplay.
+Weeks 1 & 2:
+Creating rendering engine I've called Gremlin. It is my attempt of creating raw Stage3D based Flash renderer. Although I've created similar stuff before, this time I needed to write whole new engine.
 
---
+Week 3:
+Gameplay programming. I've created map exporter for Blender, tileset assets, textures, collision system for the game and character movement.
+
+Week 4:
+Content programming. I've put enemy to the game, created tutorial and levels. Most of time I was in hurry, so code quality dropped a lot :(
+
 
 Open Source projects I'm using in this game:
+============================================
 
 Blender:
 3d modelling, map editing, animation. 
@@ -32,4 +42,8 @@ Great IDE for flash development.
 
 telemetry-utils: https://github.com/adamcath/telemetry-utils
 A script which enables Adobe Scout profiling flag.
+
+
+Adobe AGALMiniAssembler.as
+Adobe AGAL assembler to bytecode translator.
 

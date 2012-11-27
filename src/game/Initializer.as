@@ -42,8 +42,17 @@ package game {
             required.addDataUrl("static/textured_light_fp.txt");
             required.addDataUrl("static/animated_light_vp.txt");
             required.addDataUrl("static/cloning_mode_fp.txt");
+            required.addDataUrl("static/vortal_fp.txt");
 
             required.addDataUrl("static/map.bmap");
+            required.addDataUrl("static/level0.bmap");
+            required.addDataUrl("static/level1.bmap");
+            required.addDataUrl("static/level2.bmap");
+            required.addDataUrl("static/level3.bmap");
+            required.addDataUrl("static/level4.bmap");
+            required.addDataUrl("static/level5.bmap");
+            required.addDataUrl("static/level6.bmap");
+            required.addDataUrl("static/level7.bmap");
 
             required.addDataUrl("static/CoxSkeleton.orcs");
             required.addDataUrl("static/BeholderSkeleton.orcs");
@@ -76,6 +85,7 @@ package game {
             loadModelResource("static/TileGrass.orcm");
             loadModelResource("static/TileGrassSlot.orcm");
             loadModelResource("static/TileVortal.orcm");
+            loadModelResource("static/TileVortalWalled.orcm");
 
             required.load(onRequiredAssetsLoaded);
         }
@@ -111,6 +121,7 @@ package game {
                 translator.translate(ctx.loaderMgr.getLoaderString("static/tex2d_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/cloning_mode_fp.txt"), ShaderTranslator.FRAGMENT));
 
+
             ctx.shaderMgr.createShaderFromJSON("Animated",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/animated_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/animated_fp.txt"), ShaderTranslator.FRAGMENT));
@@ -118,6 +129,10 @@ package game {
             ctx.shaderMgr.createShaderFromJSON("Textured",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_fp.txt"), ShaderTranslator.FRAGMENT));
+
+            ctx.shaderMgr.createShaderFromJSON("Vortal",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/textured_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/vortal_fp.txt"), ShaderTranslator.FRAGMENT));
 
             ctx.shaderMgr.createShaderFromJSON("TexturedLight",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_vp.txt"), ShaderTranslator.VERTEX),
@@ -247,7 +262,6 @@ package game {
             var m:Material;
             var p:Pass;
 
-            ctx.textureMgr.createRenderTargetTextureResource("bigRTT1", 1024, 1024);
             ctx.textureMgr.createRenderTargetTextureResource("bigRTT2", 512, 512);
 
 
@@ -286,7 +300,6 @@ package game {
             createTexturedMaterial("FloorShadeOuterCorner", "static/tile_chess_outer_corner.png");
             createTexturedMaterial("Grass", "static/tile_grass.png");
             createTexturedMaterial("GrassShade", "static/tile_grass_shade.png");
-            createTexturedAlphaMaterial("Vortal", "static/vortal.png");
 
             createTexturedMultiplyMaterial("RoundShadow", "static/round_shadow.png");
             createTexturedMultiplyMaterial("BloodSpatter", "static/blood_spatter.png");
@@ -301,11 +314,20 @@ package game {
             m = ctx.materialMgr.createMaterial("CloningMode");
             p = new Pass();
             p.shader = ctx.shaderMgr.getShader("CloningMode");
-            p.samplers["main"] = ctx.textureMgr.getTextureResource("bigRTT1");
+            p.destBlendFactor = Context3DBlendFactor.ONE;
+            p.sourceBlendFactor = Context3DBlendFactor.ONE;
             p.samplers["clone"] = ctx.textureMgr.getTextureResource("bigRTT2");
             m.addPass(p);
 
-            ctx.renderTargetMgr.createRenderTargetFromTexture("bigRT1", ctx.textureMgr.getTextureResource("bigRTT1"));
+            m = ctx.materialMgr.createMaterial("Vortal");
+            p = new Pass();
+            p.shader = ctx.shaderMgr.getShader("Vortal");
+            p.destBlendFactor = Context3DBlendFactor.ONE;
+            p.sourceBlendFactor = Context3DBlendFactor.ONE;
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource("static/vortal.png");
+            p.samplers["frame"] = ctx.textureMgr.loadTextureResource("static/vortal_frame.png");
+            m.addPass(p);
+
             ctx.renderTargetMgr.createRenderTargetFromTexture("bigRT2", ctx.textureMgr.getTextureResource("bigRTT2"));
         }
 

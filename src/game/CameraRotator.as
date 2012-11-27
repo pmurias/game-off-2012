@@ -41,12 +41,18 @@ package game {
         }
 
         public function resetAlpha():void {
-            alphaValue = (alpha * gameCtx.time) % (Math.PI * 2);
+            alphaValue = (alpha * gameCtx.time * gameCtx.levelConfig.alphaScale) % (Math.PI * 2);
+            if (alphaValue < 0) {
+                alphaValue += Math.PI * 2;
+            }
         }
 
         public function tick():void {
             if (deadMode == false) {
-                alphaValue = (alphaValue + alpha * gameCtx.timeStep) % (Math.PI * 2);
+                alphaValue = (alphaValue + alpha * gameCtx.timeStep * gameCtx.levelConfig.alphaScale * gameCtx.calmFactor) % (Math.PI * 2);
+                if (alphaValue < 0) {
+                    alphaValue += Math.PI * 2;
+                }
             } else {
                 beta += 2.0 * gameCtx.timeStep;
             }

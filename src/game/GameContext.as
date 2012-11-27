@@ -18,6 +18,12 @@ package game {
     import game.commands.Commander;
     import game.commands.CommandSetHeroPosition;
     import game.commands.CommandSetHeroVelocity;
+    import game.levels.Level0;
+    import game.levels.Level4;
+    import game.levels.Level5;
+    import game.levels.Level6;
+    import game.levels.Level7;
+    import game.levels.LevelConfig;
     import game.modes.CloningMode;
     import game.modes.FairMode;
     import game.modes.Mode;
@@ -29,6 +35,7 @@ package game {
     import game.spawners.SharpItem;
     import game.spawners.Spawner;
     import gremlin.core.Context;
+    import gremlin.events.EventDispatcher;
     import gremlin.events.KeyCodes;
     import gremlin.gremlin2d.Quad2d;
     import gremlin.lights.DirectionaLight;
@@ -43,7 +50,7 @@ package game {
      * ...
      * @author mosowski
      */
-    public class GameContext {
+    public class GameContext extends EventDispatcher {
         public var ctx:Context;
         public var stage:Stage;
         public var graphics:Graphics;
@@ -53,6 +60,11 @@ package game {
         public var uniqueId:uint;
         public var commander:Commander;
         public var level:Level;
+        public var levelConfig:LevelConfig;
+        public var levelConfigType:Class;
+        public var youTube:YoutubePlayer;
+        public var calmFactor:Number;
+        public var calmDownActive:Boolean;
         public var gameObjects:Vector.<GameObject>;
         public var tileSet:TileSet;
 
@@ -85,16 +97,20 @@ package game {
         public var staticEmbeded:StaticEmbeded;
         public var splasher:Splasher;
         public var hud:HUD;
+        public var tipManager:TipManager;
 
         public var points:int;
+        public var currentPoints:int;
         public var deaths:int;
+
+        public static const TICK:String = "tick";
 
         public function GameContext(_ctx:Context) {
             ctx = _ctx;
             stage = ctx.stage;
 
-            var yt:YoutubePlayer = new YoutubePlayer("i5KORjVtczU");
-            stage.addChild(yt);
+            youTube = new YoutubePlayer();
+            stage.addChild(youTube);
         }
 
         public function setupState():void {
@@ -138,6 +154,7 @@ package game {
             splasher = new Splasher(this);
             hud = new HUD(this);
 
+            levelConfigType = Level0;
             initLevel();
 
             ctx.addListener(Context.RESIZE, onResize);
@@ -152,14 +169,27 @@ package game {
         }
 
         public function initLevel():void {
-            level = new Level(this, 0, 0, 0, ctx.rootNode);
-            level.fromObject(ctx.loaderMgr.getLoaderJSON("static/map.bmap"), tileSet);
-            level.layers[0].setScene(layer0);
+            if (tipManager != null) {
+                tipManager.destroy();
+            }
+            tipManager = new TipManager(this);
+            levelConfig = new levelConfigType(this);
+            levelConfig.init();
+            if (youTube) {
+                youTube.play(levelConfig.musicId);
+            }
+            calmFactor = 1.0;
+            calmDownActive = false;
+            level = levelConfig.level;
 
             hero = new HeroPlayer(this);
 
-            var gr:HeroReaper = new HeroReaper(this);
-            gr.setPosition(10, 0, 5);
+            //ta = new TipArea(this);
+            //ta.node = new Node();
+            //ta.node.setPosition(0, 2.5, 0);
+            //gr.node.addChild(ta.node);
+            //ta.setSize(200, 100);
+            //ta.setText("Hello, hello, my little friend");
 
             mode = new FairMode(this);
             mode.enter();
@@ -174,7 +204,7 @@ package game {
             commander.tick();
         }
 
-        public function resetLevel():void {
+        public function destroyLevel():void {
             spawners.length = 0;
             for (var i:int = 0; i < gameObjects.length; ++i) {
                 gameObjects[i].destroy();
@@ -188,6 +218,7 @@ package game {
             pickables.length = 0;
             heroesById = [];
             pickablesById = [];
+            mode.destroy();
 
         }
 
@@ -212,7 +243,7 @@ package game {
         public function onDeathCompleted(params:Object = null):void {
             deathBlackout.end();
             new BeholderDead(this, hero.node);
-            resetLevel();
+            destroyLevel();
             initLevel();
         }
 
@@ -221,16 +252,43 @@ package game {
 
         public function addPoints(value:int):void {
             points += value;
+            currentPoints += value;
             hud.pointsTextField.text = "Points: " + points;
         }
 
         public function addDeath():void {
             deaths++;
+            points -= currentPoints;
+            currentPoints = 0;
             hud.deathsTextField.text = "Deaths: " + deaths;
+            hud.pointsTextField.text = "Points: " + points;
+        }
+
+        public function goal():void {
+            destroyLevel();
+            clearBodies();
+            levelConfigType = levelConfig.nextLevelConfig;
+            initLevel();
+        }
+
+        public function calmDown():void {
+            if (calmDownActive == false) {
+                calmFactor = 0.2;
+                calmDownActive = true;
+                ctx.tweener.delayedCall(calmDownEnd, 15.0);
+            }
+        }
+
+        public function calmDownEnd():void {
+            if (calmDownActive == true) {
+                calmFactor = 1.0;
+                calmDownActive = false;
+            }
         }
 
         private function tick(e:Event):void {
             time += timeStep;
+            dispatch(TICK);
             mode.tick();
             deathBlackout.tick();
 
@@ -249,6 +307,15 @@ package game {
             }
 
             commander.tick();
+        }
+
+        private function clearBodies():void {
+            for (var i:int = deadBodies.length-1; i >= 0; --i) {
+                deadBodies[i].destroy();
+            }
+            for (i = bloodSpatters.length-1; i >= 0; --i) {
+                bloodSpatters[i].destroy();
+            }
         }
 
         private function onEnterFrame(params:Object = null):void {

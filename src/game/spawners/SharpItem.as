@@ -28,20 +28,19 @@ package game.spawners {
         override public function tick():void {
             super.tick();
             if (dead == false) {
-                speed = 0.1;
-                node.position.x += direction.x * speed;
-                node.position.z += direction.z * speed;
+                node.position.x += direction.x * speed * gameCtx.timeStep;
+                node.position.z += direction.z * speed * gameCtx.timeStep;
                 node.markAsDirty();
 
                 customTick();
 
                 var currentTile:Tile = gameCtx.level.getTileAtPosition(node.position, 0);
-                if (currentTile.type.blocking && currentTile != homeTile) {
+                if (currentTile == null || currentTile.type == null || currentTile.type.blocking && currentTile != homeTile) {
                     dead = true;
                 } else {
                     for (var i:int = 0; i < gameCtx.crates.length; ++i) {
                         var crate:Crate = gameCtx.crates[i];
-                        if (crate.collisionComponent.bounds.intersects(collisionComponent.bounds)) {
+                        if (crate.collisionComponent.intersects(collisionComponent)) {
                             dead = true;
                             break;
                         }

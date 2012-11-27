@@ -15,9 +15,9 @@ package gremlin.tweener {
             numActiveTweens = 0;
         }
 
-        public function delayedCall(call:Function, delay:Number):void {
+        public function delayedCall(call:Function, delay:Number, linkedObject:Object = null):void {
             var tween:Tween = getTween();
-            tween.object = null;
+            tween.object = linkedObject;
             tween.duration = delay;
             tween.startTime = ctx.time;
             tween.completeTime = ctx.time + tween.duration;
@@ -50,6 +50,15 @@ package gremlin.tweener {
             return tween;
         }
 
+        private function removeTween(tween:Tween):void {
+            tweens[numActiveTweens - 1].id = tween.id;
+            tweens[tween.id] = tweens[numActiveTweens - 1];
+            tween.id = numActiveTweens - 1;
+            tweens[numActiveTweens - 1] = tween;
+            tween.object = null;
+            tween.onComplete = null;
+        }
+
         public function tick():void {
             for (var i:int = numActiveTweens - 1; i >= 0; --i) {
                 var tween:Tween = tweens[i];
@@ -61,12 +70,7 @@ package gremlin.tweener {
                         tween.object[tween.propertyName] = tween.destinationValue;
                     }
 
-                    tweens[numActiveTweens - 1].id = tween.id;
-                    tweens[tween.id] = tweens[numActiveTweens - 1];
-                    tween.id = numActiveTweens - 1;
-                    tweens[numActiveTweens - 1] = tween;
-                    tween.object = null;
-                    tween.onComplete = null;
+                    removeTween(tween);
 
                     numActiveTweens--;
                 } else {
@@ -74,6 +78,15 @@ package gremlin.tweener {
                         var f:Number = (ctx.time - tween.startTime) / tween.duration;
                         tween.object[tween.propertyName] = tween.sourceValue + (tween.destinationValue - tween.sourceValue) * f;
                     }
+                }
+            }
+        }
+
+        public function killAllTweensOf(object:Object):void {
+            for (var i:int = numActiveTweens -1; i >= 0; --i) {
+                var tween:Tween = tweens[i];
+                if (tween.object == object) {
+                    removeTween(tween);
                 }
             }
         }

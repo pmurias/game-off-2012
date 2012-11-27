@@ -36,8 +36,11 @@ package game.spawners {
         public function fromObject(object:Object):void {
             speed = object.speed;
             delay = object.delay;
+            if ("offset" in object) {
+                lastSpawnTime += object.offset;
+            }
             direction.setTo(Math.sin(object.rotation), 0, Math.cos(object.rotation));
-            position.setTo(object.position[0]+1, object.position[1]+0.5, object.position[2]);
+            position.setTo(object.position[0], object.position[1]+0.5, object.position[2]);
 
             spawnedType = spawnedTypeByName[object.type];
         }

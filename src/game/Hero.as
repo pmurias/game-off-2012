@@ -68,7 +68,7 @@ package game {
                     var i:int;
                     var collidingSharpItem:SharpItem = null;
                     for (i = 0; i < gameCtx.sharpItems.length; ++i) {
-                        if (gameCtx.sharpItems[i].collisionComponent.bounds.intersects(collisionComponent.bounds)) {
+                        if (gameCtx.sharpItems[i].collisionComponent.intersects(collisionComponent)) {
                             collidingSharpItem = gameCtx.sharpItems[i];
                             break;
                         }
@@ -91,7 +91,7 @@ package game {
                         halfVelocity.scaleBy(0.5);
                         for (i = 0; i < gameCtx.crates.length; ++i) {
                             var crate:Crate = gameCtx.crates[i];
-                            if (collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
+                            if (collisionComponent.intersects(crate.collisionComponent)) {
                                 crate.node.position.incrementBy(halfVelocity);
                                 crate.collisionComponent.updatePosition();
 
@@ -99,9 +99,11 @@ package game {
                                 for (var j:int = 0; j < gameCtx.gameObjects.length; ++j) {
                                     var gameObject:GameObject = gameCtx.gameObjects[j];
                                     if (gameObject.collisionComponent != null && gameObject != this && gameObject != crate) {
-                                        if (gameObject.collisionComponent.bounds.intersects(crate.collisionComponent.bounds)) {
-                                            crateCanMove = false;
-                                            break;
+                                        if (gameObject.collisionComponent.intersects(crate.collisionComponent)) {
+                                            if (!(gameObject is SharpItem)) {
+                                                crateCanMove = false;
+                                                break;
+                                            }
                                         }
                                     }
                                 }

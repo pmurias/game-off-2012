@@ -25,7 +25,6 @@ package game.modes {
             cloneRotator = new CameraRotator(gameCtx);
             mainRotator.node = gameCtx.hero.node;
             cloneRotator.node = gameCtx.hero.node;
-            cloneAlpha = 0.27;
             mainRotator.tick();
             cloneRotator.tick();
 
@@ -50,6 +49,10 @@ package game.modes {
         override public function exit():void {
             exiting = true;
             returningSpeed = Math.abs(gameCtx.ctx.mathUtils.getAngleDistance(cloneRotator.alphaValue, mainRotator.alphaValue)) * gameCtx.timeStep;
+        }
+
+        override public function destroy():void {
+            quad.setScene(null);
         }
 
         override public function processInput():void {
@@ -83,6 +86,7 @@ package game.modes {
             super.tick();
             mainRotator.tick();
             cloneRotator.tick();
+            cloneRotator.alpha += (( -0.18) - cloneRotator.alpha) * 0.005;
 
             if (exiting == true) {
                 cloneRotator.alpha = 0;
@@ -105,17 +109,14 @@ package game.modes {
 
             ctx.rootNode.updateTransformation();
 
-            ctx.setCamera(mainRotator.camera);
-            ctx.renderTargetMgr.renderTargets["bigRT1"].activate();
-            gameCtx.layer0.render();
-            ctx.renderTargetMgr.renderTargets["bigRT1"].finish();
-
             ctx.setCamera(cloneRotator.camera);
             ctx.renderTargetMgr.renderTargets["bigRT2"].activate();
             gameCtx.layer0.render();
             ctx.renderTargetMgr.renderTargets["bigRT2"].finish();
 
+            ctx.setCamera(mainRotator.camera);
             ctx.renderTargetMgr.defaultRenderTarget.activate();
+            gameCtx.layer0.render();
             gameCtx.layerPostprocess.render();
             gameCtx.layerGUI.render();
             ctx.renderTargetMgr.defaultRenderTarget.finish();

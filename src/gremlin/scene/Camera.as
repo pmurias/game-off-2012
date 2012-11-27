@@ -28,8 +28,14 @@ package gremlin.scene {
 
         public function getScreenPosition(v:Vector3D, out:Point):void {
             var outVec:Vector3D = cameraMatrix.transformVector(v);
-            out.x = (outVec.x / outVec.w + 1) * ctx.stage.stageWidth * 0.5;
-            out.y = (outVec.y / outVec.w - 1) * -ctx.stage.stageHeight * 0.5;
+
+            if (outVec.z < 0) {
+                out.x = 10000;
+                out.y = 10000;
+            } else {
+                out.x = (outVec.x / outVec.w + 1) * ctx.stage.stageWidth * 0.5;
+                out.y = (outVec.y / outVec.w - 1) * -ctx.stage.stageHeight * 0.5;
+            }
         }
 
     }

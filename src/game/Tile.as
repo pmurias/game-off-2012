@@ -39,7 +39,7 @@ package game {
             if (modelResource.collisionData.collision2d != null) {
                 collisionComponent = new CollisionComponent(node);
                 collisionComponent.useFullTransformation = true;
-                collisionComponent.setBounds(modelResource.collisionData.collision2d[0]);
+                collisionComponent.setBounds(modelResource.collisionData.collision2d);
             }
             type = tileInfo;
         }

@@ -16,7 +16,7 @@ package game {
             shadow.node.setScale(3, 1, 3);
 
             collisionComponent = new CollisionComponent(node);
-            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d[0]);
+            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d);
         }
 
         override public function destroy():void {

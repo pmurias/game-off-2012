@@ -15,7 +15,7 @@ package game {
 
         override public function destroy():void {
             super.destroy();
-            gameCtx.bloodSpatters.splice(gameCtx.deadBodies.indexOf(this), 1);
+            gameCtx.deadBodies.splice(gameCtx.deadBodies.indexOf(this), 1);
         }
     }
 

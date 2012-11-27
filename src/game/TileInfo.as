@@ -10,6 +10,7 @@ package game {
         public var name:String;
         public var blocking:Boolean;
         public var isLethal:Boolean;
+        public var isGoal:Boolean;
 
         public function TileInfo(_name:String, ...resources) {
             name = _name;

@@ -1,0 +1,11 @@
+
+sampler tex
+sampler frame
+param float time
+
+delta.xy = time.xx
+uv = varying0.xy + delta.xy
+texColor = tex2D(uv.xy, tex)
+frameColor = tex2D(varying0.xy, frame)
+texColor.xyz = texColor.xyz * frameColor.xyz
+out = texColor

@@ -27,6 +27,7 @@ package game {
             addTile("TileGrass");
             addTile("TileGrassSlot");
             addTile("TileVortal");
+            addTile("TileVortalWalled");
 
             types["TileBlock"].blocking = true;
             types["TileFade"].blocking = true;
@@ -36,6 +37,9 @@ package game {
             types["TileSpikes"].isLethal = true;
             types["TileSpikesCorner"].isLethal = true;
             types["TileSpikesOuterCorner"].isLethal = true;
+
+            types["TileVortal"].isGoal = true;
+            types["TileVortalWalled"].isGoal = true;
         }
 
         public function addTile(name:String, modelResourceName:String = ""):void {

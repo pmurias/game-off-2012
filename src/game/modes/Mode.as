@@ -25,6 +25,10 @@ package game.modes {
 
         }
 
+        public function destroy():void {
+
+        }
+
         public function render():void {
 
         }
@@ -35,6 +39,8 @@ package game.modes {
 
         public function processInput():void {
         }
+
+
 
     }
 

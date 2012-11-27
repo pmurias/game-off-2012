@@ -21,7 +21,6 @@ package game {
         public function destroy():void {
             node.removeFromParent();
             entity.removeFromAllScenes();
-            gameCtx.bloodSpatters.splice(gameCtx.bloodSpatters.indexOf(this), 1);
         }
 
     }

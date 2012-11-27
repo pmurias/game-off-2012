@@ -25,6 +25,7 @@ package game {
         public var sourceObject:Object;
 
         public static var pickableTypeByName:Dictionary;
+        public static var enemiesTypeByName:Dictionary;
 
         public function Level(_gameCtx:GameContext, _width:int, _height:int, _layers:int, _rootNode:Node) {
             gameCtx = _gameCtx;
@@ -43,6 +44,11 @@ package game {
                 pickableTypeByName["eye"] = PickableEye;
                 pickableTypeByName["m"] = PickableMerge;
                 pickableTypeByName["c"] = PickableCloningMode;
+            }
+
+            if (enemiesTypeByName == null) {
+                enemiesTypeByName = new Dictionary();
+                enemiesTypeByName["reaper"] = HeroReaper;
             }
         }
 
@@ -89,6 +95,35 @@ package game {
                 crate.node.setPosition(crateSetup.position[0], crateSetup.position[1], crateSetup.position[2]);
             }
 
+            for (i = 0; i < object.level.enemies.length; ++i) {
+                var enemySetup:Object = object.level.enemies[i];
+                var enemy:Hero = new enemiesTypeByName[enemySetup.type](gameCtx);
+                enemy.node.setPosition(enemySetup.position[0], enemySetup.position[1], enemySetup.position[2]);
+            }
+
+            for (i = 0; i < object.level.tips.length; ++i) {
+                var tipSetup:Object = object.level.tips[i];
+                var tipSpawner:TipSpawner = new TipSpawner(gameCtx);
+                tipSpawner.duration = tipSetup.duration;
+                tipSpawner.node = new Node();
+                tipSpawner.spawnPosition.setTo(tipSetup.position[0], tipSetup.position[1], tipSetup.position[2]);
+                tipSpawner.node.copyPositionFrom(tipSpawner.spawnPosition);
+                gameCtx.ctx.rootNode.addChild(tipSpawner.node);
+                tipSpawner.text = tipSetup.text;
+                tipSpawner.mode = tipSetup.mode;
+                tipSpawner.range = tipSetup.range;
+                if (tipSpawner.mode == TipSpawner.GAMEOBJECT) {
+                    for (j = 0; j < gameCtx.gameObjects.length; ++j) {
+                        if (Vector3D.distance(gameCtx.gameObjects[j].node.position, tipSpawner.node.position) < 0.1) {
+                            tipSpawner.gameObject = gameCtx.gameObjects[j];
+                            break;
+                        }
+                    }
+                }
+                gameCtx.tipManager.tips.push(tipSpawner);
+            }
+
+
             startPosition.setTo(object.level['start'][0], object.level['start'][1], object.level['start'][2])
         }
 
@@ -112,7 +147,14 @@ package game {
         }
 
         public function getTileAtPosition(position:Vector3D, l:int):Tile {
-            return layers[l].tiles[int(position.x / 2)][int(position.z / 2)];
+            var x:int = int(position.x / 2);
+            var y:int = int(position.z / 2);
+            if (x < layers[l].tiles.length && x >=0) {
+                if (y < layers[l].tiles[x].length && y >= 0) {
+                    return layers[l].tiles[x][y];
+                }
+            }
+            return null;
         }
 
         public function updateTileBounds():void {
@@ -123,13 +165,13 @@ package game {
 
         public function checkNearTileCollision(gameObject:GameObject):Tile {
             var sourceTile:Tile = getTileAtPosition(gameObject.node.position, 0);
-            var bounds:Rectangle = gameObject.collisionComponent.bounds;
+            var collision:CollisionComponent = gameObject.collisionComponent;
             for (var i:int =  sourceTile.mapx - 1; i <= sourceTile.mapx + 1; ++i) {
                 for (var j:int  = sourceTile.mapy -1; j <= sourceTile.mapy +1; ++j) {
                     if (isPositionOnMap(i, j)) {
                         var tile:Tile = layers[0].tiles[i][j];
                         if (tile.getCollisionComponent() != null) {
-                            if (tile.getCollisionComponent().bounds.intersects(bounds)) {
+                            if (tile.getCollisionComponent().intersects(collision)) {
                                 return tile;
                             }
                         }

@@ -19,7 +19,7 @@ package game.spawners {
             entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Blade"), node);
             entity.addToScene(gameCtx.layer0);
             collisionComponent = new CollisionComponent(node);
-            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d[0]);
+            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d);
             rotation = 0;
             spinningSpeed = 0.3;
             enableShadow();

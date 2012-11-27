@@ -25,7 +25,7 @@ package game.pickable {
 
         public function enableCollision():void {
             collisionComponent = new CollisionComponent(node);
-            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d[0]);
+            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d);
         }
 
         protected function pickCallback(hero:Hero):Boolean {

@@ -32,7 +32,7 @@ package game {
             animatedEntity.setAnimationState("Walk");
             walkAnim.gotoAndPlay();
             collisionComponent = new CollisionComponent(node);
-            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d[0]);
+            collisionComponent.setBounds(entity.modelResource.collisionData.collision2d);
             entity.addToScene(gameCtx.layer0);
             collisionEnabled = false;
             shadow.node.setScale(1.5, 1, 1.5);
@@ -75,15 +75,18 @@ package game {
             super.tick();
             animatedEntity.currentAnimationState.advance(gameCtx.timeStep);
 
-            if (collisionComponent.bounds.intersects(gameCtx.hero.collisionComponent.bounds) && gameCtx.hero.isDead == false) {
+            if (collisionComponent.intersects(gameCtx.hero.collisionComponent) && gameCtx.hero.isDead == false) {
                 if (animatedEntity.currentAnimationState != attackAnim) {
                     animatedEntity.setAnimationState("Attack");
                     attackAnim.addSingleTimeListener(AnimationState.ANIMATION_COMPELTED, onAttackCompleted);
                     attackAnim.playOnce();
                     isAttacking = true;
                     moveTargetSet = false;
+                    var attackDirection:Vector3D = gameCtx.hero.node.position.subtract(node.position);
+                    attackDirection.normalize();
+                    rotation = Math.atan2( -attackDirection.x, -attackDirection.z);
                     velocity.setTo(0, 0, 0);
-                    gameCtx.ctx.tweener.delayedCall(dealHit, 0.5);
+                    gameCtx.ctx.tweener.delayedCall(dealHit, 0.5, this);
                 }
             }
 
@@ -103,7 +106,7 @@ package game {
         }
 
         private function dealHit():void {
-            if (collisionComponent.bounds.intersects(gameCtx.hero.collisionComponent.bounds)) {
+            if (collisionComponent.intersects(gameCtx.hero.collisionComponent)) {
                 gameCtx.hero.die();
             }
         }
@@ -118,6 +121,8 @@ package game {
             particlesDeath.dispose();
             particlesDeath.removeFromAllScenes();
             entity.removeFromAllScenes();
+            speakTip.destroy();
+            gameCtx.ctx.tweener.killAllTweensOf(this);
         }
     }
 
