@@ -121,7 +121,6 @@ package game {
             particlesDeath.dispose();
             particlesDeath.removeFromAllScenes();
             entity.removeFromAllScenes();
-            speakTip.destroy();
             gameCtx.ctx.tweener.killAllTweensOf(this);
         }
     }
