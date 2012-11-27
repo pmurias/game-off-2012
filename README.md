@@ -7,7 +7,7 @@ http://mosowski.github.com/game-off-2012
 Instructions:
 =============
 
-Most of instructions are given at tutorial levels. You command a cloned clockwork demon beholder pushed into another realm. Rule is simple, to escape terrifying dimmension, you have to reach the goal point on each level, collecting as many points as you can. There are plenty obstacles in the game, static and moving as well, sometimes you will have to push some crates and solve a riddle, but main difficulty in this game is orientation. Screen will rotate and stretch more and more over time. Can you handle this?
+Most of instructions are given at tutorial levels. You command one clone of clockwork demon beholder pushed into another realm. Rule is simple, to escape terrifying dimmension, you have to reach the goal point on each level with at least one beholder, collecting as many points as you can. There are plenty obstacles in the game, static and moving as well, sometimes you will have to push some crates and solve a riddle, but main difficulty in this game is orientation. Screen will rotate and stretch more and more over time. Can you handle this?
 
 Screenshots:
 ============
