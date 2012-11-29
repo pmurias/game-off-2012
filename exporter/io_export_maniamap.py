@@ -86,7 +86,13 @@ def save(operator,context, filepath=""):
     tileSet["TileFadeOuterCorner"] = { "code": 11 }
     tileSet["TileGrass"] = { "code": 12 }
     tileSet["TileGrassSlot"] = { "code": 13 }
-    tileSet["TileVortal"] = { "code": 14 }
+    tileSet["TileGrassCorner"] = { "code": 14 }
+    tileSet["TileGrassWalled"] = { "code": 15 }
+    tileSet["TileVortal"] = { "code": 16 }
+    tileSet["TileVortalWalled"] = { "code": 17 }
+    tileSet["TileBranch"] = { "code": 18 }
+    tileSet["TileBranchCorner"] = { "code": 19 }
+    tileSet["TileBranchOuterCorner"] = { "code": 20 }
     
     
     tileNameList = []
@@ -103,6 +109,8 @@ def save(operator,context, filepath=""):
     level["spawners"] = []
     level["pickables"] = []
     level["crates"] = []
+    level["tips"] = []
+    level["enemies"] = []
     
     tiles = [ ]
    
@@ -122,17 +130,21 @@ def save(operator,context, filepath=""):
                         level["layers"] = layerId + 1
                     tiles.append( (tileName,x,y,rotation,layerId) )
                     break
-            if sel.name == "START":
+            if sel.name[:5] == "START":
                 level["start"] = gremlinCoord(sel.location)
                 
             if sel.name.find("SPAWN") != -1:
                 spawner = { }
                 spawner["delay"] = sel["delay"]
                 spawner["speed"] = sel["speed"]
+                if "offset" in sel:
+                    spawner["offset"] = sel["offset"]
                 spawner["position"] = gremlinCoord(sel.location)
                 spawner["rotation"] = -sel.rotation_euler.z
                 if sel.name.find("/BLADE") != -1:
                     spawner["type"] = "blade"
+                if sel.name.find("/FORK") != -1:
+                    spawner["type"] = "fork"
                 level["spawners"].append(spawner)
                 
             if sel.name.find("PICK") != -1:
@@ -155,10 +167,32 @@ def save(operator,context, filepath=""):
             if sel.name[:5] == "CRATE":
                 crate = { }
                 crate["position"] = gremlinCoord(sel.location)
+                crate["type"] = "regular"
                 level["crates"].append(crate)
                 
+            if sel.name[:8] == "BIGCRATE":
+                crate = { }
+                crate["position"] = gremlinCoord(sel.location)
+                crate["type"] = "bigger"
+                level["crates"].append(crate)
                 
+            if sel.name[:3] == "TIP":
+                tip = { }
+                tip["position"] = gremlinCoord(sel.location)
+                tip["text"] = sel["text"]
+                tip["duration"] = sel["duration"]
+                tip["mode"] = sel["mode"]
+                tip["range"] = sel["range"]
+                level["tips"].append(tip)
                 
+            if sel.name[:5] == "ENEMY":
+                enemy = { }
+                enemy["position"] = gremlinCoord(sel.location)
+                enemy["speed"] = sel["speed"]
+                if sel.name.find("/REAPER") != -1:
+                    enemy["type"] = "reaper"
+                    enemy["range"] = sel["range"]                    
+                level["enemies"].append(enemy)
                
                 
         

@@ -57,6 +57,7 @@ package gremlin.tweener {
             tweens[numActiveTweens - 1] = tween;
             tween.object = null;
             tween.onComplete = null;
+            tween.propertyName = null;
         }
 
         public function tick():void {
@@ -66,7 +67,7 @@ package gremlin.tweener {
                     if (tween.onComplete != null) {
                         tween.onComplete();
                     }
-                    if (tween.object != null) {
+                    if (tween.object != null && tween.propertyName != null) {
                         tween.object[tween.propertyName] = tween.destinationValue;
                     }
 
@@ -74,7 +75,7 @@ package gremlin.tweener {
 
                     numActiveTweens--;
                 } else {
-                    if (tween.object != null) {
+                    if (tween.object != null && tween.propertyName != null) {
                         var f:Number = (ctx.time - tween.startTime) / tween.duration;
                         tween.object[tween.propertyName] = tween.sourceValue + (tween.destinationValue - tween.sourceValue) * f;
                     }

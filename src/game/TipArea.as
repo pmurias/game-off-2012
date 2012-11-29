@@ -24,8 +24,9 @@ package game {
         public var height:int;
         public var margin:int;
         public var maxAlpha:Number;
+        public var fitArea:Boolean;
 
-        private var visible:Boolean;
+        public var visible:Boolean;
         private var tweening:Boolean;
 
         public static var glowFilter:Object;
@@ -117,11 +118,16 @@ package game {
             textArea.width = width - 2 * margin;
             textArea.height = height - 2 * margin;
             textArea.text = text;
+            if (fitArea == true) {
+                setSize(width, 25 + textArea.textHeight);
+            }
             textArea.width = textArea.textWidth + 10;
             textArea.height = textArea.textHeight + 10;
             textArea.x = -width /2 + (width - textArea.width)/2;
-            textArea.y = -height - 50 + (height -textArea.height) / 2;
-            tweenIn();
+            textArea.y = -height - 50 + (height -textArea.height) / 2 + 2;
+            if (visible == true) {
+                tweenIn();
+            }
         }
 
         public function tick(params:Object = null):void {

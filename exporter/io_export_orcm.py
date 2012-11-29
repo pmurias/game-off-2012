@@ -44,7 +44,8 @@ class ExportMODEL(bpy.types.Operator, ExportHelper):
             if sel.type == 'ARMATURE':
                 self.data_layout = "pos,norm,uv0,tan,bones,weights"
             if sel.type == 'MESH':
-                modelname = sel.name
+                if sel.name[:6] != "COL2D/":
+                    modelname = sel.name
                 
         if not self.filepath:
             blend_filepath = context.blend_data.filepath

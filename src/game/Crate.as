@@ -10,7 +10,14 @@ package game {
         public function Crate(gameCtx:GameContext) {
             super(gameCtx);
             gameCtx.crates.push(this);
-            entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Crate"), node);
+        }
+
+        public function fromObject(object:Object):void {
+            if (object.type == "regular") {
+                 entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("Crate"), node);
+            } else if (object.type == "bigger") {
+                entity = new ModelEntity(gameCtx.ctx.modelMgr.getModelResource("BiggerCrate"), node);
+            }
             entity.addToScene(gameCtx.layer0);
             enableShadow();
             shadow.node.setScale(3, 1, 3);

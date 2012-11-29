@@ -26,8 +26,13 @@ package game {
             addTile("TileSpikesOuterCorner");
             addTile("TileGrass");
             addTile("TileGrassSlot");
+            addTile("TileGrassCorner");
+            addTile("TileGrassWalled");
             addTile("TileVortal");
             addTile("TileVortalWalled");
+            addTile("TileBranch");
+            addTile("TileBranchCorner");
+            addTile("TileBranchOuterCorner");
 
             types["TileBlock"].blocking = true;
             types["TileFade"].blocking = true;
@@ -37,6 +42,9 @@ package game {
             types["TileSpikes"].isLethal = true;
             types["TileSpikesCorner"].isLethal = true;
             types["TileSpikesOuterCorner"].isLethal = true;
+            types["TileBranch"].isLethal = true;
+            types["TileBranchCorner"].isLethal = true;
+            types["TileBranchOuterCorner"].isLethal = true;
 
             types["TileVortal"].isGoal = true;
             types["TileVortalWalled"].isGoal = true;

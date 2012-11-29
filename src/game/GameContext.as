@@ -23,6 +23,7 @@ package game {
     import game.levels.Level5;
     import game.levels.Level6;
     import game.levels.Level7;
+    import game.levels.Level8;
     import game.levels.LevelConfig;
     import game.modes.CloningMode;
     import game.modes.FairMode;
@@ -99,6 +100,7 @@ package game {
         public var hud:HUD;
         public var tipManager:TipManager;
 
+        public var lastCheckpoint:Vector3D;
         public var points:int;
         public var currentPoints:int;
         public var deaths:int;
@@ -184,21 +186,18 @@ package game {
 
             hero = new HeroPlayer(this);
 
-            //ta = new TipArea(this);
-            //ta.node = new Node();
-            //ta.node.setPosition(0, 2.5, 0);
-            //gr.node.addChild(ta.node);
-            //ta.setSize(200, 100);
-            //ta.setText("Hello, hello, my little friend");
-
             mode = new FairMode(this);
             mode.enter();
 
+            if (lastCheckpoint == null) {
+                lastCheckpoint = level.startPosition.clone();
+            }
+
             var cmdHeroSpawn:CommandSetHeroPosition = new CommandSetHeroPosition();
             cmdHeroSpawn.heroId = hero.id;
-            cmdHeroSpawn.x = level.startPosition.x;
-            cmdHeroSpawn.y = level.startPosition.y;
-            cmdHeroSpawn.z = level.startPosition.z;
+            cmdHeroSpawn.x = lastCheckpoint.x;
+            cmdHeroSpawn.y = lastCheckpoint.y;
+            cmdHeroSpawn.z = lastCheckpoint.z;
             commander.queueCommand(cmdHeroSpawn);
 
             commander.tick();
@@ -266,10 +265,16 @@ package game {
 
         public function goal():void {
             currentPoints = 0;
+            lastCheckpoint = null;
             destroyLevel();
             clearBodies();
             levelConfigType = levelConfig.nextLevelConfig;
             initLevel();
+        }
+
+        public function setCheckpoint(v:Vector3D):void {
+            lastCheckpoint = v.clone();
+            lastCheckpoint.y = 0;
         }
 
         public function calmDown():void {

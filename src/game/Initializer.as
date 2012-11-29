@@ -43,6 +43,8 @@ package game {
             required.addDataUrl("static/animated_light_vp.txt");
             required.addDataUrl("static/cloning_mode_fp.txt");
             required.addDataUrl("static/vortal_fp.txt");
+            required.addDataUrl("static/wavy_textured_light_vp.txt");
+            required.addDataUrl("static/wavy_side_textured_light_vp.txt");
 
             required.addDataUrl("static/map.bmap");
             required.addDataUrl("static/level0.bmap");
@@ -53,6 +55,7 @@ package game {
             required.addDataUrl("static/level5.bmap");
             required.addDataUrl("static/level6.bmap");
             required.addDataUrl("static/level7.bmap");
+            required.addDataUrl("static/level8.bmap");
 
             required.addDataUrl("static/CoxSkeleton.orcs");
             required.addDataUrl("static/BeholderSkeleton.orcs");
@@ -66,6 +69,7 @@ package game {
             loadModelResource("static/BeholderDead.orcm");
             loadModelResource("static/Hero.orcm");
             loadModelResource("static/Crate.orcm");
+            loadModelResource("static/BiggerCrate.orcm");
             loadModelResource("static/Blade.orcm");
             loadModelResource("static/Fork.orcm");
             loadModelResource("static/Pickable.orcm");
@@ -84,8 +88,13 @@ package game {
             loadModelResource("static/TileSpikesOuterCorner.orcm");
             loadModelResource("static/TileGrass.orcm");
             loadModelResource("static/TileGrassSlot.orcm");
+            loadModelResource("static/TileGrassCorner.orcm");
+            loadModelResource("static/TileGrassWalled.orcm");
             loadModelResource("static/TileVortal.orcm");
             loadModelResource("static/TileVortalWalled.orcm");
+            loadModelResource("static/TileBranch.orcm");
+            loadModelResource("static/TileBranchCorner.orcm");
+            loadModelResource("static/TileBranchOuterCorner.orcm");
 
             required.load(onRequiredAssetsLoaded);
         }
@@ -138,6 +147,14 @@ package game {
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_fp.txt"), ShaderTranslator.FRAGMENT));
 
+            ctx.shaderMgr.createShaderFromJSON("WavyTexturedLight",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/wavy_textured_light_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_fp.txt"), ShaderTranslator.FRAGMENT));
+
+            ctx.shaderMgr.createShaderFromJSON("WavySideTexturedLight",
+                translator.translate(ctx.loaderMgr.getLoaderString("static/wavy_side_textured_light_vp.txt"), ShaderTranslator.VERTEX),
+                translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_fp.txt"), ShaderTranslator.FRAGMENT));
+
             ctx.shaderMgr.createShaderFromJSON("AnimatedLight",
                 translator.translate(ctx.loaderMgr.getLoaderString("static/animated_light_vp.txt"), ShaderTranslator.VERTEX),
                 translator.translate(ctx.loaderMgr.getLoaderString("static/textured_light_fp.txt"), ShaderTranslator.FRAGMENT));
@@ -152,6 +169,30 @@ package game {
             p = new Pass();
             p.iterationMode = Pass.ITERATION_ONE_PER_DIRECTIONAL_LIGHT;
             p.shader = ctx.shaderMgr.getShader("TexturedLight");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
+        private function createWavyTexturedMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.iterationMode = Pass.ITERATION_ONE_PER_DIRECTIONAL_LIGHT;
+            p.shader = ctx.shaderMgr.getShader("WavyTexturedLight");
+            p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
+            m.addPass(p);
+            return m;
+        }
+
+        private function createWavySideTexturedMaterial(name:String, texturePath:String):Material {
+            var m:Material;
+            var p:Pass;
+            m = ctx.materialMgr.createMaterial(name);
+            p = new Pass();
+            p.iterationMode = Pass.ITERATION_ONE_PER_DIRECTIONAL_LIGHT;
+            p.shader = ctx.shaderMgr.getShader("WavySideTexturedLight");
             p.samplers["tex"] = ctx.textureMgr.loadTextureResource(texturePath);
             m.addPass(p);
             return m;
@@ -300,6 +341,8 @@ package game {
             createTexturedMaterial("FloorShadeOuterCorner", "static/tile_chess_outer_corner.png");
             createTexturedMaterial("Grass", "static/tile_grass.png");
             createTexturedMaterial("GrassShade", "static/tile_grass_shade.png");
+            createWavyTexturedMaterial("DarkWood", "static/dark_wood.png");
+            createWavySideTexturedMaterial("DarkWoodSide", "static/dark_wood.png");
 
             createTexturedMultiplyMaterial("RoundShadow", "static/round_shadow.png");
             createTexturedMultiplyMaterial("BloodSpatter", "static/blood_spatter.png");

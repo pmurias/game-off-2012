@@ -21,6 +21,27 @@ package game {
         public var walkAnim :AnimationState;
         public var attackAnim:AnimationState;
         public var isAttacking:Boolean;
+        public var isActive:Boolean;
+        public var range:Number;
+        public var speedScale:Number;
+
+        public var shoutTip:TipArea;
+        public var shoutFlag:Boolean;
+        public var previousQuote:int;
+
+        public static const quotes:Array = [
+            "Hello, hello!",
+            "Hello, my friend!",
+            "Come over here, my friend!",
+            "What do we have here?",
+            "Greetings!",
+            "Can I help you?",
+            "Hello, my little friend!",
+            "Stay a while and listen",
+            "Not event death can save you from me!",
+            "Need medical attention?",
+            "What IS your major malfunction?"
+        ];
 
         public function HeroReaper(gameCtx:GameContext) {
             super(gameCtx);
@@ -37,9 +58,22 @@ package game {
             collisionEnabled = false;
             shadow.node.setScale(1.5, 1, 1.5);
             radius = 0.5;
-            speed = 0.015;
+            setSpeedScale(1.0);
             isMortal = false;
             initParticles();
+            previousQuote = -1;
+            shoutTip = new TipArea(gameCtx);
+            shoutTip.fitArea = true;
+            shoutTip.setSize(250, 150);
+            shoutTip.node = new Node();
+            shoutTip.node.setPosition(0, 2.5, 0);
+            node.addChild(shoutTip.node);
+        }
+
+        public function setSpeedScale(scale:Number):void {
+            speedScale = scale;
+            speed = 0.015 * speedScale;
+            walkAnim.fps = 30 * speedScale;
         }
 
         private function initParticles():void {
@@ -91,23 +125,54 @@ package game {
             }
 
             if (isAttacking == false) {
-                if (moveTargetSet == false) {
-                    if (Math.sqrt(Math.pow(gameCtx.hero.node.position.x - node.position.x, 2) + Math.pow(gameCtx.hero.node.position.z - node.position.z, 2)) > 0.1) {
-                        animatedEntity.setAnimationState("Walk");
-                        walkAnim.gotoAndPlay(1);
-                        moveTo(gameCtx.hero.node.position.x, 0, gameCtx.hero.node.position.z );
-                    } else {
-                        animatedEntity.setAnimationState("Idle");
-                        idleAnim.gotoAndPlay(1);
+                if (isActive == false) {
+                    if (Math.sqrt(Math.pow(gameCtx.hero.node.position.x - node.position.x, 2) + Math.pow(gameCtx.hero.node.position.z - node.position.z, 2)) <= range && gameCtx.hero.isDead == false) {
+                        isActive = true;
                     }
-
+                }
+                if (isActive == true) {
+                    if (shoutFlag == false) {
+                        shoutFlag = true;
+                        var quoteId:int;
+                        do {
+                            quoteId = int(Math.random() * quotes.length);
+                        } while (quoteId == previousQuote);
+                        previousQuote = quoteId;
+                        say(quotes[quoteId]);
+                    }
+                    if (moveTargetSet == false) {
+                        if (Math.sqrt(Math.pow(gameCtx.hero.node.position.x - node.position.x, 2) + Math.pow(gameCtx.hero.node.position.z - node.position.z, 2)) > 0.1) {
+                            animatedEntity.setAnimationState("Walk");
+                            walkAnim.gotoAndPlay(1);
+                            moveTo(gameCtx.hero.node.position.x, 0, gameCtx.hero.node.position.z );
+                        }  else {
+                            animatedEntity.setAnimationState("Idle");
+                            idleAnim.gotoAndPlay(1);
+                        }
+                    }
+                } else {
+                    animatedEntity.setAnimationState("Idle");
+                    idleAnim.gotoAndPlay(1);
                 }
             }
+        }
+
+        public function say(text:String):void {
+            shoutTip.setText(text);
+            shoutTip.show();
+            gameCtx.ctx.tweener.delayedCall(function():void {
+                shoutTip.hide();
+                gameCtx.ctx.tweener.delayedCall(function():void {
+                    shoutFlag = false;
+                }, 8, this)
+            }, 4, this);
         }
 
         private function dealHit():void {
             if (collisionComponent.intersects(gameCtx.hero.collisionComponent)) {
                 gameCtx.hero.die();
+                say("Gottcha!");
+                isActive = false;
             }
         }
 
@@ -121,7 +186,15 @@ package game {
             particlesDeath.dispose();
             particlesDeath.removeFromAllScenes();
             entity.removeFromAllScenes();
+            shoutTip.destroy();
             gameCtx.ctx.tweener.killAllTweensOf(this);
+        }
+
+        override public function fromObject(object:Object):void {
+            range = object.range;
+            if ("speed" in object) {
+                setSpeedScale(object.speed);
+            }
         }
     }
 

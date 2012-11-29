@@ -150,6 +150,10 @@ package game {
 
         }
 
+        public function fromObject(object:Object):void {
+
+        }
+
         override public function destroy():void {
             super.destroy();
             node.removeFromParent();

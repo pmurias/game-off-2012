@@ -50,6 +50,7 @@ package game.modes {
             super.tick();
             rotator.deadMode = gameCtx.hero.isDead;
             rotator.tick();
+            rotator.clip();
         }
 
         override public function render():void {

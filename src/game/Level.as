@@ -92,12 +92,14 @@ package game {
             for (i = 0; i < object.level.crates.length; ++i) {
                 var crateSetup:Object = object.level.crates[i];
                 var crate:Crate = new Crate(gameCtx);
+                crate.fromObject(crateSetup);
                 crate.node.setPosition(crateSetup.position[0], crateSetup.position[1], crateSetup.position[2]);
             }
 
             for (i = 0; i < object.level.enemies.length; ++i) {
                 var enemySetup:Object = object.level.enemies[i];
                 var enemy:Hero = new enemiesTypeByName[enemySetup.type](gameCtx);
+                enemy.fromObject(enemySetup);
                 enemy.node.setPosition(enemySetup.position[0], enemySetup.position[1], enemySetup.position[2]);
             }
 

@@ -26,6 +26,7 @@ package game.spawners {
         }
 
         override protected function customTick():void {
+            spinningSpeed = 0.3 * Math.sqrt(speed/2);
             rotation += spinningSpeed;
 
             node.getRotation().identity();

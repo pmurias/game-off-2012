@@ -110,11 +110,13 @@ package game.modes {
             ctx.rootNode.updateTransformation();
 
             ctx.setCamera(cloneRotator.camera);
+            cloneRotator.clip();
             ctx.renderTargetMgr.renderTargets["bigRT2"].activate();
             gameCtx.layer0.render();
             ctx.renderTargetMgr.renderTargets["bigRT2"].finish();
 
             ctx.setCamera(mainRotator.camera);
+            mainRotator.clip();
             ctx.renderTargetMgr.defaultRenderTarget.activate();
             gameCtx.layer0.render();
             gameCtx.layerPostprocess.render();

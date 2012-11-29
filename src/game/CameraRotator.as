@@ -1,4 +1,6 @@
 package game {
+    import flash.display.TriangleCulling;
+    import flash.geom.Point;
     import flash.geom.Vector3D;
     import gremlin.core.Context;
     import gremlin.scene.Camera;
@@ -78,6 +80,19 @@ package game {
                 //}
             //}
 
+        }
+
+        public function clip():void {
+            var out:Point = new Point();
+            for (var i:int = 0; i < gameCtx.level.width; ++i) {
+                for (var j:int = 0; j < gameCtx.level.height; ++j) {
+                    var tile:Tile = gameCtx.level.layers[0].tiles[i][j];
+                    if (tile != null) {
+                        camera.getScreenPosition(tile.node.position, out);
+                        tile.node.setVisible(out.x > -100 && out.y > -100 && out.x < gameCtx.stage.stageWidth +100 && out.y < gameCtx.stage.stageHeight + 100);
+                    }
+                }
+            }
         }
 
         public function onResize(params:Object = null):void {

@@ -34,7 +34,7 @@ package gremlin.animation {
         public function gotoAndPlay(_time:Number = 0):void {
             isPlayingOnce = false;
             isActive = true;
-            time = (_time * fps) % animation.length;
+            time = _time % animation.length;
             for (var i:int = animation.frames.length - 1; i >=0; --i) {
                 if (time >= animation.frames[i]) {
                     currentFrame = i;
@@ -46,7 +46,7 @@ package gremlin.animation {
         public function gotoAndStop(_time:Number = 0):void {
             isPlayingOnce = false;
             isActive = false;
-            time = (_time * fps) % animation.length;
+            time = _time % animation.length;
             for (var i:int = animation.frames.length - 1; i >=0; --i) {
                 if (time >= animation.frames[i]) {
                     currentFrame = i;

@@ -16,7 +16,7 @@ package game.pickable {
         }
 
         override protected function pickCallback(hero:Hero):Boolean {
-            gameCtx.calmDown();
+            gameCtx.setCheckpoint(node.position);
             return true;
         }
 
