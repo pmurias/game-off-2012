@@ -7,7 +7,7 @@ http://mosowski.github.com/game-off-2012
 Instructions:
 =============
 
-Most of instructions are given at tutorial levels. You command one clone of clockwork demon beholder pushed into another realm. Rule is simple, to escape terrifying dimmension, you have to reach the goal point on each level with at least one beholder, collecting as many points as you can. There are plenty obstacles in the game, static and moving as well, sometimes you will have to push some crates and solve a riddle, but main difficulty in this game is orientation. Screen will rotate and stretch more and more over time. Can you handle this?
+Most of the instructions are given at tutorial levels. You command one clone of a clockwork demon beholder pushed into an another realm. Rules are simple, to escape the terrifying dimmension, you have to reach the goal point on each level with at least one beholder, collecting as many points as you can. There are plenty obstacles in the game, static and moving as well, sometimes you will have to push some crates and solve a riddle, but the main difficulty in this game is orientation. Screen will rotate and stretch more and more over time. Can you handle this?
 
 Screenshots:
 ============
@@ -18,13 +18,13 @@ Creation notes:
 ================
 
 Weeks 1 & 2:
-Creating rendering engine I've called Gremlin. It is my attempt of creating raw Stage3D based Flash renderer. Although I've created similar stuff before, this time I needed to write whole new engine.
+Creating rendering engine I've called Gremlin. It is my attempt at creating a raw Stage3D based Flash renderer. Although I've created similar stuff before, this time I needed to write a whole new engine.
 
 Week 3:
-Gameplay programming. I've created map exporter for Blender, tileset assets, textures, collision system for the game and character movement.
+Gameplay programming. I've created map a exporter for Blender, tileset assets, textures and collision system for the game and character movement.
 
 Week 4:
-Content programming. I've put enemy to the game, created tutorial and levels. Most of time I was in hurry, so code quality dropped a lot :(
+Content programming. I've put an enemy in the game, created tutorial and levels. Most of time I was in hurry, so code quality dropped a lot :(
 
 
 Open Source projects I'm using in this game:
