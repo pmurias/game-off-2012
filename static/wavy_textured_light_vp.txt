@@ -1,0 +1,32 @@
+param m44 cameraMatrix
+param m44 modelMatrix
+param m44 normalMatrix
+param vec4 lightDirection
+param float time
+
+attr vec3 pos
+attr vec3 norm
+attr vec2 uv0
+
+distortion.x = time.x
+distortion.z = 1
+distortion.y = pos.z - distortion.z
+distortion.y = distortion.z - distortion.y
+distortion.x = sin(distortion.x)
+distortion.x = distortion.x * distortion.y
+distortion.x = distortion.x * 0.1
+vertex = pos
+vertex.x = vertex.x + distortion.x
+vertex = modelMatrix * vertex
+vertex = cameraMatrix * vertex
+out = vertex
+varying0 = uv0
+
+modelNormal = normalMatrix * norm
+modelNormal = -modelNormal
+lightFactor = dot3(modelNormal, lightDirection)
+lightFactor = max(lightFactor, 0)
+lightFactor = lightFactor + 0.5
+varying1 = lightFactor
+
+
